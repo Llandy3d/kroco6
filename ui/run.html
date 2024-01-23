@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+
+  </head>
+  <body>
+    <h1 id="title">Running your script...</h1>
+    <div id="script_result">
+        <pre id="formatted_result"></pre>
+    </div>
+
+    <script>
+      // access the pre-bundled global API functions
+      const { invoke } = window.__TAURI__.tauri
+
+      invoke('run_script', {})
+        .then((response) => {
+            document.getElementById("title").textContent = "Done!"
+            document.getElementById("formatted_result").textContent = response
+        })
+        .catch((error) => {
+            console.log(error)
+        })
+    </script>
+  </body>
+</html>
