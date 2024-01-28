@@ -91,11 +91,12 @@
           </Command.Group>
           <Separator />
           <Command.Group>
-              <Command.Item>
                 <AlertDialog.Root>
                   <AlertDialog.Trigger>
-                    <PlusCircle class="mr-1" />
-                    Create a new project
+                      <Command.Item>
+                        <PlusCircle class="mr-1" />
+                        Create a new project
+                      </Command.Item>
                   </AlertDialog.Trigger>
                   <AlertDialog.Content>
                     <AlertDialog.Header>
@@ -109,7 +110,6 @@
                     </AlertDialog.Footer>
                   </AlertDialog.Content>
                 </AlertDialog.Root>
-              </Command.Item>
           </Command.Group>
         </Command.Root>
       </Popover.Content>
