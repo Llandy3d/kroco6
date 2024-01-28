@@ -33,5 +33,9 @@ const toolbox = {
 onMount(() => {
     const workspace = Blockly.inject('blocklyDiv', { toolbox: toolbox });
 });
+
+  import { toast } from "svelte-sonner";
+  import { Button } from "$lib/components/ui/button";
 </script>
 
+<Button on:click={() => toast.success("Hello world")}>Show toast</Button>
