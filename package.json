@@ -39,9 +39,19 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@internationalized/date": "^3.5.1",
+		"bits-ui": "^0.15.1",
 		"clsx": "^2.1.0",
+		"cmdk-sv": "^0.0.13",
+		"embla-carousel-svelte": "^8.0.0-rc21",
+		"formsnap": "^0.4.3",
 		"lucide-svelte": "^0.316.0",
+		"mode-watcher": "^0.1.2",
+		"svelte-sonner": "^0.3.11",
+		"sveltekit-superforms": "^1.13.4",
 		"tailwind-merge": "^2.2.1",
-		"tailwind-variants": "^0.1.20"
+		"tailwind-variants": "^0.1.20",
+		"vaul-svelte": "^0.1.0",
+		"zod": "^3.22.4"
 	}
 }
