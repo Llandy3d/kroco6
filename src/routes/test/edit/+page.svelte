@@ -24,4 +24,3 @@
     <ScriptEditor {script}/>
   </Tabs.Content>
 </Tabs.Root>
-

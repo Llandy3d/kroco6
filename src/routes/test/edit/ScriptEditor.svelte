@@ -15,8 +15,8 @@
   </Alert.Description>
 </Alert.Root>
 
-<Card.Root class="my-2">
+<Card.Root class="my-6 p-4">
   <Card.Content>
-    <pre>{script}</pre>
+    <pre>{script? script : "no script yet :("}</pre>
   </Card.Content>
 </Card.Root>

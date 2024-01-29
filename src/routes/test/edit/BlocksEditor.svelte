@@ -16,6 +16,9 @@
   // Import a message file.
   import * as En from 'blockly/msg/en';
 	import { onMount } from 'svelte';
+  import { Button } from "$lib/components/ui/button";
+	import { PlayCircle, UploadCloud } from 'lucide-svelte';
+  import * as Tooltip from "$lib/components/ui/tooltip";
 
 
   Blockly.setLocale(En);
@@ -232,9 +235,33 @@
   });
 </script>
 
-<h1>Create your script!</h1>
 
-<button id="button">Run it!</button>
-<button id="show_code">Show code</button>
+<div class="-ml-4 h-[79vh]">
+  <p class="text-2xl text-center text-gray-500 mt-4">Create your script!</p>
 
-<div id="blocklyDiv" style="height: 600px;"></div>
+  <Tooltip.Root>
+    <Tooltip.Trigger>
+      <Button class="mt-4 mb-1 rounded-full" variant="secondary">
+        <PlayCircle class="w-4 h-4 mr-2"/>
+        Run
+      </Button>
+    </Tooltip.Trigger>
+    <Tooltip.Content>
+      <p>Run locally</p>
+    </Tooltip.Content>
+  </Tooltip.Root>
+
+  <Tooltip.Root>
+    <Tooltip.Trigger>
+      <Button class="mt-4 mb-1 rounded-full" variant="secondary" disabled>
+        <UploadCloud class="w-4 h-4 mr-2"/>
+        Run in Cloud
+      </Button>
+    </Tooltip.Trigger>
+    <Tooltip.Content>
+      <p>Account required for cloud tests!</p>
+    </Tooltip.Content>
+  </Tooltip.Root>
+
+  <div id="blocklyDiv" class="h-full" ></div>
+</div>
