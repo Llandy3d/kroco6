@@ -8,6 +8,7 @@
   import { Label } from "$lib/components/ui/label";
   import * as ToggleGroup from "$lib/components/ui/toggle-group";
   import * as Tooltip from "$lib/components/ui/tooltip";
+  import { goto } from '$app/navigation';
 
   let createTestDialogOpen = false;
 </script>
@@ -65,7 +66,7 @@
         </Tooltip.Root>
       </ToggleGroup.Root>
     <Dialog.Footer>
-      <Button type="submit">Create</Button>
+      <Button type="submit" on:click={() => goto("/test/edit")}>Create</Button>
     </Dialog.Footer>
   </Dialog.Content>
 </Dialog.Root>

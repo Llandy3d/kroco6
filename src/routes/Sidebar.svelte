@@ -15,7 +15,7 @@
 
 <script lang="ts">
     import * as AlertDialog from "$lib/components/ui/alert-dialog";
-    import { PlusCircle } from 'lucide-svelte';
+    import { PlusCircle, FlaskConical } from 'lucide-svelte';
     import { Separator } from "$lib/components/ui/separator";
     import { Badge } from "$lib/components/ui/badge";
     import { Check, ChevronsUpDown } from "lucide-svelte";
@@ -24,6 +24,7 @@
     import { Button } from "$lib/components/ui/button";
     import { cn } from "$lib/utils";
     import { tick } from "svelte";
+    import { goto } from '$app/navigation';
 
     let projects = [
       {
@@ -114,5 +115,11 @@
         </Command.Root>
       </Popover.Content>
     </Popover.Root>
+
+    <Separator />
+
+    <Button variant="ghost" class="my-2" on:click={() => goto("/")}>
+      <FlaskConical class="mr-2 w-4 h-4" /> Go to tests
+    </Button>
 
 </div>
