@@ -1,6 +1,9 @@
 <script>
   import * as Alert from "$lib/components/ui/alert";
   import { Code } from "lucide-svelte";
+  import * as Card from "$lib/components/ui/card";
+
+  export let script;
 </script>
 
 
@@ -11,3 +14,9 @@
     Who knows, maybe in the future I might allow you to edit it in here :)
   </Alert.Description>
 </Alert.Root>
+
+<Card.Root class="my-2">
+  <Card.Content>
+    <pre>{script}</pre>
+  </Card.Content>
+</Card.Root>

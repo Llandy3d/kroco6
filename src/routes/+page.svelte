@@ -56,7 +56,7 @@
         </Tooltip.Root>
         <Tooltip.Root>
           <Tooltip.Trigger>
-            <ToggleGroup.Item value="script" aria-label="Toggle script" class="py-8">
+            <ToggleGroup.Item value="script" aria-label="Toggle script" class="py-8" disabled>
               <FileCode class="h-12 w-12" />
             </ToggleGroup.Item>
           </Tooltip.Trigger>
