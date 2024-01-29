@@ -58,6 +58,8 @@ async fn run_script(state: tauri::State<'_, Script>) -> Result<String, String>{
         mtx.clone()
     };
 
+    // TODO: make it toggable
+    std::env::set_var("K6_WEB_DASHBOARD", "true");
     let mut child = Command::new("k6")
     .arg("run")
     .arg("-")
