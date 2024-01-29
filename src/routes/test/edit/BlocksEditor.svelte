@@ -70,6 +70,7 @@
           {
             type: 'field_number',
             name: 'VUS',
+            value: 1,
           }
         ],
         message1: 'duration(s) %1',
@@ -77,6 +78,7 @@
           {
             type: 'field_number',
             name: 'DURATION',
+            value: 10,
           }
         ],
       },
@@ -246,6 +248,21 @@
 
   onMount(() => {
     workspace = Blockly.inject('blocklyDiv', { toolbox: toolbox });
+
+    let k6_block = workspace.newBlock("k6_test");
+    let options_block = workspace.newBlock("options");
+    let request_block = workspace.newBlock("http_request");
+
+    k6_block.getInput("OPTIONS").connection.connect(options_block.outputConnection);
+    k6_block.getInput("REQUESTS").connection.connect(request_block.outputConnection);
+
+    // make it more centered in the workspace
+    k6_block.moveBy(40, 40);
+
+    k6_block.initSvg();
+    options_block.initSvg();
+    request_block.initSvg();
+    workspace.render();
   });
 </script>
 
