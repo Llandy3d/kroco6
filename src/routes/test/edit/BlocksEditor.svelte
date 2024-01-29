@@ -20,6 +20,8 @@
 	import { PlayCircle, UploadCloud } from 'lucide-svelte';
   import * as Tooltip from "$lib/components/ui/tooltip";
 
+  import { invoke } from '@tauri-apps/api/tauri'
+
 
   Blockly.setLocale(En);
 
@@ -230,6 +232,18 @@
       ]
     };
 
+    function open_run_window() {
+      const script = javascriptGenerator.workspaceToCode(workspace);
+
+      invoke('open_run_window', {'script': script })
+        .then((response) => {
+            console.log(response)
+        })
+        .catch((error) => {
+            console.log(error)
+        })
+    }
+
   onMount(() => {
     workspace = Blockly.inject('blocklyDiv', { toolbox: toolbox });
   });
@@ -241,7 +255,7 @@
 
   <Tooltip.Root>
     <Tooltip.Trigger>
-      <Button class="mt-4 mb-1 rounded-full" variant="secondary">
+      <Button class="mt-4 mb-1 rounded-full" variant="secondary" on:click={open_run_window}>
         <PlayCircle class="w-4 h-4 mr-2"/>
         Run
       </Button>

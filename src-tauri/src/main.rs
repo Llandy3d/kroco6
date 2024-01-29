@@ -21,7 +21,7 @@ async fn open_run_window(handle: tauri::AppHandle, state: tauri::State<'_, Scrip
     let run_window = tauri::WindowBuilder::new(
       &handle,
       "run_window", /* the unique window label */
-      tauri::WindowUrl::App("run.html".into())
+      tauri::WindowUrl::App("test/run".into())
     ).build().unwrap();
     run_window.set_title("Kroco Gator").unwrap();
 
