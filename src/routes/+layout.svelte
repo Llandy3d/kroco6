@@ -13,7 +13,7 @@
         <Sidebar />
     </div>
 
-    <div class="w-4/5">
+    <div class="w-4/5 p-4">
         <slot />
     </div>
 </div>
