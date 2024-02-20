@@ -1,3 +1,83 @@
+<script lang="ts" context="module">
+	function defineBlock(type: string, block: { init: (this: Blockly.Block) => void }) {
+		Blockly.Blocks[type] = block;
+	}
+
+	Blockly.setLocale(En);
+
+	defineBlock('k6_test', {
+		init() {
+			this.appendDummyInput().appendField('K6 Test');
+
+			this.appendValueInput('OPTIONS').setCheck('options').appendField('options');
+			this.appendValueInput('REQUESTS').setCheck(null).appendField('requests');
+
+			this.setColour(160);
+
+			this.setTooltip('');
+			this.setHelpUrl('');
+		}
+	});
+
+	defineBlock('options', {
+		init() {
+			this.appendDummyInput().appendField('VUs').appendField(new Blockly.FieldNumber(1, 1));
+			this.appendDummyInput()
+				.appendField('Duration (s)')
+				.appendField(new Blockly.FieldNumber(1, 1));
+
+			this.setOutput(true, 'options');
+			this.setColour(222);
+
+			this.setTooltip('');
+			this.setHelpUrl('');
+		}
+	});
+
+	defineBlock('http_request', {
+		init() {
+			this.appendDummyInput()
+				.appendField('HTTP GET')
+				.appendField(new Blockly.FieldTextInput('https://test.k6.io'), 'REQUEST');
+
+			this.setNextStatement(true, null);
+			this.setColour(111);
+
+			this.setOutput(true);
+
+			this.setTooltip('');
+			this.setHelpUrl('');
+		}
+	});
+
+	defineBlock('http_check', {
+		init() {
+			this.appendDummyInput()
+				.appendField('field')
+				.appendField(new Blockly.FieldTextInput('status'), 'FIELD')
+				.appendField(
+					new Blockly.FieldDropdown([
+						['==', '=='],
+						['!=', '!='],
+						['>=', '>='],
+						['<=', '<='],
+						['>', '>'],
+						['<', '<']
+					]) as Blockly.Field<string | undefined>,
+					'OPERATOR'
+				)
+				.appendField(new Blockly.FieldTextInput('200'), 'VALUE');
+
+			this.setPreviousStatement(true, null);
+			this.setNextStatement(true, null);
+			this.setColour(177);
+
+			this.setTooltip('');
+			this.setHelpUrl('');
+		}
+	});
+</script>
+
 <script lang="ts">
 	// Import Blockly core.
 	import * as Blockly from 'blockly/core';
@@ -15,117 +95,6 @@
 	import { invoke } from '@tauri-apps/api/tauri';
 
 	export let workspace: Blockly.Workspace;
-
-	Blockly.setLocale(En);
-
-	Blockly.defineBlocksWithJsonArray([
-		{
-			// The type is like the "class name" for your block. It is used to construct
-			// new instances. E.g. in the toolbox.
-			type: 'k6_test',
-			colour: 160,
-			// The message defines the basic text of your block, and where inputs or
-			// fields will be inserted.
-			message0: 'K6 Test',
-			message1: 'options %1',
-			args1: [
-				// Each arg is associated with a %# in the message.
-				// This one gets substituted for %1.
-				{
-					type: 'input_value',
-					name: 'OPTIONS',
-					check: 'options'
-				}
-			],
-			message2: 'requests %1',
-			args2: [
-				// Each arg is associated with a %# in the message.
-				// This one gets substituted for %1.
-				{
-					type: 'input_value',
-					name: 'REQUESTS'
-				}
-			],
-			// Adds an untyped next connection to the bottom of the block.
-			nextStatement: null
-		},
-		{
-			type: 'options',
-			colour: 222,
-			output: null,
-			// The message defines the basic text of your block, and where inputs or
-			// fields will be inserted.
-			message0: 'VUS %1',
-			args0: [
-				// Each arg is associated with a %# in the message.
-				// This one gets substituted for %1.
-				{
-					type: 'field_number',
-					name: 'VUS',
-					value: 1
-				}
-			],
-			message1: 'duration(s) %1',
-			args1: [
-				{
-					type: 'field_number',
-					name: 'DURATION',
-					value: 10
-				}
-			]
-		},
-		{
-			type: 'http_request',
-			colour: 111,
-			output: null,
-			// The message defines the basic text of your block, and where inputs or
-			// fields will be inserted.
-			message0: 'HTTP GET %1',
-			args0: [
-				// Each arg is associated with a %# in the message.
-				// This one gets substituted for %1.
-				{
-					type: 'field_input',
-					name: 'REQUEST',
-					text: 'https://test.k6.io'
-				}
-			],
-			nextStatement: null
-		},
-		{
-			type: 'http_check',
-			colour: 177,
-			// The message defines the basic text of your block, and where inputs or
-			// fields will be inserted.
-			message0: 'field %1 %3 value %2',
-			args0: [
-				{
-					type: 'field_input',
-					name: 'FIELD',
-					text: 'status'
-				},
-				{
-					type: 'field_input',
-					name: 'VALUE'
-				},
-				{
-					type: 'field_dropdown',
-					name: 'OPERATOR',
-					options: [
-						['==', '=='],
-						['!=', '!='],
-						['>=', '>='],
-						['<=', '<='],
-						['>', '>'],
-						['<', '<']
-					]
-				}
-			],
-
-			previousStatement: null,
-			nextStatement: null
-		}
-	]);
 
 	// workspace
 
@@ -157,7 +126,7 @@
 		]
 	};
 
-	function open_run_window() {
+	function openRunWindow() {
 		const script = javascriptGenerator.workspaceToCode(workspace);
 
 		invoke('open_run_window', { script: script })
@@ -216,7 +185,7 @@
 
 	<Tooltip.Root>
 		<Tooltip.Trigger>
-			<Button class="mb-1 mt-4 rounded-full" variant="secondary" on:click={open_run_window}>
+			<Button class="mb-1 mt-4 rounded-full" variant="secondary" on:click={openRunWindow}>
 				<PlayCircle class="mr-2 h-4 w-4" />
 				Run
 			</Button>
