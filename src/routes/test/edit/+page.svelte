@@ -6,11 +6,11 @@
 	import { convertBlocksToScript } from '../../../utils/codegen';
 
 	let script: string;
-	let workspace: Blockly.Workspace;
+	let workspace: Blockly.WorkspaceSvg;
 
-	function changedTab(tab: string | undefined) {
+	async function changedTab(tab: string | undefined) {
 		if (tab === 'script') {
-			script = convertBlocksToScript(workspace);
+			script = await convertBlocksToScript(workspace);
 		}
 	}
 </script>
