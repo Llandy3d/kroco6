@@ -12,10 +12,6 @@
 	import { onMount } from 'svelte';
 
 	let createTestDialogOpen = false;
-
-	onMount(() => {
-		goto('/test/playground');
-	});
 </script>
 
 <Alert.Root>

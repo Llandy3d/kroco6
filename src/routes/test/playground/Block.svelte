@@ -16,12 +16,12 @@
 <div
 	use:dropmask
 	use:draggable={{ enabled: true, data: block }}
-	on:dragchange={handleDragChange}
 	class="flex items-center bg-white text-black shadow-md"
+	class:dragging
+	on:dragchange={handleDragChange}
 >
 	<div
 		class="flex cursor-pointer items-center self-stretch bg-indigo-400 p-2 text-white"
-		class:dragging
 		role="presentation"
 		data-drag-handle
 	>

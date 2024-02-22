@@ -19,12 +19,15 @@
 
 	const handleDropped = (ev: CustomEvent<DroppedEvent<Dropped, Target>>) => {
 		dispatch('dropped', ev.detail);
+
+		accepting = false;
+		dropping = false;
 	};
 </script>
 
-<div class="relative">
+<div class="max-h-0">
 	<div
-		class="drop-zone bg-black opacity-20"
+		class="drop-zone overflow-visible bg-black opacity-5"
 		class:dropping
 		class:accepting
 		use:dropzone={{ data }}
@@ -40,7 +43,9 @@
 	}
 
 	.accepting {
-		height: 8px;
+		position: relative;
+		top: -8px;
+		height: 16px;
 	}
 
 	.dropping {

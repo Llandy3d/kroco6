@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Block as BlockType } from '$lib/store/test/types';
 	import Block from './Block.svelte';
-	import { dropzone, type DroppedEvent } from './dnd';
+	import { type DroppedEvent } from './dnd';
 	import { derived } from 'svelte/store';
 	import { blocks } from '$lib/store/test';
 	import DropZone from './DropZone.svelte';

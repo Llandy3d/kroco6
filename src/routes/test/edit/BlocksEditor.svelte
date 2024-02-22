@@ -89,13 +89,13 @@
 	import * as En from 'blockly/msg/en';
 	import { onMount } from 'svelte';
 	import { Button } from '$lib/components/ui/button';
-	import { PlayCircle, UploadCloud } from 'lucide-svelte';
+	import { Import, PlayCircle, UploadCloud } from 'lucide-svelte';
 	import * as Tooltip from '$lib/components/ui/tooltip';
-	import { ResponseType, fetch } from '@tauri-apps/api/http';
 
 	import { invoke } from '@tauri-apps/api/tauri';
 	import type { OpenAPI } from 'openapi-types';
 	import { defineGenerator } from '../../../utils/codegen';
+	import ImportDialog from './ImportDialog.svelte';
 
 	export let workspace: Blockly.WorkspaceSvg;
 
@@ -129,14 +129,8 @@
 		]
 	};
 
-	fetch<string>(
-		'https://raw.githubusercontent.com/davidkpiano/openapi-test/master/examples/swapi.json',
-		{
-			method: 'GET',
-			responseType: ResponseType.Text
-		}
-	).then((response) => {
-		const api = JSON.parse(response.data) as OpenAPI.Document;
+	const handleImported = (ev: CustomEvent<{ api: OpenAPI.Document }>) => {
+		const api = ev.detail.api;
 
 		if (api.paths === undefined) {
 			return;
@@ -230,7 +224,13 @@
 				console.log(path, method, operation);
 			});
 		});
-	});
+	};
+
+	let importDialogOpen = false;
+
+	function openImportDialog() {
+		importDialogOpen = true;
+	}
 
 	function openRunWindow() {
 		const script = javascriptGenerator.workspaceToCode(workspace);
@@ -297,29 +297,39 @@
 <div class="-ml-4 h-[79vh]">
 	<p class="mt-4 text-center text-2xl text-gray-500">Create your script!</p>
 
-	<Tooltip.Root>
-		<Tooltip.Trigger>
-			<Button class="mb-1 mt-4 rounded-full" variant="secondary" on:click={openRunWindow}>
-				<PlayCircle class="mr-2 h-4 w-4" />
-				Run
+	<div class="flex justify-between p-2">
+		<div>
+			<Tooltip.Root>
+				<Tooltip.Trigger>
+					<Button variant="secondary" on:click={openRunWindow}>
+						<PlayCircle class="mr-2 h-4 w-4" />
+						Run
+					</Button>
+				</Tooltip.Trigger>
+				<Tooltip.Content>
+					<p>Run locally</p>
+				</Tooltip.Content>
+			</Tooltip.Root>
+			<Tooltip.Root>
+				<Tooltip.Trigger>
+					<Button variant="secondary" disabled>
+						<UploadCloud class="mr-2 h-4 w-4" />
+						Run in Cloud
+					</Button>
+				</Tooltip.Trigger>
+				<Tooltip.Content>
+					<p>Account required for cloud tests!</p>
+				</Tooltip.Content>
+			</Tooltip.Root>
+		</div>
+		<div>
+			<Button variant="secondary" on:click={openImportDialog}>
+				<Import class="mr-2 h-4 w-4" /> Import
 			</Button>
-		</Tooltip.Trigger>
-		<Tooltip.Content>
-			<p>Run locally</p>
-		</Tooltip.Content>
-	</Tooltip.Root>
-
-	<Tooltip.Root>
-		<Tooltip.Trigger>
-			<Button class="mb-1 mt-4 rounded-full" variant="secondary" disabled>
-				<UploadCloud class="mr-2 h-4 w-4" />
-				Run in Cloud
-			</Button>
-		</Tooltip.Trigger>
-		<Tooltip.Content>
-			<p>Account required for cloud tests!</p>
-		</Tooltip.Content>
-	</Tooltip.Root>
+		</div>
+	</div>
 
 	<div id="blocklyDiv" class="h-full"></div>
+
+	<ImportDialog bind:open={importDialogOpen} on:imported={handleImported} />
 </div>
