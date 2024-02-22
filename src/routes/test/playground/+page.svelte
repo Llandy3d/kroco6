@@ -7,7 +7,7 @@
 	import { blocks, roots } from '$lib/store/test';
 	import { onMount } from 'svelte';
 
-	const handleDrop = (ev: DroppedEvent<BlockType>) => {
+	const handleDrop = (ev: CustomEvent<DroppedEvent<BlockType, {}>>) => {
 		const parent = {
 			type: 'canvas',
 			top: ev.detail.top,
@@ -15,7 +15,7 @@
 		} as const;
 
 		$blocks = $blocks.map((block) =>
-			ev.detail.data.id === block.id ? { ...block, parent } : block
+			ev.detail.data.dropped.id === block.id ? { ...block, parent } : block
 		);
 
 		console.log('dropped', ev.detail);
@@ -32,7 +32,7 @@
 	});
 </script>
 
-<div class="relative h-full w-full" use:dropzone on:dropped={handleDrop}>
+<div class="relative h-full w-full" use:dropzone={{ data: {} }} on:dropped={handleDrop}>
 	{#each $roots as root}
 		<Root {root}>
 			<Block block={root} />

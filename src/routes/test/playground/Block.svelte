@@ -1,46 +1,42 @@
 <script lang="ts">
-	import { blocks } from '$lib/store/test';
 	import type { Block } from '$lib/store/test/types';
 	import { GripVertical } from 'lucide-svelte';
-	import { draggable } from './dnd';
-	import { derived } from 'svelte/store';
+	import { draggable, type DragChangeEvent, dropmask } from './dnd';
 	import BlockCollection from './BlockCollection.svelte';
-	import type { InsertBlockEvent } from './types';
 
 	export let block: Block;
 
-	const children = derived(blocks, ($blocks) => {
-		return $blocks.filter((current) => {
-			return current.parent.type === 'collection' && current.parent.id === block.id;
-		});
-	});
+	let dragging = false;
 
-	const handleInsert = (ev: CustomEvent<InsertBlockEvent>) => {
-		console.log('insert', ev.detail);
+	const handleDragChange = (ev: CustomEvent<DragChangeEvent>) => {
+		dragging = ev.detail.dragging;
 	};
 </script>
 
 <div
+	use:dropmask
 	use:draggable={{ enabled: true, data: block }}
+	on:dragchange={handleDragChange}
 	class="flex items-center bg-white text-black shadow-md"
 >
 	<div
 		class="flex cursor-pointer items-center self-stretch bg-indigo-400 p-2 text-white"
+		class:dragging
 		role="presentation"
 		data-drag-handle
 	>
 		<GripVertical />
 	</div>
-	<div class="flex flex-col p-2">
+	<div class="flex flex-col gap-2 p-2">
 		<div>
 			{block.text}
 		</div>
-		<BlockCollection children={$children} on:insert={handleInsert} />
+		<BlockCollection owner={block} />
 	</div>
 </div>
 
 <style>
-	[data-dragging] {
+	.dragging {
 		opacity: 0.5;
 	}
 </style>

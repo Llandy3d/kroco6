@@ -1,4 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { ActionReturn } from 'svelte/action';
+import { writable } from 'svelte/store';
+
+interface DraggingState {}
+
+const dragging = writable<DraggingState | null>(null);
 
 interface DragSource<T = unknown> {
 	top: number;
@@ -12,10 +18,10 @@ interface DraggableOptions<T> {
 }
 
 interface DraggableAttributes {
-	'on:dragged'?: () => void;
+	'on:dragchange'?: (dragging: CustomEvent<DragChangeEvent>) => void;
 }
 
-export function draggable<T>(
+function draggable<T>(
 	node: HTMLElement,
 	options: DraggableOptions<T>
 ): ActionReturn<DraggableOptions<T>, DraggableAttributes> {
@@ -25,12 +31,10 @@ export function draggable<T>(
 
 	const handleMouseDown = () => {
 		node.draggable = true;
-		node.dataset.dragging = 'true';
 	};
 
 	const handleMouseUp = () => {
 		node.draggable = false;
-		node.dataset.dragging = 'false';
 	};
 
 	const handleDragStart = (event: DragEvent) => {
@@ -49,13 +53,31 @@ export function draggable<T>(
 		event.dataTransfer.setData('application/json', JSON.stringify(payload));
 		event.dataTransfer.effectAllowed = 'all';
 
+		dragging.set({});
+
+		node.dispatchEvent(
+			new CustomEvent<DragChangeEvent>('dragchange', {
+				detail: {
+					dragging: true
+				}
+			})
+		);
+
 		event.stopPropagation();
 	};
 
 	const handleDragEnd = () => {
 		handleMouseUp();
 
-		node.dispatchEvent(new CustomEvent('dragged'));
+		dragging.set(null);
+
+		node.dispatchEvent(
+			new CustomEvent<DragChangeEvent>('dragchange', {
+				detail: {
+					dragging: false
+				}
+			})
+		);
 	};
 
 	node.addEventListener('dragstart', handleDragStart);
@@ -78,26 +100,61 @@ export function draggable<T>(
 	};
 }
 
-interface DropZoneOptions {}
-
-export type DroppedEvent<T = unknown> = CustomEvent<{
+interface DropZoneOptions<T> {
 	data: T;
-	top: number;
-	left: number;
-}>;
-
-interface DropZoneAttributes {
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	'on:dropped': (event: DroppedEvent<any>) => void;
 }
 
-export function dropzone<T>(node: HTMLElement): ActionReturn<DropZoneOptions, DropZoneAttributes> {
-	const handleDragStart = (event: DragEvent) => {
-		if (event.dataTransfer === null) {
-			return;
-		}
+interface DragChangeEvent {
+	dragging: boolean;
+}
 
-		console.log('data', event.dataTransfer.getData('application/json'));
+interface AcceptingEvent {
+	accepting: boolean;
+}
+
+interface DroppingEvent {
+	dropping: boolean;
+}
+
+interface DroppedEvent<Dropped = unknown, Target = unknown> {
+	data: {
+		dropped: Dropped;
+		target: Target;
+	};
+	top: number;
+	left: number;
+}
+
+interface DropZoneAttributes<TargetData> {
+	'on:dropped': (event: CustomEvent<DroppedEvent<any, TargetData>>) => void;
+	'on:accepting'?: (event: CustomEvent<AcceptingEvent>) => void;
+	'on:dropping'?: (event: CustomEvent<DroppingEvent>) => void;
+}
+
+function dropzone<TargetData>(
+	node: HTMLElement,
+	options: DropZoneOptions<TargetData>
+): ActionReturn<DropZoneOptions<TargetData>, DropZoneAttributes<TargetData>> {
+	let { data: target } = options;
+
+	const handleDragEnter = () => {
+		node.dispatchEvent(
+			new CustomEvent<DroppingEvent>('dropping', {
+				detail: {
+					dropping: true
+				}
+			})
+		);
+	};
+
+	const handleDragLeave = () => {
+		node.dispatchEvent(
+			new CustomEvent<DroppingEvent>('dropping', {
+				detail: {
+					dropping: false
+				}
+			})
+		);
 	};
 
 	const handleDragOver = (event: DragEvent) => {
@@ -127,12 +184,15 @@ export function dropzone<T>(node: HTMLElement): ActionReturn<DropZoneOptions, Dr
 
 		const bounds = node.getBoundingClientRect();
 
-		const source = JSON.parse(data) as DragSource<T>;
+		const source = JSON.parse(data) as DragSource<any>;
 
 		node.dispatchEvent(
-			new CustomEvent<DroppedEvent['detail']>('dropped', {
+			new CustomEvent<DroppedEvent>('dropped', {
 				detail: {
-					data: source.data,
+					data: {
+						dropped: source.data,
+						target
+					},
 					top: event.clientY - bounds.top - source.top,
 					left: event.clientX - bounds.left - source.left
 				}
@@ -140,20 +200,66 @@ export function dropzone<T>(node: HTMLElement): ActionReturn<DropZoneOptions, Dr
 		);
 	};
 
+	const unsubscribe = dragging.subscribe((state) => {
+		node.dispatchEvent(
+			new CustomEvent<AcceptingEvent>('accepting', {
+				detail: {
+					accepting: state !== null
+				}
+			})
+		);
+	});
+
+	node.addEventListener('dragenter', handleDragEnter);
+	node.addEventListener('dragleave', handleDragLeave);
 	node.addEventListener('dragover', handleDragOver);
 	node.addEventListener('drop', handleDrop);
 
-	window.addEventListener('dragstart', handleDragStart, {
-		passive: true
-	});
-
 	return {
-		update() {},
+		update(newOptions) {
+			target = newOptions.data;
+		},
 		destroy() {
+			node.removeEventListener('dragenter', handleDragEnter);
+			node.removeEventListener('dragleave', handleDragLeave);
 			node.removeEventListener('dragover', handleDragOver);
 			node.removeEventListener('drop', handleDrop);
 
-			window.removeEventListener('dragstart', handleDragStart);
+			unsubscribe();
 		}
 	};
 }
+
+function dropmask(node: HTMLElement) {
+	const handleDragOver = (ev: DragEvent) => {
+		ev.preventDefault();
+		ev.stopPropagation();
+	};
+
+	const handleDrop = (ev: DragEvent) => {
+		ev.preventDefault();
+		ev.stopPropagation();
+	};
+
+	node.addEventListener('dragover', handleDragOver);
+	node.addEventListener('drop', handleDrop);
+
+	return {
+		destroy() {
+			node.removeEventListener('dragover', handleDragOver);
+			node.removeEventListener('drop', handleDrop);
+		}
+	};
+}
+
+export {
+	draggable,
+	dropzone,
+	dropmask,
+	dragging,
+	type DragSource,
+	type AcceptingEvent,
+	type DroppingEvent,
+	type DroppedEvent,
+	type DragChangeEvent
+};
