@@ -9,8 +9,13 @@
 	import * as ToggleGroup from '$lib/components/ui/toggle-group';
 	import * as Tooltip from '$lib/components/ui/tooltip';
 	import { goto } from '$app/navigation';
+	import { onMount } from 'svelte';
 
 	let createTestDialogOpen = false;
+
+	onMount(() => {
+		goto('/test/playground');
+	});
 </script>
 
 <Alert.Root>
