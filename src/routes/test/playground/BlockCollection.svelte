@@ -51,7 +51,9 @@
 	{#each $children as child}
 		<li class="relative border-b-2 border-slate-200">
 			<DropZone data={child} on:dropped={handleDropped} />
-			<Block block={child} />
+			{#key child.id}
+				<Block block={child} />
+			{/key}
 		</li>
 	{/each}
 	<li class="relative">

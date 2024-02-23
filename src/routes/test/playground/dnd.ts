@@ -198,6 +198,8 @@ function dropzone<TargetData>(
 				}
 			})
 		);
+
+		dragging.set(null);
 	};
 
 	const unsubscribe = dragging.subscribe((state) => {

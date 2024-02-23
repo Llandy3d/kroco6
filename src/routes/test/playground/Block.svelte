@@ -39,4 +39,8 @@
 	.dragging {
 		opacity: 0.5;
 	}
+
+	.dragging * {
+		pointer-events: none;
+	}
 </style>

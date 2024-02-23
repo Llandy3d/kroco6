@@ -11,6 +11,10 @@
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 
+	onMount(() => {
+		goto('/test/playground');
+	});
+
 	let createTestDialogOpen = false;
 </script>
 

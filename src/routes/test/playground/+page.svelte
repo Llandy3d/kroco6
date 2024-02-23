@@ -34,8 +34,10 @@
 
 <div class="relative h-full w-full" use:dropzone={{ data: {} }} on:dropped={handleDrop}>
 	{#each $roots as root}
-		<Root {root}>
-			<Block block={root} />
-		</Root>
+		{#key root.id}
+			<Root {root}>
+				<Block block={root} />
+			</Root>
+		{/key}
 	{/each}
 </div>

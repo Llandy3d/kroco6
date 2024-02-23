@@ -18,13 +18,10 @@
 	}>();
 
 	const handleImportClick = () => {
-		fetch<string>(
-			'https://raw.githubusercontent.com/davidkpiano/openapi-test/master/examples/swapi.json',
-			{
-				method: 'GET',
-				responseType: ResponseType.Text
-			}
-		).then((response) => {
+		fetch<string>(url, {
+			method: 'GET',
+			responseType: ResponseType.Text
+		}).then((response) => {
 			const api = JSON.parse(response.data) as OpenAPI.Document;
 
 			dispatch('imported', {

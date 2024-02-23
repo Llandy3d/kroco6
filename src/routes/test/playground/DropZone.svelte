@@ -27,7 +27,7 @@
 
 <div class="max-h-0">
 	<div
-		class="drop-zone overflow-visible bg-black opacity-5"
+		class="drop-zone overflow-visible bg-black opacity-0"
 		class:dropping
 		class:accepting
 		use:dropzone={{ data }}
@@ -44,11 +44,11 @@
 
 	.accepting {
 		position: relative;
-		top: -8px;
-		height: 16px;
+		top: -6px;
+		height: 12px;
 	}
 
 	.dropping {
-		opacity: 0.5;
+		opacity: 0.2;
 	}
 </style>
