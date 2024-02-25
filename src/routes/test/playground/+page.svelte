@@ -6,6 +6,7 @@
 	import { dropzone, type DroppedEvent } from './dnd';
 	import { blocks, roots } from '$lib/store/test';
 	import { onMount } from 'svelte';
+	import ScenarioBlock from './ScenarioBlock.svelte';
 
 	const handleDrop = (ev: CustomEvent<DroppedEvent<BlockType, {}>>) => {
 		const parent = {
@@ -27,7 +28,8 @@
 			{ id: '1', text: 'Second', parent: { type: 'canvas', top: 400, left: 100 } },
 			{ id: '2', text: 'Third', parent: { type: 'collection', id: '1' } },
 			{ id: '3', text: 'Fourth', parent: { type: 'collection', id: '1' } },
-			{ id: '4', text: 'Fifth', parent: { type: 'collection', id: '2' } }
+			{ id: '4', text: 'Fifth', parent: { type: 'collection', id: '2' } },
+			{ id: '5', text: 'This one is a bit longer', parent: { type: 'collection', id: '2' } }
 		]);
 	});
 </script>
@@ -36,7 +38,7 @@
 	{#each $roots as root}
 		{#key root.id}
 			<Root {root}>
-				<Block block={root} />
+				<ScenarioBlock block={root} />
 			</Root>
 		{/key}
 	{/each}

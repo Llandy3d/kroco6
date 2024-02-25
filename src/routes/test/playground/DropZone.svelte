@@ -27,7 +27,7 @@
 
 <div class="max-h-0">
 	<div
-		class="drop-zone overflow-visible bg-black opacity-0"
+		class="drop-zone min-w-8 overflow-visible bg-black opacity-0"
 		class:dropping
 		class:accepting
 		use:dropzone={{ data }}

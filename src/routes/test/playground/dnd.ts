@@ -29,12 +29,16 @@ function draggable<T>(
 
 	const handle = node.querySelector<HTMLElement>('[data-drag-handle]') ?? node;
 
-	const handleMouseDown = () => {
+	const handleMouseDown = (event: MouseEvent) => {
 		node.draggable = true;
+
+		event.stopPropagation();
 	};
 
-	const handleMouseUp = () => {
+	const handleMouseUp = (event: MouseEvent) => {
 		node.draggable = false;
+
+		event.stopPropagation();
 	};
 
 	const handleDragStart = (event: DragEvent) => {
@@ -67,7 +71,7 @@ function draggable<T>(
 	};
 
 	const handleDragEnd = () => {
-		handleMouseUp();
+		node.draggable = false;
 
 		dragging.set(null);
 
