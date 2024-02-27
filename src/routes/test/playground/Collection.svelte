@@ -15,6 +15,7 @@
 	import DropZone from './DropZone.svelte';
 	import { createEventDispatcher } from 'svelte';
 
+	export let accepts: string[] | undefined;
 	export let items: BlockType[];
 
 	const dispatch = createEventDispatcher<{
@@ -53,14 +54,14 @@
 			<ul class="separator flex min-h-2 w-6 flex-auto list-none flex-col">
 				{#each items as item}
 					<li class="relative border-slate-200">
-						<DropZone data={item} on:dropped={handleDropped} />
+						<DropZone {accepts} data={item} on:dropped={handleDropped} />
 						{#key item.id}
 							<slot {item} />
 						{/key}
 					</li>
 				{/each}
 				<li class="relative">
-					<DropZone data={null} on:dropped={handleDropped} />
+					<DropZone {accepts} data={null} on:dropped={handleDropped} />
 				</li>
 			</ul>
 		</div>

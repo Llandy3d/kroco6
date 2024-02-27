@@ -32,16 +32,28 @@
 	};
 </script>
 
-<Block {block}>
+<Block type="scenario" {block}>
 	<svelte:fragment>
 		<Field class="bg-white"
 			>Run <StringInput placeholder="Scenario name" bind:value={block.name} /> using
 		</Field>
-		<Collection items={$executors} on:append={append} on:insert={insert} let:item>
+		<Collection
+			accepts={['executor']}
+			items={$executors}
+			on:append={append}
+			on:insert={insert}
+			let:item
+		>
 			<AnyBlock block={item} />
 		</Collection>
 		<Field class="bg-white">by doing the following:</Field>
-		<Collection items={$steps} on:append={append} on:insert={insert} let:item>
+		<Collection
+			accepts={['http-request']}
+			items={$steps}
+			on:append={append}
+			on:insert={insert}
+			let:item
+		>
 			<AnyBlock block={item} />
 		</Collection>
 	</svelte:fragment>

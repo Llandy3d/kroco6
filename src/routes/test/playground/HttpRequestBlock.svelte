@@ -7,7 +7,7 @@
 	export let block: HttpRequestBlock;
 </script>
 
-<Block class="bg-orange-200" {block}>
+<Block type="http-request" class="bg-orange-200" {block}>
 	<Field>
 		{block.name}
 	</Field>

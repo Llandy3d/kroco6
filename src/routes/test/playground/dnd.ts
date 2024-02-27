@@ -2,18 +2,17 @@
 import type { ActionReturn } from 'svelte/action';
 import { writable } from 'svelte/store';
 
-interface DraggingState {}
-
-const dragging = writable<DraggingState | null>(null);
+const dragging = writable<DragSource<any> | null>(null);
 
 interface DragSource<T = unknown> {
 	top: number;
 	left: number;
+	type: string;
 	data: T;
 }
 
 interface DraggableOptions<T> {
-	enabled: boolean;
+	type: string;
 	data: T;
 }
 
@@ -25,7 +24,7 @@ function draggable<T>(
 	node: HTMLElement,
 	options: DraggableOptions<T>
 ): ActionReturn<DraggableOptions<T>, DraggableAttributes> {
-	let { data } = options;
+	let { type, data } = options;
 
 	const handle = node.querySelector<HTMLElement>('[data-drag-handle]') ?? node;
 
@@ -51,13 +50,14 @@ function draggable<T>(
 		const payload: DragSource<T> = {
 			top: event.clientY - bounds.top,
 			left: event.clientX - bounds.left,
+			type,
 			data
 		};
 
 		event.dataTransfer.setData('application/json', JSON.stringify(payload));
 		event.dataTransfer.effectAllowed = 'all';
 
-		dragging.set({});
+		dragging.set(payload);
 
 		node.dispatchEvent(
 			new CustomEvent<DragChangeEvent>('dragchange', {
@@ -92,6 +92,7 @@ function draggable<T>(
 
 	return {
 		update(options) {
+			type = options.type;
 			data = options.data;
 		},
 		destroy() {
@@ -105,6 +106,7 @@ function draggable<T>(
 }
 
 interface DropZoneOptions<T> {
+	accepts?: string[];
 	data: T;
 }
 
@@ -139,9 +141,23 @@ function dropzone<TargetData>(
 	node: HTMLElement,
 	options: DropZoneOptions<TargetData>
 ): ActionReturn<DropZoneOptions<TargetData>, DropZoneAttributes<TargetData>> {
-	let { data: target } = options;
+	let source: DragSource<any> | null = null;
+
+	let { accepts, data: target } = options;
+
+	const isAcceptable = (source: DragSource<unknown> | null): source is DragSource => {
+		if (source === null) {
+			return false;
+		}
+
+		return accepts === undefined || accepts.includes(source.type);
+	};
 
 	const handleDragEnter = () => {
+		if (!isAcceptable(source)) {
+			return;
+		}
+
 		node.dispatchEvent(
 			new CustomEvent<DroppingEvent>('dropping', {
 				detail: {
@@ -152,6 +168,10 @@ function dropzone<TargetData>(
 	};
 
 	const handleDragLeave = () => {
+		if (!isAcceptable(source)) {
+			return;
+		}
+
 		node.dispatchEvent(
 			new CustomEvent<DroppingEvent>('dropping', {
 				detail: {
@@ -162,7 +182,11 @@ function dropzone<TargetData>(
 	};
 
 	const handleDragOver = (event: DragEvent) => {
-		if (!event.dataTransfer) {
+		if (event.dataTransfer === null) {
+			return;
+		}
+
+		if (!isAcceptable(source)) {
 			return;
 		}
 
@@ -177,9 +201,7 @@ function dropzone<TargetData>(
 			return;
 		}
 
-		const data = event.dataTransfer.getData('application/json');
-
-		if (data === '') {
+		if (!isAcceptable(source)) {
 			return;
 		}
 
@@ -187,8 +209,6 @@ function dropzone<TargetData>(
 		event.stopPropagation();
 
 		const bounds = node.getBoundingClientRect();
-
-		const source = JSON.parse(data) as DragSource<any>;
 
 		node.dispatchEvent(
 			new CustomEvent<DroppedEvent>('dropped', {
@@ -207,6 +227,8 @@ function dropzone<TargetData>(
 	};
 
 	const unsubscribe = dragging.subscribe((state) => {
+		source = state;
+
 		node.dispatchEvent(
 			new CustomEvent<AcceptingEvent>('accepting', {
 				detail: {
@@ -223,6 +245,7 @@ function dropzone<TargetData>(
 
 	return {
 		update(newOptions) {
+			accepts = options.accepts;
 			target = newOptions.data;
 		},
 		destroy() {

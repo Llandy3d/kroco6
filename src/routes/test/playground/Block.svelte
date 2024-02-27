@@ -4,6 +4,7 @@
 	import { draggable, type DragChangeEvent, dropmask } from './dnd';
 	import { cn } from '$lib/utils';
 
+	export let type: string;
 	export let block: Block;
 
 	let dragging = false;
@@ -18,7 +19,7 @@
 
 <div
 	use:dropmask
-	use:draggable={{ enabled: true, data: block }}
+	use:draggable={{ type, data: block }}
 	class={cn('block-root flex w-min items-center rounded-r-md', className)}
 	class:dragging
 	on:dragchange={handleDragChange}

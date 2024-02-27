@@ -3,6 +3,7 @@
 	import { dropzone, type DroppedEvent, type DroppingEvent, type AcceptingEvent } from './dnd';
 
 	export let data: Target;
+	export let accepts: string[] | undefined;
 
 	let accepting = false;
 	let dropping = false;
@@ -30,7 +31,7 @@
 		class="drop-zone min-w-8 overflow-visible bg-black opacity-0"
 		class:dropping
 		class:accepting
-		use:dropzone={{ data }}
+		use:dropzone={{ accepts, data }}
 		on:accepting={handleAccepting}
 		on:dropping={handleDropping}
 		on:dropped={handleDropped}

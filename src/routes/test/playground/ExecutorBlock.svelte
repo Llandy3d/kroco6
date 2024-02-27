@@ -6,6 +6,6 @@
 	export let block: ExecutorBlock;
 </script>
 
-<Block {block}>
+<Block type="executor" {block}>
 	<Field class="bg-white">{block.executor.type}</Field>
 </Block>
