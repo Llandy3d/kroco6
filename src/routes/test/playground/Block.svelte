@@ -2,6 +2,7 @@
 	import type { Block } from '$lib/store/test/types';
 	import { GripVertical } from 'lucide-svelte';
 	import { draggable, type DragChangeEvent, dropmask } from './dnd';
+	import { cn } from '$lib/utils';
 
 	export let block: Block;
 
@@ -18,8 +19,7 @@
 <div
 	use:dropmask
 	use:draggable={{ enabled: true, data: block }}
-	class="block-root flex items-center first:rounded-md"
-	class:className
+	class={cn('block-root flex w-min items-center rounded-r-md', className)}
 	class:dragging
 	on:dragchange={handleDragChange}
 >
@@ -36,14 +36,6 @@
 </div>
 
 <style>
-	.block-root:first-child .drag-handle {
-		border-top-left-radius: 0.375rem;
-	}
-
-	.block-root:last-child .drag-handle {
-		border-bottom-left-radius: 0.375rem;
-	}
-
 	.dragging {
 		opacity: 0.5;
 	}

@@ -1,10 +1,10 @@
 import { derived, writable } from 'svelte/store';
-import { isRootBlock, type Block } from './types';
+import { type Block } from './types';
 
 const blocks = writable<Block[]>([]);
 
 const roots = derived(blocks, (blocks) => {
-	return blocks.filter(isRootBlock);
+	return blocks.filter((block) => block.parent.type === 'canvas');
 });
 
 function appendBlock(owner: Block, block: Block) {

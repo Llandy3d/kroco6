@@ -8,8 +8,8 @@
 
 <div
 	class={cn(
-		className,
-		'relative whitespace-nowrap border-slate-400 p-1 text-sm text-black last:shadow-md'
+		'relative whitespace-nowrap border-slate-400  p-1 text-sm text-black last:shadow-md',
+		className
 	)}
 >
 	<slot />

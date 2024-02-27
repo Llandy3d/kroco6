@@ -7,6 +7,7 @@
 	import { blocks, roots } from '$lib/store/test';
 	import { onMount } from 'svelte';
 	import ScenarioBlock from './ScenarioBlock.svelte';
+	import AnyBlock from './AnyBlock.svelte';
 
 	const handleDrop = (ev: CustomEvent<DroppedEvent<BlockType, {}>>) => {
 		const parent = {
@@ -24,22 +25,56 @@
 
 	onMount(() => {
 		blocks.set([
-			{ id: '0', text: 'First', parent: { type: 'canvas', top: 100, left: 100 } },
-			{ id: '1', text: 'Second', parent: { type: 'canvas', top: 400, left: 100 } },
-			{ id: '2', text: 'Third', parent: { type: 'collection', id: '1' } },
-			{ id: '3', text: 'Fourth', parent: { type: 'collection', id: '1' } },
-			{ id: '4', text: 'Fifth', parent: { type: 'collection', id: '2' } },
-			{ id: '5', text: 'This one is a bit longer', parent: { type: 'collection', id: '2' } }
+			{
+				type: 'scenario',
+				id: '0',
+				name: 'My simple scenario',
+				parent: { type: 'canvas', top: 100, left: 100 }
+			},
+			{
+				type: 'scenario',
+				id: '1',
+				name: 'Another scenario',
+				parent: { type: 'canvas', top: 400, left: 100 }
+			},
+			{
+				type: 'http-request',
+				id: '2',
+				name: 'Get something',
+				method: 'GET',
+				url: '/something',
+				parameters: {},
+				parent: { type: 'collection', id: '1' }
+			},
+			{
+				type: 'http-request',
+				id: '3',
+				name: 'Get something with id',
+				method: 'GET',
+				url: '/something/1',
+				parameters: {
+					id: { type: 'string', value: '1' }
+				},
+				parent: { type: 'collection', id: '1' }
+			},
+			{
+				type: 'executor',
+				id: '4',
+				executor: {
+					type: 'constant-vus',
+					vus: 1,
+					duration: '1m'
+				},
+				parent: { type: 'collection', id: '0' }
+			}
 		]);
 	});
 </script>
 
 <div class="relative h-full w-full" use:dropzone={{ data: {} }} on:dropped={handleDrop}>
-	{#each $roots as root}
-		{#key root.id}
-			<Root {root}>
-				<ScenarioBlock block={root} />
-			</Root>
-		{/key}
+	{#each $roots as root (root.id)}
+		<Root {root}>
+			<AnyBlock block={root} />
+		</Root>
 	{/each}
 </div>

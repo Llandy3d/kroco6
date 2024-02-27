@@ -50,9 +50,9 @@
 	<div class="select-none">
 		<div class="flex rounded-l-md">
 			<div class="w-2 bg-white"></div>
-			<ul class="min-h-2 w-6 flex-auto list-none">
+			<ul class="separator flex min-h-2 w-6 flex-auto list-none flex-col">
 				{#each items as item}
-					<li class="relative border-b-2 border-slate-200">
+					<li class="relative border-slate-200">
 						<DropZone data={item} on:dropped={handleDropped} />
 						{#key item.id}
 							<slot {item} />
@@ -69,4 +69,7 @@
 </div>
 
 <style>
+	.separator {
+		gap: 1px;
+	}
 </style>
