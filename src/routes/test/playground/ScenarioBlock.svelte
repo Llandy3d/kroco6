@@ -5,7 +5,7 @@
 	import Field from './Field.svelte';
 	import Collection, { type AppendBlockEvent, type InsertBlockEvent } from './Collection.svelte';
 	import { derived } from 'svelte/store';
-	import { appendBlock, blocks, insertBefore } from '$lib/store/test';
+	import { appendBlock, blocks, insertBlock } from '$lib/store/test';
 	import AnyBlock from './AnyBlock.svelte';
 	import StringInput, { type StringInputChangeEvent } from './StringInput.svelte';
 
@@ -28,7 +28,7 @@
 	};
 
 	const insert = ({ detail }: CustomEvent<InsertBlockEvent>) => {
-		insertBefore(block, detail.before, detail.target);
+		insertBlock(block, detail.before, detail.target);
 	};
 
 	const handleNameChange = (ev: CustomEvent<StringInputChangeEvent>) => {

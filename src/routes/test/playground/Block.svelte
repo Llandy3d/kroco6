@@ -20,6 +20,7 @@
 </script>
 
 <div
+	id={block.id}
 	use:dropmask
 	use:draggable={{ type, data: block }}
 	class={cn('block-root flex w-min items-center rounded-r-md', className)}

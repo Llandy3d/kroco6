@@ -1,5 +1,6 @@
 import { derived, writable } from 'svelte/store';
 import { type Block } from './types';
+import { nanoid } from 'nanoid';
 
 const blocks = writable<Block[]>([]);
 
@@ -7,12 +8,18 @@ const roots = derived(blocks, (blocks) => {
 	return blocks.filter((block) => block.parent.type === 'canvas');
 });
 
+function instantiateBlock(block: Block) {
+	return block.parent.type === 'toolbox' ? { ...block, id: nanoid() } : block;
+}
+
 function appendBlock(owner: Block, block: Block) {
 	blocks.update((blocks) => {
+		const target = instantiateBlock(block);
+
 		return [
-			...blocks.filter((current) => current.id !== block.id),
+			...blocks.filter((current) => current.id !== target.id),
 			{
-				...block,
+				...target,
 				parent: {
 					type: 'collection',
 					id: owner.id
@@ -24,8 +31,10 @@ function appendBlock(owner: Block, block: Block) {
 
 function insertBlock(owner: Block, before: Block, block: Block) {
 	blocks.update((blocks) => {
+		const target = instantiateBlock(block);
+
 		return blocks.flatMap((current) => {
-			if (current.id === block.id) {
+			if (current.id === target.id) {
 				return [];
 			}
 
@@ -34,7 +43,7 @@ function insertBlock(owner: Block, before: Block, block: Block) {
 			}
 
 			const newBlock: Block = {
-				...block,
+				...target,
 				parent: {
 					type: 'collection',
 					id: owner.id
@@ -46,4 +55,4 @@ function insertBlock(owner: Block, before: Block, block: Block) {
 	});
 }
 
-export { appendBlock, insertBlock as insertBefore, blocks, roots };
+export { instantiateBlock, appendBlock, insertBlock, blocks, roots };

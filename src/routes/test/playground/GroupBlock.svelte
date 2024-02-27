@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { appendBlock, blocks, insertBefore } from '$lib/store/test';
+	import { appendBlock, blocks, insertBlock } from '$lib/store/test';
 	import { type GroupBlock, STEPS } from '$lib/store/test/types';
 	import { derived } from 'svelte/store';
 	import Block from './Block.svelte';
@@ -19,7 +19,7 @@
 	};
 
 	const insert = ({ detail }: CustomEvent<InsertBlockEvent>) => {
-		insertBefore(block, detail.before, detail.target);
+		insertBlock(block, detail.before, detail.target);
 	};
 
 	const handleNameChange = (ev: CustomEvent<StringInputChangeEvent>) => {

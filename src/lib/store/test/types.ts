@@ -9,9 +9,13 @@ interface CollectionParent {
 	id: string;
 }
 
+interface ToolboxParent {
+	type: 'toolbox';
+}
+
 interface BlockBase {
 	id: string;
-	parent: CanvasParent | CollectionParent;
+	parent: CanvasParent | CollectionParent | ToolboxParent;
 }
 
 interface ScenarioBlock extends BlockBase {

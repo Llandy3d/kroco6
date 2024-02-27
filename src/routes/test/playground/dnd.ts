@@ -15,6 +15,7 @@ interface DragSource<T = unknown> {
 interface DraggableOptions<T> {
 	type: string;
 	data: T;
+	transform?: (data: T) => T;
 }
 
 interface DraggableAttributes {
@@ -25,7 +26,7 @@ function draggable<T>(
 	node: HTMLElement,
 	options: DraggableOptions<T>
 ): ActionReturn<DraggableOptions<T>, DraggableAttributes> {
-	let { type, data } = options;
+	let { type, data, transform } = options;
 
 	const handle = node.querySelector<HTMLElement>('[data-drag-handle]') ?? node;
 
@@ -53,7 +54,7 @@ function draggable<T>(
 			top: event.clientY - bounds.top,
 			left: event.clientX - bounds.left,
 			type,
-			data
+			data: transform?.(data) ?? data
 		};
 
 		event.dataTransfer.setData('application/json', JSON.stringify(payload));
@@ -96,6 +97,7 @@ function draggable<T>(
 		update(options) {
 			type = options.type;
 			data = options.data;
+			transform = options.transform;
 		},
 		destroy() {
 			node.removeEventListener('dragstart', handleDragStart);

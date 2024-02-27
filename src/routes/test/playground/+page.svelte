@@ -4,23 +4,34 @@
 	import Block from './Block.svelte';
 	import Root from './Root.svelte';
 	import { dropzone, type DroppedEvent } from './dnd';
-	import { blocks, roots } from '$lib/store/test';
+	import { blocks, instantiateBlock, roots } from '$lib/store/test';
 	import { onMount } from 'svelte';
 	import ScenarioBlock from './ScenarioBlock.svelte';
 	import AnyBlock from './AnyBlock.svelte';
+	import * as Tabs from '$lib/components/ui/tabs';
+	import { Content } from '$lib/components/ui/accordion';
+	import Toolbox from './Toolbox.svelte';
 
-	const handleDrop = (ev: CustomEvent<DroppedEvent<BlockType, {}>>) => {
+	let tab = 'build';
+
+	const handleDrop = ({ detail }: CustomEvent<DroppedEvent<BlockType, {}>>) => {
+		const dropped = detail.data.dropped;
+
 		const parent = {
 			type: 'canvas',
-			top: ev.detail.top,
-			left: ev.detail.left
+			top: detail.top,
+			left: detail.left
 		} as const;
 
-		$blocks = $blocks.map((block) =>
-			ev.detail.data.dropped.id === block.id ? { ...block, parent } : block
-		);
+		if (dropped.parent.type === 'toolbox') {
+			const newBlock = instantiateBlock(dropped);
 
-		console.log('dropped', ev.detail);
+			$blocks = [...$blocks, { ...newBlock, parent }];
+
+			return;
+		}
+
+		$blocks = $blocks.map((block) => (dropped.id === block.id ? { ...block, parent } : block));
 	};
 
 	onMount(() => {
@@ -77,10 +88,24 @@
 	});
 </script>
 
-<div class="relative h-full w-full" use:dropzone={{ data: {} }} on:dropped={handleDrop}>
-	{#each $roots as root (root.id)}
-		<Root {root}>
-			<AnyBlock block={root} />
-		</Root>
-	{/each}
-</div>
+<Tabs.Root class="flex h-full flex-col" bind:value={tab}>
+	<Tabs.List class="w-full">
+		<Tabs.Trigger value="build">Build</Tabs.Trigger>
+		<Tabs.Trigger value="script">Script</Tabs.Trigger>
+	</Tabs.List>
+	<Tabs.Content value="build" class="flex-auto">
+		<div class="relative flex h-full w-full" use:dropzone={{ data: {} }} on:dropped={handleDrop}>
+			<Toolbox />
+			<div class="flex-auto">
+				{#each $roots as root (root.id)}
+					<Root {root}>
+						<AnyBlock block={root} />
+					</Root>
+				{/each}
+			</div>
+		</div>
+	</Tabs.Content>
+	<Tabs.Content value="script" class="flex-auto">
+		<p>Script</p>
+	</Tabs.Content>
+</Tabs.Root>
