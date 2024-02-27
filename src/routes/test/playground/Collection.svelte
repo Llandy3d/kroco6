@@ -11,12 +11,17 @@
 
 <script lang="ts">
 	import type { Block as BlockType } from '$lib/store/test/types';
+	import { cn } from '$lib/utils';
 	import { type DroppedEvent } from './dnd';
 	import DropZone from './DropZone.svelte';
 	import { createEventDispatcher } from 'svelte';
 
 	export let accepts: string[] | undefined;
 	export let items: BlockType[];
+
+	let className = '';
+
+	export { className as class };
 
 	const dispatch = createEventDispatcher<{
 		insert: InsertBlockEvent;
@@ -46,30 +51,37 @@
 	};
 </script>
 
-<div>
-	<div class="h-2 w-full rounded-br-md bg-white shadow-md shadow-slate-400"></div>
+<div class="collection-root">
+	<div class={cn('h-2 w-full rounded-br-md bg-white shadow-md shadow-slate-400', className)}></div>
 	<div class="select-none">
 		<div class="flex rounded-l-md">
-			<div class="w-2 bg-white"></div>
-			<ul class="separator flex min-h-2 w-6 flex-auto list-none flex-col">
-				{#each items as item}
+			<div class={cn('w-2 bg-white', className)}></div>
+			<ul class="separator flex w-6 flex-auto list-none flex-col">
+				{#each items as item (item.id)}
 					<li class="relative border-slate-200">
 						<DropZone {accepts} data={item} on:dropped={handleDropped} />
-						{#key item.id}
-							<slot {item} />
-						{/key}
+						<slot {item} />
 					</li>
 				{/each}
-				<li class="relative">
+				<li class="relative min-h-2">
 					<DropZone {accepts} data={null} on:dropped={handleDropped} />
 				</li>
 			</ul>
 		</div>
 	</div>
-	<div class="h-2 w-full rounded-tr-md bg-white shadow-md shadow-slate-400"></div>
+	<div
+		class={cn(
+			'collection-footer h-2 w-full rounded-tr-md bg-white shadow-md shadow-slate-400',
+			className
+		)}
+	></div>
 </div>
 
 <style>
+	.collection-root:last-child .collection-footer {
+		border-bottom-right-radius: 0.25rem;
+	}
+
 	.separator {
 		gap: 1px;
 	}

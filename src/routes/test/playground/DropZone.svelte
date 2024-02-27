@@ -1,4 +1,29 @@
 <script lang="ts" generics="Dropped, Target">
+	function debounce<T extends (...args: any[]) => any>(fn: T, delay: number, maxWait: number) {
+		let delayTimeout: number | undefined = undefined;
+		let maxWaitTimeout: number | undefined = undefined;
+
+		return function (this: ThisParameterType<T>, ...args: Parameters<T>) {
+			clearTimeout(delayTimeout);
+
+			delayTimeout = setTimeout(() => {
+				clearTimeout(maxWaitTimeout);
+				maxWaitTimeout = undefined;
+
+				fn.apply(this, args);
+			}, delay);
+
+			maxWaitTimeout =
+				maxWaitTimeout ??
+				setTimeout(() => {
+					clearTimeout(delayTimeout);
+					maxWaitTimeout = undefined;
+
+					fn.apply(this, args);
+				}, maxWait);
+		};
+	}
+
 	import { createEventDispatcher } from 'svelte';
 	import { dropzone, type DroppedEvent, type DroppingEvent, type AcceptingEvent } from './dnd';
 
@@ -7,6 +32,7 @@
 
 	let accepting = false;
 	let dropping = false;
+	let height = 0;
 
 	const dispatch = createEventDispatcher<{ dropped: DroppedEvent<any, Target> }>();
 
@@ -14,23 +40,34 @@
 		accepting = ev.detail.accepting;
 	};
 
-	const handleDropping = (ev: CustomEvent<DroppingEvent>) => {
-		dropping = ev.detail.dropping;
-	};
+	const handleDropping = debounce(
+		(ev: CustomEvent<DroppingEvent>) => {
+			if (ev.detail.source?.data !== data && ev.detail.dropping) {
+				height = ev.detail.source?.node.getBoundingClientRect().height ?? 0;
+				dropping = ev.detail.dropping;
+
+				return;
+			}
+
+			height = 0;
+			dropping = false;
+		},
+		75,
+		200
+	);
 
 	const handleDropped = (ev: CustomEvent<DroppedEvent<Dropped, Target>>) => {
 		dispatch('dropped', ev.detail);
 
 		accepting = false;
 		dropping = false;
+		height = 0;
 	};
 </script>
 
-<div class="max-h-0">
+<div class="drop-zone" class:dropping class:accepting style={`height: ${height}px`}>
 	<div
-		class="drop-zone min-w-8 overflow-visible bg-black opacity-0"
-		class:dropping
-		class:accepting
+		class="drop-area min-w-8 overflow-visible bg-black opacity-0"
 		use:dropzone={{ accepts, data }}
 		on:accepting={handleAccepting}
 		on:dropping={handleDropping}
@@ -40,16 +77,21 @@
 
 <style>
 	.drop-zone {
-		transition: height 0.2s;
+		height: 0;
 	}
 
-	.accepting {
+	.drop-area {
+		z-index: 1000;
+	}
+
+	.drop-zone.accepting .drop-area {
 		position: relative;
-		top: -6px;
-		height: 12px;
+		top: -8px;
+		min-height: 16px;
 	}
 
-	.dropping {
+	.drop-zone.dropping .drop-area {
 		opacity: 0.2;
+		height: calc(50% + 16px);
 	}
 </style>

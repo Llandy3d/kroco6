@@ -66,6 +66,12 @@
 					duration: '1m'
 				},
 				parent: { type: 'collection', id: '0' }
+			},
+			{
+				type: 'group',
+				id: '5',
+				name: 'My group',
+				parent: { type: 'canvas', top: 200, left: 200 }
 			}
 		]);
 	});

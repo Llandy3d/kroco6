@@ -5,6 +5,7 @@ import { writable } from 'svelte/store';
 const dragging = writable<DragSource<any> | null>(null);
 
 interface DragSource<T = unknown> {
+	node: HTMLElement;
 	top: number;
 	left: number;
 	type: string;
@@ -48,6 +49,7 @@ function draggable<T>(
 		const bounds = node.getBoundingClientRect();
 
 		const payload: DragSource<T> = {
+			node,
 			top: event.clientY - bounds.top,
 			left: event.clientX - bounds.left,
 			type,
@@ -106,7 +108,7 @@ function draggable<T>(
 }
 
 interface DropZoneOptions<T> {
-	accepts?: string[];
+	accepts?: readonly string[];
 	data: T;
 }
 
@@ -119,6 +121,7 @@ interface AcceptingEvent {
 }
 
 interface DroppingEvent {
+	source: DragSource<any> | null;
 	dropping: boolean;
 }
 
@@ -161,7 +164,8 @@ function dropzone<TargetData>(
 		node.dispatchEvent(
 			new CustomEvent<DroppingEvent>('dropping', {
 				detail: {
-					dropping: true
+					dropping: true,
+					source
 				}
 			})
 		);
@@ -175,7 +179,8 @@ function dropzone<TargetData>(
 		node.dispatchEvent(
 			new CustomEvent<DroppingEvent>('dropping', {
 				detail: {
-					dropping: false
+					dropping: false,
+					source
 				}
 			})
 		);

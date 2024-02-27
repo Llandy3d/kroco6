@@ -1,13 +1,13 @@
 <script lang="ts">
 	import Block from './Block.svelte';
-	import type { ScenarioBlock } from '$lib/store/test/types';
+	import { STEPS, type ScenarioBlock } from '$lib/store/test/types';
 	import { Input } from '$lib/components/ui/input';
 	import Field from './Field.svelte';
 	import Collection, { type AppendBlockEvent, type InsertBlockEvent } from './Collection.svelte';
 	import { derived } from 'svelte/store';
 	import { appendBlock, blocks, insertBefore } from '$lib/store/test';
 	import AnyBlock from './AnyBlock.svelte';
-	import StringInput from './StringInput.svelte';
+	import StringInput, { type StringInputChangeEvent } from './StringInput.svelte';
 
 	export let block: ScenarioBlock;
 
@@ -30,31 +30,31 @@
 	const insert = ({ detail }: CustomEvent<InsertBlockEvent>) => {
 		insertBefore(block, detail.before, detail.target);
 	};
+
+	const handleNameChange = (ev: CustomEvent<StringInputChangeEvent>) => {
+		block = {
+			...block,
+			name: ev.detail.value
+		};
+	};
 </script>
 
 <Block type="scenario" {block}>
-	<svelte:fragment>
-		<Field class="bg-white"
-			>Run <StringInput placeholder="Scenario name" bind:value={block.name} /> using
-		</Field>
-		<Collection
-			accepts={['executor']}
-			items={$executors}
-			on:append={append}
-			on:insert={insert}
-			let:item
-		>
-			<AnyBlock block={item} />
-		</Collection>
-		<Field class="bg-white">by doing the following:</Field>
-		<Collection
-			accepts={['http-request']}
-			items={$steps}
-			on:append={append}
-			on:insert={insert}
-			let:item
-		>
-			<AnyBlock block={item} />
-		</Collection>
-	</svelte:fragment>
+	<Field class="bg-white"
+		>Run <StringInput placeholder="Scenario name" value={block.name} on:change={handleNameChange} />
+		using
+	</Field>
+	<Collection
+		accepts={['executor']}
+		items={$executors}
+		on:append={append}
+		on:insert={insert}
+		let:item
+	>
+		<AnyBlock block={item} />
+	</Collection>
+	<Field class="bg-white">by doing the following:</Field>
+	<Collection accepts={STEPS} items={$steps} on:append={append} on:insert={insert} let:item>
+		<AnyBlock block={item} />
+	</Collection>
 </Block>

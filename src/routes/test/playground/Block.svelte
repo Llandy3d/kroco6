@@ -8,13 +8,15 @@
 	export let block: Block;
 
 	let dragging = false;
+
 	let className = '';
+	let handleClass = '';
 
 	const handleDragChange = (ev: CustomEvent<DragChangeEvent>) => {
 		dragging = ev.detail.dragging;
 	};
 
-	export { className as class };
+	export { className as class, handleClass };
 </script>
 
 <div
@@ -25,20 +27,31 @@
 	on:dragchange={handleDragChange}
 >
 	<div
-		class="drag-handle flex cursor-pointer select-none items-center self-stretch bg-indigo-400 p-1 text-white shadow-md shadow-slate-400"
+		class={cn(
+			'drag-handle flex cursor-pointer select-none items-center self-stretch bg-indigo-400 p-1 text-white shadow-md shadow-slate-400',
+			handleClass
+		)}
 		role="presentation"
 		data-drag-handle
 	>
 		<GripVertical size={18} />
 	</div>
-	<div class="flex flex-col">
+	<div class="block-content flex flex-col">
 		<slot />
 	</div>
 </div>
 
 <style>
+	.block-content > :global(*:first-child) {
+		border-top-right-radius: 0.25rem;
+	}
+
+	.block-content > :global(*:last-child) {
+		border-bottom-right-radius: 0.25rem;
+	}
+
 	.dragging {
-		opacity: 0.5;
+		opacity: 0.8;
 	}
 
 	.dragging * {

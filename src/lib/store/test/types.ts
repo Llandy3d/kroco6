@@ -54,10 +54,27 @@ interface ExecutorBlock extends BlockBase {
 	executor: Executor;
 }
 
-type Block = ScenarioBlock | HttpRequestBlock | ExecutorBlock;
+interface GroupBlock extends BlockBase {
+	type: 'group';
+	name: string;
+}
+
+type Block = ScenarioBlock | GroupBlock | HttpRequestBlock | ExecutorBlock;
+
+type Step = HttpRequestBlock | GroupBlock;
 
 function isRootBlock<T extends Block>(block: T): block is T & { parent: CanvasParent } {
 	return block.parent.type === 'canvas';
 }
 
-export { isRootBlock, type Block, type ScenarioBlock, type HttpRequestBlock, type ExecutorBlock };
+const STEPS: Array<Step['type']> = ['http-request', 'group'];
+
+export {
+	isRootBlock,
+	STEPS,
+	type Block,
+	type ScenarioBlock,
+	type HttpRequestBlock,
+	type ExecutorBlock,
+	type GroupBlock
+};
