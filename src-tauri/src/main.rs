@@ -22,7 +22,7 @@ async fn open_run_window(handle: tauri::AppHandle, state: tauri::State<'_, Scrip
       &handle,
       "run_window", /* the unique window label */
       tauri::WindowUrl::App("test/run".into())
-    ).build().unwrap();
+    ).inner_size(1400.0, 1000.0).build().unwrap();
     run_window.set_title("Kroco Gator").unwrap();
 
     let mut mtx = state.0.lock().unwrap();
