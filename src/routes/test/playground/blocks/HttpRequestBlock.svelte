@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { HttpRequestBlock } from '$lib/store/test/types';
-	import Field from './Field.svelte';
-	import Block from './Block.svelte';
-	import StringInput from './StringInput.svelte';
+	import Field from './primitives/Field.svelte';
+	import Block from './primitives/Block.svelte';
+	import StringInput from '../inputs/StringInput.svelte';
 
 	export let block: HttpRequestBlock;
 </script>
@@ -14,7 +14,7 @@
 	{#each Object.entries(block.parameters) as [key, param] (key)}
 		{#if param.type === 'string'}
 			<Field>
-				{key}: <StringInput bind:value={param.value} />
+				{key}: <StringInput value={param.value} />
 			</Field>
 		{/if}
 	{/each}

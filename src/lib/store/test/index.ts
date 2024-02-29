@@ -1,6 +1,52 @@
 import { derived, writable } from 'svelte/store';
-import { type Block } from './types';
+import { type Block, type HttpRequestBlock } from './types';
 import { nanoid } from 'nanoid';
+import type { OpenAPIV3_1 } from 'openapi-types';
+import { isTruthy } from '../../../utils/typescript';
+
+type Falsy = '' | 0 | false | null | undefined;
+
+const api = writable<OpenAPIV3_1.Document>({
+	info: {
+		title: 'Untitled API',
+		version: '1.0.0'
+	},
+	openapi: '3.0.0',
+	paths: {}
+});
+
+const requests = derived(api, ($api) => {
+	return Object.entries($api.paths ?? {}).flatMap(([path, methods]) => {
+		if (methods === undefined) {
+			return [];
+		}
+
+		const a: Array<HttpRequestBlock | Falsy> = [
+			methods.get && {
+				type: 'http-request',
+				id: nanoid(),
+				method: 'get',
+				url: path,
+				name: methods.get.summary ?? `GET ${path}`,
+				parameters: {},
+				parent: { type: 'toolbox' }
+			},
+			methods.post && {
+				type: 'http-request',
+				id: nanoid(),
+				method: 'post',
+				url: path,
+				name: methods.post.summary ?? `POST ${path}`,
+				parameters: {},
+				parent: { type: 'toolbox' }
+			}
+		];
+
+		return a.filter(isTruthy);
+	});
+});
+
+const selected = writable<Block | null>(null);
 
 const blocks = writable<Block[]>([]);
 
@@ -55,4 +101,37 @@ function insertBlock(owner: Block, before: Block, block: Block) {
 	});
 }
 
-export { instantiateBlock, appendBlock, insertBlock, blocks, roots };
+function updateBlock(block: Block) {
+	blocks.update((blocks) => {
+		return blocks.map((current) => (current.id === block.id ? block : current));
+	});
+}
+
+function deleteBlock(block: Block | null) {
+	if (block === null) {
+		return;
+	}
+
+	blocks.update((blocks) => {
+		const newChildren = blocks.map((current) =>
+			current.parent.type === 'collection' && current.parent.id === block.id
+				? { ...current, parent: block.parent }
+				: current
+		);
+
+		return newChildren.filter((current) => current.id !== block?.id);
+	});
+}
+
+export {
+	instantiateBlock,
+	appendBlock,
+	insertBlock,
+	updateBlock,
+	deleteBlock,
+	selected,
+	api,
+	blocks,
+	requests,
+	roots
+};

@@ -1,3 +1,9 @@
+<script lang="ts" context="module">
+	export interface ImportEvent {
+		api: OpenAPI.Document;
+	}
+</script>
+
 <script lang="ts">
 	import type { OpenAPI } from 'openapi-types';
 	import * as Dialog from '$lib/components/ui/dialog';
@@ -12,9 +18,7 @@
 	let url: string = '';
 
 	const dispatch = createEventDispatcher<{
-		imported: {
-			api: OpenAPI.Document;
-		};
+		imported: ImportEvent;
 	}>();
 
 	const handleImportClick = () => {

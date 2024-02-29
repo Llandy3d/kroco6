@@ -1,8 +1,9 @@
 <script lang="ts">
 	import type { Block } from '$lib/store/test/types';
-	import { GripVertical } from 'lucide-svelte';
-	import { draggable, type DragChangeEvent, dropmask } from './dnd';
+	import { GripVertical, Key } from 'lucide-svelte';
+	import { draggable, type DragChangeEvent } from './dnd';
 	import { cn } from '$lib/utils';
+	import { deleteBlock, selected } from '$lib/store/test';
 
 	export let type: string;
 	export let block: Block;
@@ -16,15 +17,43 @@
 		dragging = ev.detail.dragging;
 	};
 
+	const handleClick = (ev: MouseEvent) => {
+		if (ev.target instanceof HTMLElement) {
+			ev.stopPropagation();
+			ev.preventDefault();
+
+			ev.target.parentElement?.focus();
+
+			selected.set(block);
+		}
+	};
+
+	const handleKeyPress = (ev: KeyboardEvent) => {
+		if (ev.key === 'Backspace') {
+			ev.preventDefault();
+			ev.stopPropagation();
+
+			deleteBlock(block);
+
+			$selected = null;
+		}
+	};
+
 	export { className as class, handleClass };
 </script>
 
+<!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+<!-- svelte-ignore a11y-no-static-element-interactions -->
 <div
+	tabindex="0"
 	id={block.id}
-	use:dropmask
 	use:draggable={{ type, data: block }}
-	class={cn('block-root flex w-min items-center rounded-r-md', className)}
+	class={cn(
+		'block-root flex w-min items-center rounded-r-md outline-2 outline-indigo-500 focus:outline',
+		className
+	)}
 	class:dragging
+	on:keypress={handleKeyPress}
 	on:dragchange={handleDragChange}
 >
 	<div
@@ -34,6 +63,7 @@
 		)}
 		role="presentation"
 		data-drag-handle
+		on:click={handleClick}
 	>
 		<GripVertical size={18} />
 	</div>

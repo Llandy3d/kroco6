@@ -2,10 +2,13 @@
 	import { appendBlock, blocks, insertBlock } from '$lib/store/test';
 	import { type GroupBlock, STEPS } from '$lib/store/test/types';
 	import { derived } from 'svelte/store';
-	import Block from './Block.svelte';
-	import Field from './Field.svelte';
-	import StringInput, { type StringInputChangeEvent } from './StringInput.svelte';
-	import Collection, { type AppendBlockEvent, type InsertBlockEvent } from './Collection.svelte';
+	import Block from './primitives/Block.svelte';
+	import Field from './primitives/Field.svelte';
+	import StringInput, { type StringInputChangeEvent } from '../inputs/StringInput.svelte';
+	import Collection, {
+		type AppendBlockEvent,
+		type InsertBlockEvent
+	} from './primitives/Collection.svelte';
 	import AnyBlock from './AnyBlock.svelte';
 
 	export let block: GroupBlock;

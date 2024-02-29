@@ -1,13 +1,15 @@
 <script lang="ts">
-	import Block from './Block.svelte';
+	import Block from './primitives/Block.svelte';
 	import { STEPS, type ScenarioBlock } from '$lib/store/test/types';
-	import { Input } from '$lib/components/ui/input';
-	import Field from './Field.svelte';
-	import Collection, { type AppendBlockEvent, type InsertBlockEvent } from './Collection.svelte';
+	import Field from './primitives/Field.svelte';
+	import Collection, {
+		type AppendBlockEvent,
+		type InsertBlockEvent
+	} from './primitives/Collection.svelte';
 	import { derived } from 'svelte/store';
-	import { appendBlock, blocks, insertBlock } from '$lib/store/test';
+	import { appendBlock, blocks, insertBlock, updateBlock } from '$lib/store/test';
 	import AnyBlock from './AnyBlock.svelte';
-	import StringInput, { type StringInputChangeEvent } from './StringInput.svelte';
+	import StringInput, { type StringInputChangeEvent } from '../inputs/StringInput.svelte';
 
 	export let block: ScenarioBlock;
 
@@ -32,17 +34,14 @@
 	};
 
 	const handleNameChange = (ev: CustomEvent<StringInputChangeEvent>) => {
-		block = {
-			...block,
-			name: ev.detail.value
-		};
+		updateBlock({ ...block, name: ev.detail.value });
 	};
 </script>
 
 <Block type="scenario" {block}>
 	<Field class="bg-white"
 		>Run <StringInput placeholder="Scenario name" value={block.name} on:change={handleNameChange} />
-		using
+		with
 	</Field>
 	<Collection
 		accepts={['executor']}
@@ -53,7 +52,7 @@
 	>
 		<AnyBlock block={item} />
 	</Collection>
-	<Field class="bg-white">by doing the following:</Field>
+	<Field class="bg-white">and do the following:</Field>
 	<Collection accepts={STEPS} items={$steps} on:append={append} on:insert={insert} let:item>
 		<AnyBlock block={item} />
 	</Collection>

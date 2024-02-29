@@ -2,7 +2,7 @@
 	import '../app.pcss';
 	import { Toaster } from '$lib/components/ui/sonner';
 	import { ModeWatcher } from 'mode-watcher';
-	import Sidebar from './Sidebar.svelte';
+	import Logo from '$lib/Logo.svelte';
 </script>
 
 <ModeWatcher />
