@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { appendBlock, blocks, insertBlock } from '$lib/store/test';
+	import { appendBlock, blocks, insertBlock, updateBlock } from '$lib/store/test';
 	import { type GroupBlock, STEPS } from '$lib/store/test/types';
 	import { derived } from 'svelte/store';
 	import Block from './primitives/Block.svelte';
@@ -26,16 +26,16 @@
 	};
 
 	const handleNameChange = (ev: CustomEvent<StringInputChangeEvent>) => {
-		block = {
+		updateBlock({
 			...block,
 			name: ev.detail.value
-		};
+		});
 	};
 </script>
 
 <Block type="group" handleClass="bg-amber-500" {block}>
 	<Field class="bg-amber-100"
-		>Grouped as <StringInput value={block.name} change={handleNameChange} />
+		>Grouped as <StringInput value={block.name} on:change={handleNameChange} />
 	</Field>
 	<Field class="bg-amber-100">do the following:</Field>
 	<Collection

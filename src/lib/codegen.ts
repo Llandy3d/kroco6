@@ -34,6 +34,25 @@ function emitStep(step: Step): string {
         });
       `;
 
+		case 'check':
+			return `
+        response = ${emitStep(step.target)}
+
+			  check(response, {
+					${step.checks
+						.map((check) => {
+							switch (check.type) {
+								case 'has-status':
+									return `status: (r) => r.status === ${check.status}`;
+
+								case 'body-contains':
+									return `body: (r) => r.body.includes(${JSON.stringify(check.value)})`;
+							}
+						})
+						.join(',')},
+				})
+			`;
+
 		default:
 			return exhaustive(step);
 	}
@@ -85,6 +104,8 @@ function emitExecutors(scenario: Scenario) {
 function emitScenario(scenario: Scenario) {
 	return ` 
     export function ${sanitizeName(scenario.name)}() {
+			let response = null;
+
       ${scenario.steps.map(emitStep).join('\n\n')}
     }
   `;
@@ -97,7 +118,7 @@ function emitScript(test: Test) {
 
 	const code = `
     import http from 'k6/http';
-    import { check } from 'k6';
+    import { group, check } from 'k6';
 
     export const options = {
       scenarios: { 

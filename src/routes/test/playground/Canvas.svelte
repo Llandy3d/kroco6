@@ -3,7 +3,7 @@
 
 	import Root from './blocks/Root.svelte';
 	import { dropzone, type DroppedEvent } from './blocks/primitives/dnd';
-	import { blocks, reparentBlock, roots, selected } from '$lib/store/test';
+	import { reparentBlock, roots, selected } from '$lib/store/test';
 	import AnyBlock from './blocks/AnyBlock.svelte';
 	import Toolbox from './Toolbox.svelte';
 
@@ -26,6 +26,8 @@
 
 <div class="relative flex h-full w-full" use:dropzone={{ data: {} }} on:dropped={handleDrop}>
 	<Toolbox />
+	<!-- svelte-ignore a11y-click-events-have-key-events -->
+	<!-- svelte-ignore a11y-no-static-element-interactions -->
 	<div class="flex-auto" on:click={handleClick}>
 		{#each $roots as root (root.id)}
 			<Root {root}>

@@ -37,7 +37,18 @@ interface LibraryFile extends OpenFileBase {
 
 type OpenFile = BlockFile | ScriptFile | LibraryFile;
 
-const openFiles = writable<OpenFile[]>([]);
+const openFiles = writable<OpenFile[]>([
+	{
+		handle: '1',
+		name: 'Untitled Test',
+		path: { type: 'new' },
+		type: 'block',
+		document: {
+			version: 0,
+			blocks: []
+		}
+	}
+]);
 const currentFile = writable<OpenFile | null>(null);
 
 export {

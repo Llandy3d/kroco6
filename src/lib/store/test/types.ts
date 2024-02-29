@@ -13,11 +13,16 @@ interface ToolboxParent {
 	type: 'toolbox';
 }
 
-type BlockParent = CanvasParent | CollectionParent | ToolboxParent;
+interface ImmediateParent {
+	type: 'immediate';
+	id: string;
+}
+
+type BlockParent = CanvasParent | CollectionParent | ToolboxParent | ImmediateParent;
 
 interface BlockBase {
 	id: string;
-	parent: CanvasParent | CollectionParent | ToolboxParent;
+	parent: BlockParent;
 }
 
 interface ScenarioBlock extends BlockBase {
@@ -65,15 +70,36 @@ interface GroupBlock extends BlockBase {
 	name: string;
 }
 
-type Block = ScenarioBlock | GroupBlock | HttpRequestBlock | ExecutorBlock;
+interface CheckBase {
+	id: string;
+}
 
-type StepBlock = HttpRequestBlock | GroupBlock;
+interface StatusCheck extends CheckBase {
+	type: 'has-status';
+	status: number;
+}
+
+interface BodyContainsCheck extends CheckBase {
+	type: 'body-contains';
+	value: string;
+}
+
+type CheckExpression = StatusCheck | BodyContainsCheck;
+
+interface CheckBlock extends BlockBase {
+	type: 'check';
+	checks: CheckExpression[];
+}
+
+type Block = ScenarioBlock | GroupBlock | HttpRequestBlock | ExecutorBlock | CheckBlock;
+
+type StepBlock = HttpRequestBlock | GroupBlock | CheckBlock;
 
 function isRootBlock<T extends Block>(block: T): block is T & { parent: CanvasParent } {
 	return block.parent.type === 'canvas';
 }
 
-const STEPS: Array<StepBlock['type']> = ['http-request', 'group'];
+const STEPS: Array<StepBlock['type']> = ['http-request', 'group', 'check'];
 
 interface BlockDocument {
 	version: 0;
@@ -90,5 +116,8 @@ export {
 	type GroupBlock,
 	type StepBlock,
 	type BlockDocument,
-	type BlockParent
+	type BlockParent,
+	type ImmediateParent,
+	type CheckBlock,
+	type CheckExpression
 };

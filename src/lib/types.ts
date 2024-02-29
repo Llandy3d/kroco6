@@ -1,3 +1,21 @@
+interface StatusCheck {
+	type: 'has-status';
+	status: number;
+}
+
+interface BodyContainsCheck {
+	type: 'body-contains';
+	value: string;
+}
+
+type Check = StatusCheck | BodyContainsCheck;
+
+interface CheckStep {
+	type: 'check';
+	target: HttpRequestStep;
+	checks: Check[];
+}
+
 interface GroupStep {
 	type: 'group';
 	name: string;
@@ -11,7 +29,7 @@ interface HttpRequestStep {
 	url: string;
 }
 
-type Step = GroupStep | HttpRequestStep;
+type Step = GroupStep | HttpRequestStep | CheckStep;
 
 interface ConstantVusExecutor {
 	type: 'constant-vus';
@@ -40,4 +58,14 @@ interface Test {
 	scenarios: Scenario[];
 }
 
-export type { Test, Scenario, Step, Executor };
+export type {
+	Test,
+	Scenario,
+	Step,
+	Executor,
+	HttpRequestStep,
+	GroupStep,
+	CheckStep,
+	StatusCheck,
+	BodyContainsCheck
+};

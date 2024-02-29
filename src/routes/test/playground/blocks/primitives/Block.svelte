@@ -53,6 +53,11 @@
 		className
 	)}
 	class:dragging
+	data-parent={block.parent.type === 'canvas'
+		? 'canvas'
+		: block.parent.type === 'toolbox'
+			? 'toolbox'
+			: block.parent.id}
 	on:keypress={handleKeyPress}
 	on:dragchange={handleDragChange}
 >

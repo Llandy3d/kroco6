@@ -5,26 +5,14 @@
 	import Canvas from './Canvas.svelte';
 	import ScriptPreview from './ScriptPreview.svelte';
 	import { blocks, loadBlocks } from '$lib/store/test';
-	import { storeContent } from '$lib/files';
+	import { loadContent, storeContent } from '$lib/files';
 
 	let tab = 'build';
 
 	export let file: BlockFile;
 
 	onMount(() => {
-		let document = sessionStorage.getItem(file.handle);
-
-		if (document === null) {
-			if (file.path.type === 'new') {
-				loadBlocks([]);
-
-				return;
-			}
-
-			document = file.path.original;
-
-			return;
-		}
+		let document = loadContent(file);
 
 		try {
 			const { blocks } = JSON.parse(document);

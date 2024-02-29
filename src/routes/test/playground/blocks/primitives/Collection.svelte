@@ -52,7 +52,7 @@
 </script>
 
 <div class="collection-root">
-	<div class={cn('h-2 w-full rounded-br-md bg-white shadow-md shadow-slate-400', className)}></div>
+	<div class={cn('h-2 w-full rounded-br-md  bg-white shadow-md shadow-slate-400', className)}></div>
 	<div class="select-none">
 		<div class="flex rounded-l-md">
 			<div class={cn('w-2 bg-white', className)}></div>

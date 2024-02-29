@@ -5,6 +5,11 @@
 	import { api } from '$lib/store/test';
 	import ListButton from './ListButton.svelte';
 	import MethodBadge from './MethodBadge.svelte';
+	import { onDestroy, onMount } from 'svelte';
+	import type { LibraryFile } from '$lib/store/editor';
+	import { loadContent, storeContent } from '$lib/files';
+
+	export let file: LibraryFile;
 
 	let importModalOpen = false;
 
@@ -19,6 +24,20 @@
 
 		$api = event.detail.api as OpenAPIV3_1.Document;
 	};
+
+	onMount(() => {
+		const content = loadContent(file);
+
+		try {
+			$api = JSON.parse(content);
+		} catch (e) {
+			console.error(e);
+		}
+	});
+
+	onDestroy(() => {
+		storeContent(file, JSON.stringify($api));
+	});
 </script>
 
 <div class="flex h-full flex-col">
@@ -29,15 +48,13 @@
 					{#if value?.get}
 						<ListButton
 							><MethodBadge class="bg-green-500">GET</MethodBadge>
-							{value.get.summary ?? path}</ListButton
-						>
+							{value.get.summary ?? path}
+						</ListButton>
 					{/if}
 					{#if value?.head}
 						<ListButton>
-							<Button>
-								<MethodBadge class="bg-green-500">HEAD</MethodBadge>
-								{value.head.summary ?? path}
-							</Button>
+							<MethodBadge class="bg-green-500">HEAD</MethodBadge>
+							{value.head.summary ?? path}
 						</ListButton>
 					{/if}
 					{#if value?.options}
@@ -49,8 +66,8 @@
 					{#if value?.put}
 						<ListButton
 							><MethodBadge class="bg-green-500">PUT</MethodBadge>
-							{value.put.summary ?? path}</ListButton
-						>
+							{value.put.summary ?? path}
+						</ListButton>
 					{/if}
 					{#if value?.post}
 						<ListButton>

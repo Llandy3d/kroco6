@@ -1,6 +1,12 @@
 import { exhaustive } from '../utils/typescript';
-import type { ScenarioBlock, Block, ExecutorBlock, StepBlock } from './store/test/types';
-import type { Executor, Step, Test } from './types';
+import type {
+	ScenarioBlock,
+	Block,
+	ExecutorBlock,
+	StepBlock,
+	HttpRequestBlock
+} from './store/test/types';
+import type { Executor, HttpRequestStep, Step, Test } from './types';
 
 function isExecutorBlock(block: Block): block is ExecutorBlock {
 	return block.type === 'executor';
@@ -11,7 +17,7 @@ function isScenarioBlock(block: Block): block is ScenarioBlock {
 }
 
 function isStepBlock(block: Block): block is StepBlock {
-	return block.type === 'http-request' || block.type === 'group';
+	return block.type === 'http-request' || block.type === 'group' || block.type === 'check';
 }
 
 function byParentId<T extends Block>(id: string) {
@@ -22,6 +28,23 @@ function toExecutor(block: ExecutorBlock): Executor {
 	return block.executor;
 }
 
+function required<T>(value: T | undefined): T {
+	if (value === undefined) {
+		throw new Error('Value is required');
+	}
+
+	return value;
+}
+
+function toHttpRequestStep(block: HttpRequestBlock): HttpRequestStep {
+	return {
+		type: 'http-request',
+		name: block.name,
+		method: block.method,
+		url: block.url
+	};
+}
+
 export function blocksToTest(blocks: Block[]): Test {
 	const scenarios = blocks.filter(isScenarioBlock);
 	const steps = blocks.filter(isStepBlock);
@@ -29,15 +52,36 @@ export function blocksToTest(blocks: Block[]): Test {
 
 	function toStep(block: StepBlock): Step {
 		switch (block.type) {
-			case 'http-request':
+			case 'check':
 				return {
-					type: 'http-request',
-					name: block.name,
-					method: block.method,
-					url: Object.entries(block.parameters).reduce((url, [name, parameter]) => {
-						return url.replace(`{${name}}`, parameter.value.toString());
-					}, block.url)
+					type: 'check',
+					target: toHttpRequestStep(
+						required(
+							steps.find((step) => step.parent.type === 'immediate' && step.parent.id === block.id)
+						) as HttpRequestBlock
+					),
+					checks: block.checks.map((check) => {
+						switch (check.type) {
+							case 'has-status':
+								return {
+									type: 'has-status',
+									status: check.status
+								};
+
+							case 'body-contains':
+								return {
+									type: 'body-contains',
+									value: check.value
+								};
+
+							default:
+								return exhaustive(check);
+						}
+					})
 				};
+
+			case 'http-request':
+				return toHttpRequestStep(block);
 
 			case 'group':
 				return {

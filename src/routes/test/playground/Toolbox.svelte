@@ -1,10 +1,4 @@
-<script lang="ts">
-	import type { Block } from '$lib/store/test/types';
-	import AnyBlock from './blocks/AnyBlock.svelte';
-	import { dropmask } from './blocks/primitives/dnd';
-	import { selected, requests } from '$lib/store/test';
-	import { exhaustive } from '../../../utils/typescript';
-
+<script lang="ts" context="module">
 	const TEMPLATES: Block[] = [
 		{
 			id: 'scenario-template',
@@ -23,8 +17,29 @@
 			type: 'group',
 			name: '',
 			parent: { type: 'toolbox' }
+		},
+		{
+			id: 'check-template',
+			type: 'check',
+			checks: [
+				{
+					id: nanoid(),
+					type: 'has-status',
+					status: 200
+				}
+			],
+			parent: { type: 'toolbox' }
 		}
 	];
+</script>
+
+<script lang="ts">
+	import type { Block } from '$lib/store/test/types';
+	import AnyBlock from './blocks/AnyBlock.svelte';
+	import { dropmask } from './blocks/primitives/dnd';
+	import { selected, requests } from '$lib/store/test';
+	import { exhaustive } from '../../../utils/typescript';
+	import { nanoid } from 'nanoid';
 
 	function isCompatible(block: Block, selected: Block | null) {
 		if (selected === null) {
@@ -41,6 +56,9 @@
 
 			case 'group':
 				return block.type === 'group' || block.type === 'http-request';
+
+			case 'check':
+				return block.type === 'http-request';
 
 			default:
 				return exhaustive(selected);

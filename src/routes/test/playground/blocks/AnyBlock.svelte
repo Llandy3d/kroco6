@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Block } from '$lib/store/test/types';
+	import CheckBlock from './CheckBlock.svelte';
 	import ExecutorBlock from './ExecutorBlock.svelte';
 	import GroupBlock from './GroupBlock.svelte';
 	import HttpRequestBlock from './HttpRequestBlock.svelte';
@@ -20,6 +21,8 @@
 	<ExecutorBlock {block} />
 {:else if block.type === 'group'}
 	<GroupBlock {block} />
+{:else if block.type === 'check'}
+	<CheckBlock {block} />
 {:else}
 	<p>{exhaustive(block)}</p>
 {/if}

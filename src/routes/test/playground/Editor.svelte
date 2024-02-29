@@ -14,5 +14,5 @@
 {:else if $currentFile.type === 'script'}
 	<ScriptEditor file={$currentFile} />
 {:else if $currentFile.type === 'library'}
-	<Library />
+	<Library file={$currentFile} />
 {/if}

@@ -9,16 +9,23 @@
 	import { mode } from 'mode-watcher';
 	import { blocks } from '$lib/store/test';
 
+	let error: unknown = null;
+
 	let script = derived(
 		blocks,
 		(blocks, set) => {
-			const test = blocksToTest(blocks);
+			try {
+				const test = blocksToTest(blocks);
 
-			emitScript(test).then((script) => {
-				console.log('generated script', { script });
+				emitScript(test).then((script) => {
+					console.log('generated script', { script });
 
-				set(script);
-			});
+					error = null;
+					set(script);
+				});
+			} catch (e) {
+				error = e;
+			}
 		},
 		''
 	);
@@ -32,8 +39,14 @@
 	{/if}
 </svelte:head>
 
-<div class="p-4">
-	<Highlight language={typescript} code={$script} let:highlighted>
-		<LineNumbers {highlighted} />
-	</Highlight>
-</div>
+{#if error === null}
+	<div class="p-4">
+		<Highlight language={typescript} code={$script} let:highlighted>
+			<LineNumbers {highlighted} />
+		</Highlight>
+	</div>
+{:else}
+	<div>
+		An error occurred while converting to script. Make sure you've filled in all the required data.
+	</div>
+{/if}

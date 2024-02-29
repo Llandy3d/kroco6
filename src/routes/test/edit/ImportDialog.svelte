@@ -15,7 +15,8 @@
 
 	export let open = false;
 
-	let url: string = '';
+	let url: string =
+		'https://raw.githubusercontent.com/OAI/OpenAPI-Specification/main/examples/v3.0/petstore.json';
 
 	const dispatch = createEventDispatcher<{
 		imported: ImportEvent;
