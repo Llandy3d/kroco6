@@ -1,29 +1,30 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+<script context="module">
+  let workspace;
 
-    <!-- Load Blockly core -->
-    <script src="https://unpkg.com/blockly/blockly_compressed.js"></script>
-    <!-- Load the default blocks -->
-    <script src="https://unpkg.com/blockly/blocks_compressed.js"></script>
-    <!-- Load a generator -->
-    <script src="https://unpkg.com/blockly/javascript_compressed.js"></script>
-    <!-- Load a message file -->
-    <script src="https://unpkg.com/blockly/msg/en.js"></script>
-  </head>
-  <body>
-    <h1>Create your script!</h1>
+  export function convertBlocksToScript() {
+    return javascriptGenerator.workspaceToCode(workspace);
+  }
+</script>
 
-    <button id="button">Run it!</button>
-    <button id="show_code">Show code</button>
+<script>
+  // Import Blockly core.
+  import * as Blockly from 'blockly/core';
+  // Import the default blocks.
+  import * as libraryBlocks from 'blockly/blocks';
+  // Import a generator.
+  import {javascriptGenerator} from 'blockly/javascript';
+  // Import a message file.
+  import * as En from 'blockly/msg/en';
+	import { onMount } from 'svelte';
+  import { Button } from "$lib/components/ui/button";
+	import { PlayCircle, UploadCloud } from 'lucide-svelte';
+  import * as Tooltip from "$lib/components/ui/tooltip";
 
-    <!-- <div id="blocklyDiv" style="height: 480px; width: 600px;"></div> -->
-    <div id="blocklyDiv" style="height: 600px;"></div>
+  import { invoke } from '@tauri-apps/api/tauri'
 
-    <script>
+
+  Blockly.setLocale(En);
+
 
     const definitions = Blockly.defineBlocksWithJsonArray([
       {
@@ -51,7 +52,6 @@
           {
             type: 'input_value',
             name: 'REQUESTS',
-            <!-- check: 'http_request', -->
           }
         ],
         // Adds an untyped next connection to the bottom of the block.
@@ -70,6 +70,7 @@
           {
             type: 'field_number',
             name: 'VUS',
+            value: 1,
           }
         ],
         message1: 'duration(s) %1',
@@ -77,6 +78,7 @@
           {
             type: 'field_number',
             name: 'DURATION',
+            value: 10,
           }
         ],
       },
@@ -96,15 +98,6 @@
             text: "https://test.k6.io"
           }
         ],
-        <!-- message1: 'data %1', -->
-        <!-- args1: [ -->
-        <!--   { -->
-        <!--     type: 'field_input', -->
-        <!--     name: 'DATA', -->
-        <!--     text: '', -->
-        <!--   } -->
-        <!-- ], -->
-
         nextStatement: null,
       },
       {
@@ -145,12 +138,10 @@
 
     // code generator 
 
-    javascript.javascriptGenerator.forBlock['k6_test'] = function(block, generator) {
+    javascriptGenerator.forBlock['k6_test'] = function(block, generator) {
       const steps = block.getFieldValue('FIELD_NAME');
       const options = block.getInputTargetBlock('OPTIONS');
       const requests_block = block.getInputTargetBlock('REQUESTS');
-        <!-- console.log(request_block.getChildren()); -->
-        <!-- console.log(request_block.type); -->
 
       const vus = options.getFieldValue('VUS');
       const duration = options.getFieldValue('DURATION');
@@ -160,7 +151,7 @@
             export default function () {
             `;
 
-        requests_list = []
+        let requests_list = []
         if (requests_block.type == "lists_create_with") {
             requests_list = requests_block.getChildren();
 
@@ -242,22 +233,11 @@
         }
       ]
     };
-        const workspace = Blockly.inject('blocklyDiv', { toolbox: toolbox });
-
-    <!-- document.getElementById("button").addEventListener("click", function() { -->
-    <!--     const script = javascript.javascriptGenerator.workspaceToCode(workspace); -->
-    <!--     console.log(script) -->
-    <!-- }) -->
-
-
-      // access the pre-bundled global API functions
-      const { invoke } = window.__TAURI__.tauri
 
     function open_run_window() {
-      const script = javascript.javascriptGenerator.workspaceToCode(workspace);
+      const script = javascriptGenerator.workspaceToCode(workspace);
 
       invoke('open_run_window', {'script': script })
-        // `invoke` returns a Promise
         .then((response) => {
             console.log(response)
         })
@@ -266,17 +246,53 @@
         })
     }
 
-    document.getElementById("button").addEventListener("click", function() {
-        open_run_window();
-    })
+  onMount(() => {
+    workspace = Blockly.inject('blocklyDiv', { toolbox: toolbox });
 
-    document.getElementById("show_code").addEventListener("click", function() {
-        const script = javascript.javascriptGenerator.workspaceToCode(workspace);
-        alert(script);
-    })
+    let k6_block = workspace.newBlock("k6_test");
+    let options_block = workspace.newBlock("options");
+    let request_block = workspace.newBlock("http_request");
 
-      const mainWindow = window.__TAURI__.window.WebviewWindow.getByLabel('main')
-    mainWindow.blobby = 2
-    </script>
-  </body>
-</html>
+    k6_block.getInput("OPTIONS").connection.connect(options_block.outputConnection);
+    k6_block.getInput("REQUESTS").connection.connect(request_block.outputConnection);
+
+    // make it more centered in the workspace
+    k6_block.moveBy(40, 40);
+
+    k6_block.initSvg();
+    options_block.initSvg();
+    request_block.initSvg();
+    workspace.render();
+  });
+</script>
+
+
+<div class="-ml-4 h-[79vh]">
+  <p class="text-2xl text-center text-gray-500 mt-4">Create your script!</p>
+
+  <Tooltip.Root>
+    <Tooltip.Trigger>
+      <Button class="mt-4 mb-1 rounded-full" variant="secondary" on:click={open_run_window}>
+        <PlayCircle class="w-4 h-4 mr-2"/>
+        Run
+      </Button>
+    </Tooltip.Trigger>
+    <Tooltip.Content>
+      <p>Run locally</p>
+    </Tooltip.Content>
+  </Tooltip.Root>
+
+  <Tooltip.Root>
+    <Tooltip.Trigger>
+      <Button class="mt-4 mb-1 rounded-full" variant="secondary" disabled>
+        <UploadCloud class="w-4 h-4 mr-2"/>
+        Run in Cloud
+      </Button>
+    </Tooltip.Trigger>
+    <Tooltip.Content>
+      <p>Account required for cloud tests!</p>
+    </Tooltip.Content>
+  </Tooltip.Root>
+
+  <div id="blocklyDiv" class="h-full" ></div>
+</div>

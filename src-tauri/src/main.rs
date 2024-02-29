@@ -21,8 +21,8 @@ async fn open_run_window(handle: tauri::AppHandle, state: tauri::State<'_, Scrip
     let run_window = tauri::WindowBuilder::new(
       &handle,
       "run_window", /* the unique window label */
-      tauri::WindowUrl::App("run.html".into())
-    ).build().unwrap();
+      tauri::WindowUrl::App("test/run".into())
+    ).inner_size(1400.0, 1000.0).build().unwrap();
     run_window.set_title("Kroco Gator").unwrap();
 
     let mut mtx = state.0.lock().unwrap();
@@ -58,6 +58,8 @@ async fn run_script(state: tauri::State<'_, Script>) -> Result<String, String>{
         mtx.clone()
     };
 
+    // TODO: make it toggable
+    std::env::set_var("K6_WEB_DASHBOARD", "true");
     let mut child = Command::new("k6")
     .arg("run")
     .arg("-")
