@@ -3,5 +3,5 @@
 </script>
 
 <li>
-	<Button variant="outline" class="w-full justify-start rounded-none"><div><slot /></div></Button>
+	<Button variant="outline" class="h-16 w-full justify-start rounded-none"><slot /></Button>
 </li>

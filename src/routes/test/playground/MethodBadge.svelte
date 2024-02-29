@@ -6,4 +6,4 @@
 	export { className as class };
 </script>
 
-<Badge class={cn('w-14 justify-center text-white', className)}><slot /></Badge>
+<Badge class={cn('mr-2 w-14 justify-center text-white', className)}><slot /></Badge>
