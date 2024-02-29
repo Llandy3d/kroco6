@@ -1,5 +1,5 @@
 import { derived, writable } from 'svelte/store';
-import { type Block, type HttpRequestBlock } from './types';
+import { type Block, type BlockParent, type HttpRequestBlock } from './types';
 import { nanoid } from 'nanoid';
 import type { OpenAPIV3_1 } from 'openapi-types';
 import { isTruthy } from '../../../utils/typescript';
@@ -58,8 +58,14 @@ function instantiateBlock(block: Block) {
 	return block.parent.type === 'toolbox' ? { ...block, id: nanoid() } : block;
 }
 
-function appendBlock(owner: Block, block: Block) {
+function updateInFile(callback: (blocks: Block[]) => Block[]) {
 	blocks.update((blocks) => {
+		return callback(blocks);
+	});
+}
+
+function appendBlock(owner: Block, block: Block) {
+	updateInFile((blocks) => {
 		const target = instantiateBlock(block);
 
 		return [
@@ -76,7 +82,7 @@ function appendBlock(owner: Block, block: Block) {
 }
 
 function insertBlock(owner: Block, before: Block, block: Block) {
-	blocks.update((blocks) => {
+	updateInFile((blocks) => {
 		const target = instantiateBlock(block);
 
 		return blocks.flatMap((current) => {
@@ -102,7 +108,7 @@ function insertBlock(owner: Block, before: Block, block: Block) {
 }
 
 function updateBlock(block: Block) {
-	blocks.update((blocks) => {
+	updateInFile((blocks) => {
 		return blocks.map((current) => (current.id === block.id ? block : current));
 	});
 }
@@ -112,7 +118,7 @@ function deleteBlock(block: Block | null) {
 		return;
 	}
 
-	blocks.update((blocks) => {
+	updateInFile((blocks) => {
 		const newChildren = blocks.map((current) =>
 			current.parent.type === 'collection' && current.parent.id === block.id
 				? { ...current, parent: block.parent }
@@ -123,12 +129,30 @@ function deleteBlock(block: Block | null) {
 	});
 }
 
+function reparentBlock(parent: BlockParent, block: Block) {
+	updateInFile((blocks) => {
+		if (block.parent.type === 'toolbox') {
+			const newBlock = instantiateBlock(block);
+
+			return [...blocks, { ...newBlock, parent }];
+		}
+
+		return blocks.map((current) => (current.id === block.id ? { ...block, parent } : current));
+	});
+}
+
+function loadBlocks(newBlocks: Block[]) {
+	blocks.set(newBlocks);
+}
+
 export {
 	instantiateBlock,
 	appendBlock,
 	insertBlock,
+	reparentBlock,
 	updateBlock,
 	deleteBlock,
+	loadBlocks,
 	selected,
 	api,
 	blocks,

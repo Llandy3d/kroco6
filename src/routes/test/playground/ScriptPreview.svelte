@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { blocks } from '$lib/store/test';
 	import { derived } from 'svelte/store';
 	import { blocksToTest } from '$lib/convert';
 	import { emitScript } from '$lib/codegen';
@@ -8,11 +7,12 @@
 	import light from 'svelte-highlight/styles/github';
 	import dark from 'svelte-highlight/styles/github-dark';
 	import { mode } from 'mode-watcher';
+	import { blocks } from '$lib/store/test';
 
 	let script = derived(
 		blocks,
-		($blocks, set) => {
-			const test = blocksToTest($blocks);
+		(blocks, set) => {
+			const test = blocksToTest(blocks);
 
 			emitScript(test).then((script) => {
 				console.log('generated script', { script });

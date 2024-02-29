@@ -1,14 +1,17 @@
+<script context="module">
+	import { setMode } from 'mode-watcher';
+
+	setMode('light');
+</script>
+
 <script>
 	import '../app.pcss';
 	import { Toaster } from '$lib/components/ui/sonner';
-	import { ModeWatcher } from 'mode-watcher';
-	import Logo from '$lib/Logo.svelte';
 </script>
 
-<ModeWatcher />
 <Toaster />
 
-<div class="h-full w-full">
+<div class="flex h-full w-full flex-col">
 	<slot />
 </div>
 <!-- <div class="flex">

@@ -3,7 +3,7 @@
 
 	import Root from './blocks/Root.svelte';
 	import { dropzone, type DroppedEvent } from './blocks/primitives/dnd';
-	import { blocks, instantiateBlock, roots, selected } from '$lib/store/test';
+	import { blocks, reparentBlock, roots, selected } from '$lib/store/test';
 	import AnyBlock from './blocks/AnyBlock.svelte';
 	import Toolbox from './Toolbox.svelte';
 
@@ -16,15 +16,7 @@
 			left: detail.left
 		} as const;
 
-		if (dropped.parent.type === 'toolbox') {
-			const newBlock = instantiateBlock(dropped);
-
-			$blocks = [...$blocks, { ...newBlock, parent }];
-
-			return;
-		}
-
-		$blocks = $blocks.map((block) => (dropped.id === block.id ? { ...block, parent } : block));
+		reparentBlock(parent, dropped);
 	};
 
 	const handleClick = () => {

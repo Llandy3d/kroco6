@@ -13,6 +13,8 @@ interface ToolboxParent {
 	type: 'toolbox';
 }
 
+type BlockParent = CanvasParent | CollectionParent | ToolboxParent;
+
 interface BlockBase {
 	id: string;
 	parent: CanvasParent | CollectionParent | ToolboxParent;
@@ -73,6 +75,11 @@ function isRootBlock<T extends Block>(block: T): block is T & { parent: CanvasPa
 
 const STEPS: Array<StepBlock['type']> = ['http-request', 'group'];
 
+interface BlockDocument {
+	version: 0;
+	blocks: Block[];
+}
+
 export {
 	isRootBlock,
 	STEPS,
@@ -81,5 +88,7 @@ export {
 	type HttpRequestBlock,
 	type ExecutorBlock,
 	type GroupBlock,
-	type StepBlock
+	type StepBlock,
+	type BlockDocument,
+	type BlockParent
 };

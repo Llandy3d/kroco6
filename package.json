@@ -50,6 +50,7 @@
 		"formsnap": "^0.4.3",
 		"lucide-svelte": "^0.316.0",
 		"mode-watcher": "^0.1.2",
+		"monaco-editor": "^0.46.0",
 		"nanoid": "^5.0.6",
 		"svelte-highlight": "^7.6.0",
 		"svelte-sonner": "^0.3.11",
