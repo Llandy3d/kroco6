@@ -22,7 +22,12 @@ fn main() {
 
     tauri::Builder::default()
         .manage(application_state)
-        .invoke_handler(tauri::generate_handler![open_run_window, run_script, list_projects])
+        .invoke_handler(tauri::generate_handler![
+            open_run_window,
+            run_script,
+            list_projects,
+            create_project
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
@@ -54,6 +59,17 @@ async fn open_run_window(
 #[tauri::command]
 async fn list_projects(state: tauri::State<'_, ApplicationState>) -> Result<Vec<models::Project>, String> {
     state.project_manager.list_projects()
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn create_project(
+    state: tauri::State<'_, ApplicationState>,
+    name: &str,
+    description: Option<&str>,
+) -> Result<models::Project, String> {
+    state.project_manager
+        .create_project(models::Project::new(name, description))
         .map_err(|e| e.to_string())
 }
 

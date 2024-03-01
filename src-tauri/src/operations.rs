@@ -4,8 +4,9 @@ use std::path;
 use crate::models::{Project};
 
 const PROJECTS_DIR: &str = "projects";
+const DEFAULT_PROJECT_NAME: &str = "default";
 
-pub(crate) struct LocalProjectManager {
+pub struct LocalProjectManager {
     base_path: path::PathBuf,
 }
 
@@ -22,15 +23,15 @@ impl LocalProjectManager {
         }
 
         // Ensure the default project is created
-        if !projects_dir.join("default").exists() {
-            self.create("default")?;
+        if !projects_dir.join(DEFAULT_PROJECT_NAME).exists() {
+            self.create_project(Project::default())?;
         }
 
         Ok(())
     }
 
     // Create a new local project
-    fn create(&self, name: &str) -> io::Result<Project> {
+    pub fn create_project(&self, project: Project) -> io::Result<Project> {
         let projects_dir = &self.projects_dir();
 
         // We store projects in a directory called "projects"
@@ -41,12 +42,12 @@ impl LocalProjectManager {
         }
 
         // Compute the path of the project in the "projects" directory
-        let project_path = projects_dir.join(name);
+        let project_path = projects_dir.join(&project.name);
 
         // Create the underlying directory for the project
         fs::create_dir(project_path)?;
 
-        Ok(Project::new(name))
+        Ok(project.clone())
     }
 
     // List local projects
@@ -61,7 +62,7 @@ impl LocalProjectManager {
             let entry = entry?;
             let path = entry.path();
             if path.is_dir() {
-                let project = Project::new(path.file_name().unwrap().to_str().unwrap());
+                let project = Project::new(path.file_name().unwrap().to_str().unwrap(), None);
                 projects.push(project);
             }
         }
