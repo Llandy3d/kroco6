@@ -13,7 +13,12 @@ use std::sync::Mutex;
 
 fn main() {
     let application_state = ApplicationState::default();
-    application_state.project_manager.initialize().expect("Failed to initialize application state");
+
+    // Initialize the application state's ProjectManager instance
+    // to ensure that the underlying projects directory exists
+    application_state.project_manager
+        .initialize()
+        .expect("Failed to initialize application state");
 
     tauri::Builder::default()
         .manage(application_state)
@@ -102,16 +107,31 @@ async fn run_script(state: tauri::State<'_, ApplicationState>) -> Result<String,
     Ok(k6_output)
 }
 
+// ApplicationState holds the state of the application.
+//
+// It is used to store and expose configuration as well as
+// constructs that are used throughout the application's tauri commands
+// and life cycle.
 struct ApplicationState {
+    // The path where the application stores its data
     pub storage_path: PathBuf,
+
+    // The project manager used to interact with local projects
+    // exposing operations such as listing, creating, deleting, etc.
     pub project_manager: operations::LocalProjectManager,
 
+    // Legacy: the script to run
     script: Mutex<String>
 }
 
 impl ApplicationState {
     pub fn new() -> Self {
+        // We obtain the system's configuration directory
+        // from the `dirs` crate.
         let config_dir = dirs::config_dir().expect("Failed to get config directory");
+
+        // We create a subdirectory for our application inside
+        // of the configuration directory, if it does not already exist.
         let storage_path = Path::new(&config_dir).join("kroco6");
         if !&storage_path.exists() {
             fs::create_dir(&storage_path).expect("Failed to create storage directory");
