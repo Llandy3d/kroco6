@@ -1,30 +1,29 @@
 <script>
-  import { invoke } from '@tauri-apps/api/tauri'
+	import { invoke } from '@tauri-apps/api/tauri';
 	import { Loader2 } from 'lucide-svelte';
 
-  let title = "Running your script...";
-  let result = "";
+	let title = 'Running your script...';
+	let result = '';
 
-  invoke('run_script', {})
-    .then((response) => {
-        title = "Done!"
-        result = response
-    })
-    .catch((error) => {
-        console.log(error)
-    })
+	invoke('run_script', {})
+		.then((response) => {
+			title = 'Done!';
+			result = response;
+		})
+		.catch((error) => {
+			console.log(error);
+		});
 
-  function tryVisitDashboard() {
-    window.location = "http://localhost:5665";
-    setTimeout(tryVisitDashboard, 1000);
-  }
+	function tryVisitDashboard() {
+		window.location = 'http://localhost:5665';
+		setTimeout(tryVisitDashboard, 1000);
+	}
 
-  tryVisitDashboard();
-
+	tryVisitDashboard();
 </script>
 
 <div class="flex flex-col">
-  <p class="text-2xl">{title}</p>
-  <!-- <pre>{result}</pre> -->
-  <Loader2 class="animate-spin mt-1" />
+	<p class="text-2xl">{title}</p>
+	<!-- <pre>{result}</pre> -->
+	<Loader2 class="mt-1 animate-spin" />
 </div>
