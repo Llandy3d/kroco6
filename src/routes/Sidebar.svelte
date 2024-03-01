@@ -1,42 +1,25 @@
-<!-- <script> -->
-<!--     import { Badge } from "$lib/components/ui/badge"; -->
-<!--     import { Separator } from "$lib/components/ui/separator"; -->
-<!--     let projects = ["Default Project"]; -->
-<!-- </script> -->
-
-<!-- <div class="flex-col h-screen bg-gray-500 text-center py-4"> -->
-<!--     <Badge>Projects</Badge> -->
-<!--     {#each projects as project} -->
-<!--         <p>{project}</p> -->
-<!--         <Separator /> -->
-<!--     {/each} -->
-
-<!-- </div> -->
-
 <script lang="ts">
-	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 	import { PlusCircle, FlaskConical } from 'lucide-svelte';
-	import { Separator } from '$lib/components/ui/separator';
-	import { Badge } from '$lib/components/ui/badge';
 	import { Check, ChevronsUpDown } from 'lucide-svelte';
+	import { tick } from 'svelte';
+
+	import { goto } from '$app/navigation';
+	import { createProject } from '$lib/backend-client';
+	import * as AlertDialog from '$lib/components/ui/alert-dialog';
+	import { Badge } from '$lib/components/ui/badge';
 	import * as Command from '$lib/components/ui/command';
 	import * as Popover from '$lib/components/ui/popover';
+	import { Input } from '$lib/components/ui/input';
 	import { Button } from '$lib/components/ui/button';
+	import { projects } from '$lib/stores/projects';
+	import { Separator } from '$lib/components/ui/separator';
 	import { cn } from '$lib/utils';
-	import { tick } from 'svelte';
-	import { goto } from '$app/navigation';
-
-	let projects = [
-		{
-			value: 'default-project',
-			label: 'Default Project'
-		}
-	];
 
 	let open = false;
 	let value = 'default-project';
+	let createProjectValue = '';
 
-	$: selectedValue = projects.find((f) => f.value === value)?.label ?? 'Select a project...';
+	$: selectedValue = $projects.find((f) => f.name === value)?.name ?? 'Select a project...';
 
 	// We want to refocus the trigger button when the user selects
 	// an item from the list so users can continue navigating the
@@ -46,6 +29,12 @@
 		tick().then(() => {
 			document.getElementById(triggerId)?.focus();
 		});
+	}
+
+	async function onCreateProject() {
+		const createdProject = await createProject(createProjectValue);
+		projects.update((p) => [...p, createdProject]);
+		createProjectValue = '';
 	}
 </script>
 
@@ -70,16 +59,16 @@
 				<Command.Input placeholder="Search project..." />
 				<Command.Empty>No project found.</Command.Empty>
 				<Command.Group>
-					{#each projects as project}
+					{#each $projects as project}
 						<Command.Item
-							value={project.value}
+							value={project.name}
 							onSelect={(currentValue) => {
 								value = currentValue;
 								closeAndFocusTrigger(ids.trigger);
 							}}
 						>
-							<Check class={cn('mr-2 h-4 w-4', value !== project.value && 'text-transparent')} />
-							{project.label}
+							<Check class={cn('mr-2 h-4 w-4', value !== project.name && 'text-transparent')} />
+							{project.name}
 						</Command.Item>
 					{/each}
 				</Command.Group>
@@ -92,13 +81,18 @@
 								Create a new project
 							</Command.Item>
 						</AlertDialog.Trigger>
+
 						<AlertDialog.Content>
 							<AlertDialog.Header>
 								<AlertDialog.Title>Subscription required!</AlertDialog.Title>
 								<AlertDialog.Description>
-									Please subscribe to create more projects.... nah it just isn't implemented yet :)
+									<div class="flex w-full max-w-sm items-center space-x-2">
+										<Input type="text" placeholder="project name" bind:value={createProjectValue} />
+										<Button type="submit" on:click={onCreateProject}>Create</Button>
+									</div>
 								</AlertDialog.Description>
 							</AlertDialog.Header>
+
 							<AlertDialog.Footer>
 								<AlertDialog.Cancel>Close</AlertDialog.Cancel>
 							</AlertDialog.Footer>
