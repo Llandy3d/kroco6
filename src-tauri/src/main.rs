@@ -9,7 +9,6 @@ use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::sync::Mutex;
-use tauri::Error;
 
 
 fn main() {

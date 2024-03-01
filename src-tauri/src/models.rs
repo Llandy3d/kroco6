@@ -15,7 +15,7 @@ pub enum TestKind {
 pub struct Test {
     kind: TestKind,
     name: String,
-    blocks_file_path: PathBuf,
+    file_path: PathBuf,
 }
 
 // A Collection represents either a single test, or
@@ -40,6 +40,8 @@ pub struct Project {
     // The name of the Project
     pub name: String,
 
+    pub description: Option<String>,
+
     // FIXME @oleiade: eventually, we want environment to be also definable
     // at the project level (and give it precedence) but for the hackathon
     // we start and stick with an app-wide "global" environment.
@@ -51,6 +53,7 @@ impl Project {
         Self {
             test_collections: vec![],
             name: name.to_string(),
+            description: None,
         }
     }
 

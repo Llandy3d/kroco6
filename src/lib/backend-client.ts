@@ -4,6 +4,6 @@ export interface Project {
 	name: string;
 }
 
-export async function list_projects(): Promise<Project[]> {
+export async function listProjects(): Promise<Project[]> {
 	return await invoke('list_projects', {});
 }
