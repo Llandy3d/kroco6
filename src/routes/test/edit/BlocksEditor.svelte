@@ -23,7 +23,6 @@
 	import { runScriptInCloud } from '$lib/backend-client';
 
 	Blockly.setLocale(En);
-	Blockly.setLocale(En);
 
 	const definitions = Blockly.defineBlocksWithJsonArray([
 		{
