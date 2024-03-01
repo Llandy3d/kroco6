@@ -1,4 +1,4 @@
-import { exhaustive } from '../utils/typescript';
+import { exhaustive } from './utils/typescript';
 import type { Scenario, Step, Test } from './types';
 import * as prettier from 'prettier';
 import * as babelParser from 'prettier/parser-babel';

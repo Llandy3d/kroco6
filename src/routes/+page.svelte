@@ -11,8 +11,9 @@
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 
+	// Ugly hack to get to the editor... project management peeps, please fix this
 	onMount(() => {
-		goto('/test/playground');
+		goto('/test/edit');
 	});
 
 	let createTestDialogOpen = false;

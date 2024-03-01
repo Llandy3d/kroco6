@@ -2,7 +2,7 @@ import { derived, writable } from 'svelte/store';
 import { type Block, type BlockParent, type HttpRequestBlock } from './types';
 import { nanoid } from 'nanoid';
 import type { OpenAPIV3_1 } from 'openapi-types';
-import { isTruthy } from '../../../utils/typescript';
+import { isTruthy } from '../../utils/typescript';
 
 type Falsy = '' | 0 | false | null | undefined;
 

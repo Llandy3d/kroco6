@@ -1,21 +1,37 @@
-<script lang="ts">
-	import * as Alert from '$lib/components/ui/alert';
-	import { Code } from 'lucide-svelte';
-	import * as Card from '$lib/components/ui/card';
-
-	export let script: string;
+<script lang="ts" context="module">
+	import { loadContent, storeContent } from '$lib/files';
+	import type { ScriptFile } from '$lib/store/editor';
+	import * as monaco from 'monaco-editor';
 </script>
 
-<Alert.Root>
-	<Code class="h-4 w-4" />
-	<Alert.Title>Script to be executed</Alert.Title>
-	<Alert.Description>
-		Who knows, maybe in the future I might allow you to edit it in here :)
-	</Alert.Description>
-</Alert.Root>
+<script lang="ts">
+	import { onDestroy, onMount } from 'svelte';
 
-<Card.Root class="my-6 p-4">
-	<Card.Content>
-		<pre>{script ? script : 'no script yet :('}</pre>
-	</Card.Content>
-</Card.Root>
+	export let file: ScriptFile;
+
+	let container: HTMLDivElement;
+	let editor: monaco.editor.IStandaloneCodeEditor;
+
+	let script = '';
+
+	onMount(() => {
+		script = loadContent(file);
+
+		editor = monaco.editor.create(container, {
+			value: script,
+			language: 'javascript'
+		});
+
+		editor.onDidChangeModelContent(() => {
+			script = editor.getValue();
+		});
+	});
+
+	onDestroy(() => {
+		storeContent(file, script);
+
+		editor.dispose();
+	});
+</script>
+
+<div class="full-w flex-auto" bind:this={container}></div>

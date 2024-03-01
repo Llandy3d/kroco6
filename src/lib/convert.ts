@@ -1,4 +1,4 @@
-import { exhaustive } from '../utils/typescript';
+import { exhaustive } from './utils/typescript';
 import type {
 	ScenarioBlock,
 	Block,

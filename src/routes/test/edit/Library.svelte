@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Button from '$lib/components/ui/button/button.svelte';
 	import type { OpenAPIV3_1 } from 'openapi-types';
-	import ImportDialog, { type ImportEvent } from '../edit/ImportDialog.svelte';
+	import ImportDialog, { type ImportEvent } from './ImportDialog.svelte';
 	import { api } from '$lib/store/test';
 	import ListButton from './ListButton.svelte';
 	import MethodBadge from './MethodBadge.svelte';

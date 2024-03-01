@@ -12,7 +12,7 @@
 	import type { CheckExpression } from '$lib/store/test/types';
 	import { createEventDispatcher } from 'svelte';
 	import type { Selected } from 'bits-ui';
-	import { exhaustive } from '../../../../utils/typescript';
+	import { exhaustive } from '$lib/utils/typescript';
 	import { XIcon } from 'lucide-svelte';
 
 	export let check: CheckExpression;

@@ -62,7 +62,7 @@
 	import AnyBlock from './blocks/AnyBlock.svelte';
 	import { dropmask } from './blocks/primitives/dnd';
 	import { selected, requests, api } from '$lib/store/test';
-	import { exhaustive } from '../../../utils/typescript';
+	import { exhaustive } from '$lib/utils/typescript';
 	import { nanoid } from 'nanoid';
 
 	function isCompatible(block: Block, selected: Block | null) {
