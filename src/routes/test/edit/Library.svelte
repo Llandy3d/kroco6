@@ -1,15 +1,9 @@
 <script lang="ts">
 	import Button from '$lib/components/ui/button/button.svelte';
-	import type { OpenAPIV3_1 } from 'openapi-types';
 	import ImportDialog, { type ImportEvent } from './ImportDialog.svelte';
-	import { api } from '$lib/store/test';
+	import { library, syncLibrary } from '$lib/store/test';
 	import ListButton from './ListButton.svelte';
 	import MethodBadge from './MethodBadge.svelte';
-	import { onDestroy, onMount } from 'svelte';
-	import type { LibraryFile } from '$lib/store/editor';
-	import { loadContent, storeContent } from '$lib/files';
-
-	export let file: LibraryFile;
 
 	let importModalOpen = false;
 
@@ -18,33 +12,21 @@
 	};
 
 	const handleImport = (event: CustomEvent<ImportEvent>) => {
+		// For now we only support V3
 		if (!('openapi' in event.detail.api)) {
 			return;
 		}
 
-		$api = event.detail.api as OpenAPIV3_1.Document;
+		syncLibrary(event.detail.api);
 	};
-
-	onMount(() => {
-		const content = loadContent(file);
-
-		try {
-			$api = JSON.parse(content);
-		} catch (e) {
-			console.error(e);
-		}
-	});
-
-	onDestroy(() => {
-		storeContent(file, JSON.stringify($api));
-	});
 </script>
 
 <div class="flex h-full flex-col">
 	<div class="flex flex-auto">
 		<div class="h-full min-w-80 bg-accent">
 			<ul class="list-none">
-				{#each Object.entries($api.paths ?? {}) as [path, value] (path)}
+				<h2 class="p-2 font-bold">{$library.info.title}</h2>
+				{#each Object.entries($library.paths ?? {}) as [path, value] (path)}
 					{#if value?.get}
 						<ListButton
 							><MethodBadge class="bg-green-500">GET</MethodBadge>
@@ -65,19 +47,19 @@
 					{/if}
 					{#if value?.put}
 						<ListButton
-							><MethodBadge class="bg-green-500">PUT</MethodBadge>
+							><MethodBadge class="bg-yellow-500">PUT</MethodBadge>
 							{value.put.summary ?? path}
 						</ListButton>
 					{/if}
 					{#if value?.post}
 						<ListButton>
-							<MethodBadge class="bg-green-500">POST</MethodBadge>
+							<MethodBadge class="bg-yellow-500">POST</MethodBadge>
 							{value.post.summary ?? path}
 						</ListButton>
 					{/if}
 					{#if value?.patch}
 						<ListButton>
-							<MethodBadge class="bg-green-500">PATCH</MethodBadge>
+							<MethodBadge class="bg-yellow-500">PATCH</MethodBadge>
 							{value.patch.summary ?? path}
 						</ListButton>
 					{/if}

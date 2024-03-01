@@ -1,3 +1,5 @@
+import type { OpenAPIV3_1, OpenAPIV3 } from 'openapi-types';
+
 interface CanvasParent {
 	type: 'canvas';
 	top: number;
@@ -101,21 +103,39 @@ function isRootBlock<T extends Block>(block: T): block is T & { parent: CanvasPa
 
 const STEPS: Array<StepBlock['type']> = ['http-request', 'group', 'check'];
 
-interface BlockDocument {
+const EMPTY_LIBRARY: OpenAPIV3_1.Document = {
+	info: {
+		title: 'Untitled API',
+		version: '1.0.0'
+	},
+	openapi: '3.0.0',
+	paths: {}
+};
+
+const EMPTY_BLOCK_TEST: BlockTest = {
+	version: 0,
+	library: EMPTY_LIBRARY,
+	blocks: []
+};
+
+interface BlockTest {
 	version: 0;
+	library: OpenAPIV3_1.Document | OpenAPIV3.Document;
 	blocks: Block[];
 }
 
 export {
 	isRootBlock,
 	STEPS,
+	EMPTY_LIBRARY,
+	EMPTY_BLOCK_TEST,
 	type Block,
 	type ScenarioBlock,
 	type HttpRequestBlock,
 	type ExecutorBlock,
 	type GroupBlock,
 	type StepBlock,
-	type BlockDocument,
+	type BlockTest,
 	type BlockParent,
 	type ImmediateParent,
 	type CheckBlock,

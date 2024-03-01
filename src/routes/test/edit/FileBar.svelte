@@ -1,13 +1,10 @@
 <script lang="ts">
-	const NEW_FILE = nanoid();
-
 	import {
 		type OpenFile,
 		openFiles,
 		currentFile,
 		type ScriptFile,
-		type BlockFile,
-		type LibraryFile
+		type BlockFile
 	} from '$lib/store/editor';
 	import { RadioGroup } from 'bits-ui';
 	import { PlusIcon, X } from 'lucide-svelte';
@@ -43,11 +40,7 @@
 			type: 'block',
 			handle: nanoid(),
 			name: nameClashes === 0 ? 'New Blocks' : `New Blocks (${nameClashes})`,
-			path: { type: 'new' },
-			document: {
-				version: 0,
-				blocks: []
-			}
+			path: { type: 'new' }
 		};
 
 		handleNewFile(newFile);
@@ -60,29 +53,7 @@
 			type: 'script',
 			handle: nanoid(),
 			name: nameClashes === 0 ? 'New Script' : `New Script (${nameClashes})`,
-			path: { type: 'new' },
-			script: ''
-		};
-
-		handleNewFile(newFile);
-	};
-
-	const handleNewLibraryFile = () => {
-		const nameClashes = calculateNameClashes('New Library');
-
-		const newFile: LibraryFile = {
-			type: 'library',
-			handle: nanoid(),
-			name: nameClashes === 0 ? 'New Library' : `New Library (${nameClashes})`,
-			path: { type: 'new' },
-			document: {
-				openapi: '3.1.0',
-				info: {
-					title: 'New Library',
-					version: '0.0.1'
-				},
-				paths: {}
-			}
+			path: { type: 'new' }
 		};
 
 		handleNewFile(newFile);
@@ -117,8 +88,6 @@
 		<DropdownMenu.Content>
 			<DropdownMenu.Item on:click={handleNewBlocksFile}>Blocks</DropdownMenu.Item>
 			<DropdownMenu.Item on:click={handleNewScriptFile}>Script</DropdownMenu.Item>
-			<DropdownMenu.Item on:click={handleNewLibraryFile}>Library</DropdownMenu.Item>
-			<DropdownMenu.Item on:click={handleNewLibraryFile}>Suite</DropdownMenu.Item>
 		</DropdownMenu.Content>
 	</DropdownMenu.Root>
 	<!-- <button class="p-1 hover:bg-slate-200"></button> -->

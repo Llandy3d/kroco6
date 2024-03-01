@@ -4,40 +4,45 @@
 	import { onDestroy, onMount } from 'svelte';
 	import Canvas from './Canvas.svelte';
 	import ScriptPreview from './ScriptPreview.svelte';
-	import { blocks, loadBlocks } from '$lib/store/test';
+	import { blockTest, loadBlockTest } from '$lib/store/test';
 	import { loadContent, storeContent } from '$lib/files';
+	import Library from './Library.svelte';
+	import { EMPTY_BLOCK_TEST, type BlockTest } from '$lib/store/test/types';
 
-	let tab = 'build';
+	let tab = 'library';
 
 	export let file: BlockFile;
 
 	onMount(() => {
-		let document = loadContent(file);
+		// We store the block test in sessionStorage, so that changes are preserved
+		// when the user switches between tabs.
+		let content = loadContent(file);
 
 		try {
-			const { blocks } = JSON.parse(document);
+			const blockTest = JSON.parse(content) as BlockTest;
 
-			loadBlocks(blocks);
+			loadBlockTest(blockTest);
 		} catch (e) {
-			loadBlocks([]);
+			loadBlockTest(EMPTY_BLOCK_TEST);
 
 			console.error(e);
 		}
 	});
 
 	onDestroy(() => {
-		storeContent(file, {
-			version: 0,
-			blocks: $blocks
-		});
+		storeContent(file, $blockTest);
 	});
 </script>
 
 <Tabs.Root class="flex flex-auto flex-col" bind:value={tab}>
 	<Tabs.List class="w-full">
+		<Tabs.Trigger value="library">Library</Tabs.Trigger>
 		<Tabs.Trigger value="build">Build</Tabs.Trigger>
 		<Tabs.Trigger value="script">Script</Tabs.Trigger>
 	</Tabs.List>
+	<Tabs.Content value="library" class="flex-auto">
+		<Library />
+	</Tabs.Content>
 	<Tabs.Content value="build" class="flex-auto">
 		<Canvas />
 	</Tabs.Content>

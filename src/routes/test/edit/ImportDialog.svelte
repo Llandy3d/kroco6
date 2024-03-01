@@ -1,11 +1,11 @@
 <script lang="ts" context="module">
 	export interface ImportEvent {
-		api: OpenAPI.Document;
+		api: OpenAPIV3_1.Document;
 	}
 </script>
 
 <script lang="ts">
-	import type { OpenAPI } from 'openapi-types';
+	import type { OpenAPIV3_1 } from 'openapi-types';
 	import * as Dialog from '$lib/components/ui/dialog';
 	import { createEventDispatcher } from 'svelte';
 	import { Label } from '$lib/components/ui/label';
@@ -27,7 +27,7 @@
 			method: 'GET',
 			responseType: ResponseType.Text
 		}).then((response) => {
-			const api = JSON.parse(response.data) as OpenAPI.Document;
+			const api = JSON.parse(response.data) as OpenAPIV3_1.Document;
 
 			dispatch('imported', {
 				api

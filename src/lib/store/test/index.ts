@@ -1,22 +1,21 @@
-import { derived, writable } from 'svelte/store';
-import { type Block, type BlockParent, type HttpRequestBlock } from './types';
+import { derived, writable as readable, writable } from 'svelte/store';
+import {
+	type Block,
+	type BlockTest,
+	type BlockParent,
+	type HttpRequestBlock,
+	EMPTY_BLOCK_TEST
+} from './types';
 import { nanoid } from 'nanoid';
-import type { OpenAPIV3_1 } from 'openapi-types';
 import { isTruthy } from '../../utils/typescript';
+import type { OpenAPIV3_1 } from 'openapi-types';
 
 type Falsy = '' | 0 | false | null | undefined;
 
-const api = writable<OpenAPIV3_1.Document>({
-	info: {
-		title: 'Untitled API',
-		version: '1.0.0'
-	},
-	openapi: '3.0.0',
-	paths: {}
-});
+const blockTest = writable<BlockTest>(EMPTY_BLOCK_TEST);
 
-const requests = derived(api, ($api) => {
-	return Object.entries($api.paths ?? {}).flatMap(([path, methods]) => {
+const requests = derived(blockTest, ($test) => {
+	return Object.entries($test.library.paths ?? {}).flatMap(([path, methods]) => {
 		if (methods === undefined) {
 			return [];
 		}
@@ -46,9 +45,10 @@ const requests = derived(api, ($api) => {
 	});
 });
 
-const selected = writable<Block | null>(null);
+const selected = readable<Block | null>(null);
 
-const blocks = writable<Block[]>([]);
+const blocks = derived(blockTest, (test) => test.blocks);
+const library = derived(blockTest, (test) => test.library);
 
 const roots = derived(blocks, (blocks) => {
 	return blocks.filter((block) => block.parent.type === 'canvas');
@@ -58,14 +58,17 @@ function instantiateBlock(block: Block) {
 	return block.parent.type === 'toolbox' ? { ...block, id: nanoid() } : block;
 }
 
-function updateInFile(callback: (blocks: Block[]) => Block[]) {
-	blocks.update((blocks) => {
-		return callback(blocks);
+function updateBlocksInTest(callback: (blocks: Block[]) => Block[]) {
+	blockTest.update((test) => {
+		return {
+			...test,
+			blocks: callback(test.blocks)
+		};
 	});
 }
 
 function appendBlock(owner: Block, block: Block) {
-	updateInFile((blocks) => {
+	updateBlocksInTest((blocks) => {
 		const target = instantiateBlock(block);
 
 		return [
@@ -82,7 +85,7 @@ function appendBlock(owner: Block, block: Block) {
 }
 
 function insertBlock(owner: Block, before: Block, block: Block) {
-	updateInFile((blocks) => {
+	updateBlocksInTest((blocks) => {
 		const target = instantiateBlock(block);
 
 		return blocks.flatMap((current) => {
@@ -108,7 +111,7 @@ function insertBlock(owner: Block, before: Block, block: Block) {
 }
 
 function updateBlock(block: Block) {
-	updateInFile((blocks) => {
+	updateBlocksInTest((blocks) => {
 		return blocks.map((current) => (current.id === block.id ? block : current));
 	});
 }
@@ -118,7 +121,7 @@ function deleteBlock(block: Block | null) {
 		return;
 	}
 
-	updateInFile((blocks) => {
+	updateBlocksInTest((blocks) => {
 		const newChildren = blocks.map((current) =>
 			current.parent.type === 'collection' && current.parent.id === block.id
 				? { ...current, parent: block.parent }
@@ -130,7 +133,7 @@ function deleteBlock(block: Block | null) {
 }
 
 function reparentBlock(parent: BlockParent, block: Block) {
-	updateInFile((blocks) => {
+	updateBlocksInTest((blocks) => {
 		if (block.parent.type === 'toolbox') {
 			const newBlock = instantiateBlock(block);
 
@@ -141,8 +144,17 @@ function reparentBlock(parent: BlockParent, block: Block) {
 	});
 }
 
-function loadBlocks(newBlocks: Block[]) {
-	blocks.set(newBlocks);
+function syncLibrary(library: OpenAPIV3_1.Document) {
+	blockTest.update((test) => {
+		return {
+			...test,
+			library
+		};
+	});
+}
+
+function loadBlockTest(test: BlockTest) {
+	blockTest.set(test);
 }
 
 export {
@@ -152,9 +164,11 @@ export {
 	reparentBlock,
 	updateBlock,
 	deleteBlock,
-	loadBlocks,
+	syncLibrary,
+	loadBlockTest,
 	selected,
-	api,
+	blockTest,
+	library,
 	blocks,
 	requests,
 	roots

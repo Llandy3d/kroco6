@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { currentFile } from '$lib/store/editor';
 	import BlocksEditor from './BlocksEditor.svelte';
-	import Library from './Library.svelte';
 	import ScriptEditor from './ScriptEditor.svelte';
 </script>
 
@@ -13,6 +12,4 @@
 	<BlocksEditor file={$currentFile} />
 {:else if $currentFile.type === 'script'}
 	<ScriptEditor file={$currentFile} />
-{:else if $currentFile.type === 'library'}
-	<Library file={$currentFile} />
 {/if}

@@ -61,7 +61,7 @@
 	import type { Block } from '$lib/store/test/types';
 	import AnyBlock from './blocks/AnyBlock.svelte';
 	import { dropmask } from './blocks/primitives/dnd';
-	import { selected, requests, api } from '$lib/store/test';
+	import { selected, requests, library } from '$lib/store/test';
 	import { exhaustive } from '$lib/utils/typescript';
 	import { nanoid } from 'nanoid';
 
@@ -111,7 +111,7 @@
 			</ul>
 		{/each}
 		<ul>
-			<h2 class="p-2 font-bold">{$api.info.title}</h2>
+			<h2 class="p-2 font-bold">{$library.info.title}</h2>
 			{#each $requests as template (template.id)}
 				<li
 					class="border-b border-gray-200 p-2"
