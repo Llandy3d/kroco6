@@ -15,6 +15,8 @@ type Falsy = '' | 0 | false | null | undefined;
 const blockTest = writable<BlockTest>(EMPTY_BLOCK_TEST);
 
 const requests = derived(blockTest, ($test) => {
+	const baseUrl = $test.library.servers?.[0]?.url ?? '';
+
 	return Object.entries($test.library.paths ?? {}).flatMap(([path, methods]) => {
 		if (methods === undefined) {
 			return [];
@@ -25,7 +27,7 @@ const requests = derived(blockTest, ($test) => {
 				type: 'http-request',
 				id: nanoid(),
 				method: 'get',
-				url: path,
+				url: new URL(path, baseUrl).toString(),
 				name: methods.get.summary ?? `GET ${path}`,
 				parameters: {},
 				parent: { type: 'toolbox' }
