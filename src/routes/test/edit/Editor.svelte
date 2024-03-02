@@ -1,6 +1,6 @@
 <script lang="ts">
   import { currentFile } from "$lib/store/editor";
-  import BlocksEditor from "./BlocksEditor.svelte";
+  import BlocksEditor from "./blocks/BlocksEditor.svelte";
   import ScriptEditor from "./ScriptEditor.svelte";
 </script>
 

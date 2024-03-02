@@ -3,49 +3,13 @@ import {
   type Block,
   type BlockTest,
   type BlockParent,
-  type HttpRequestBlock,
   EMPTY_BLOCK_TEST,
+  type ApiEndpoint,
 } from "./types";
 import { nanoid } from "nanoid";
-import { isTruthy } from "../../utils/typescript";
-import type { OpenAPIV3_1 } from "openapi-types";
-
-type Falsy = "" | 0 | false | null | undefined;
+import type { OpenAPIV3 } from "openapi-types";
 
 const blockTest = writable<BlockTest>(EMPTY_BLOCK_TEST);
-
-const requests = derived(blockTest, ($test) => {
-  const baseUrl = $test.library.servers?.[0]?.url ?? "";
-
-  return Object.entries($test.library.paths ?? {}).flatMap(([path, methods]) => {
-    if (methods === undefined) {
-      return [];
-    }
-
-    const a: Array<HttpRequestBlock | Falsy> = [
-      methods.get && {
-        type: "http-request",
-        id: nanoid(),
-        method: "get",
-        url: new URL(path, baseUrl).toString(),
-        name: methods.get.summary ?? `GET ${path}`,
-        parameters: {},
-        parent: { type: "toolbox" },
-      },
-      methods.post && {
-        type: "http-request",
-        id: nanoid(),
-        method: "post",
-        url: path,
-        name: methods.post.summary ?? `POST ${path}`,
-        parameters: {},
-        parent: { type: "toolbox" },
-      },
-    ];
-
-    return a.filter(isTruthy);
-  });
-});
 
 const selected = readable<Block | null>(null);
 
@@ -146,7 +110,7 @@ function reparentBlock(parent: BlockParent, block: Block) {
   });
 }
 
-function syncLibrary(library: OpenAPIV3_1.Document) {
+function syncLibrary(library: OpenAPIV3.Document) {
   blockTest.update((test) => {
     return {
       ...test,
@@ -159,6 +123,32 @@ function loadBlockTest(test: BlockTest) {
   blockTest.set(test);
 }
 
+function updateInPaths(fn: (operation: OpenAPIV3.PathsObject) => OpenAPIV3.PathsObject) {
+  blockTest.update((test) => {
+    return {
+      ...test,
+      library: {
+        ...test.library,
+        paths: fn(test.library.paths),
+      },
+    };
+  });
+}
+
+function updateEndpoint(previous: ApiEndpoint, next: ApiEndpoint) {
+  updateInPaths((paths) => {
+    return Object.entries(paths).reduce((acc, [path, details]) => {
+      const isRenamed = path === previous.path && previous.path !== next.path;
+
+      if (isRenamed || path === next.path) {
+        return { ...acc, [next.path]: next.details };
+      }
+
+      return { ...acc, [path]: details };
+    }, {} as OpenAPIV3.PathsObject);
+  });
+}
+
 export {
   instantiateBlock,
   appendBlock,
@@ -168,10 +158,10 @@ export {
   deleteBlock,
   syncLibrary,
   loadBlockTest,
+  updateEndpoint,
   selected,
   blockTest,
   library,
   blocks,
-  requests,
   roots,
 };

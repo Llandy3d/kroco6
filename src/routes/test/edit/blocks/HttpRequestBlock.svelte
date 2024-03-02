@@ -2,7 +2,7 @@
   import type { HttpRequestBlock } from "$lib/store/test/types";
   import Field from "./primitives/Field.svelte";
   import Block from "./primitives/Block.svelte";
-  import StringInput from "../inputs/StringInput.svelte";
+  import StringInput from "./inputs/StringInput.svelte";
 
   export let block: HttpRequestBlock;
 </script>

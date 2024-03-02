@@ -8,6 +8,17 @@ body {
   height: 100%;
 }
 
+/* These two rules disable momentum scrolling on macOS */
+body {
+  overflow: hidden;
+}
+
+#app {
+  -webkit-overflow-scrolling: touch;
+  height: 100vh;
+  overflow: auto;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -25,8 +36,8 @@ body {
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 250 93.7% 68.6%;
+    --primary-foreground: 0 0% 100%;
 
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;

@@ -9,7 +9,7 @@
   import { derived } from "svelte/store";
   import { appendBlock, blocks, insertBlock, updateBlock } from "$lib/store/test";
   import AnyBlock from "./AnyBlock.svelte";
-  import StringInput, { type StringInputChangeEvent } from "../inputs/StringInput.svelte";
+  import StringInput, { type StringInputChangeEvent } from "./inputs/StringInput.svelte";
 
   export let block: ScenarioBlock;
 

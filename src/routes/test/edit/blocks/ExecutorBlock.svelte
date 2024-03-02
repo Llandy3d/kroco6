@@ -2,7 +2,7 @@
   import type { ExecutorBlock } from "$lib/store/test/types";
   import Block from "./primitives/Block.svelte";
   import Field from "./primitives/Field.svelte";
-  import StringInput from "../inputs/StringInput.svelte";
+  import StringInput from "./inputs/StringInput.svelte";
 
   export let block: ExecutorBlock;
 </script>

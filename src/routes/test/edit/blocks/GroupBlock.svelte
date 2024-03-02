@@ -4,7 +4,7 @@
   import { derived } from "svelte/store";
   import Block from "./primitives/Block.svelte";
   import Field from "./primitives/Field.svelte";
-  import StringInput, { type StringInputChangeEvent } from "../inputs/StringInput.svelte";
+  import StringInput, { type StringInputChangeEvent } from "./inputs/StringInput.svelte";
   import Collection, {
     type AppendBlockEvent,
     type InsertBlockEvent,
