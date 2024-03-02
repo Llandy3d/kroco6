@@ -8,12 +8,14 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { saveToken } from '$lib/backend-client';
+	import * as Tooltip from '$lib/components/ui/tooltip';
+	import { Content } from '$lib/components/ui/accordion';
 
 	let token = '';
 	let projectId = '';
 	let modalOpen = false;
 
-	$: canRunTestsInCloud = !!token && !!projectId;
+	$: canRunTestsInCloud = token !== '' && projectId !== '';
 
 	onMount(async () => {
 		token = await invoke('get_cloud_token');
@@ -29,30 +31,37 @@
 </script>
 
 <div class="my-2 flex gap-2 p-2">
-	<Button class="rounded-full" variant="secondary" on:click={runTest}>
-		<PlayCircle class="mr-2 h-4 w-4" />
+	<Button size="sm" variant="secondary" on:click={runTest}>
+		<PlayCircle size={14} class="mr-2 h-4 w-4" />
 		Run
 	</Button>
 
-	<Button
-		class="rounded-full"
-		variant="secondary"
-		on:click={() => runTestInCloud(projectId)}
-		disabled={!canRunTestsInCloud}
-	>
-		<UploadCloud class="mr-2 h-4 w-4" />
-		Run in Cloud
-	</Button>
+	<Tooltip.Root open={canRunTestsInCloud ? false : undefined}>
+		<Tooltip.Trigger>
+			<Button
+				size="sm"
+				variant="secondary"
+				on:click={() => runTestInCloud(projectId)}
+				disabled={!canRunTestsInCloud}
+			>
+				<UploadCloud size={14} class="mr-2 h-4 w-4" />
+				Run in Cloud
+			</Button>
+		</Tooltip.Trigger>
+		<Tooltip.Content side="bottom">
+			You need to configure a token and project id to run tests in the cloud.
+		</Tooltip.Content>
+	</Tooltip.Root>
 
 	<Button
-		class="ml-auto rounded-full"
-		variant="secondary"
+		class="rounded-full"
+		size="sm"
+		variant="ghost"
 		on:click={() => {
 			modalOpen = true;
 		}}
 	>
-		<Settings class="mr-2" />
-		Settings
+		<Settings size={16} />
 	</Button>
 </div>
 

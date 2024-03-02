@@ -16,6 +16,11 @@
 			"dialog": {
 				"message": true
 			},
+			"http": {
+				"all": false,
+				"request": true,
+				"scope": ["http://*", "https://*"]
+			},
 			"shell": {
 				"open": true
 			}
@@ -65,7 +70,8 @@
 				"height": 800,
 				"resizable": true,
 				"title": "Kroco6",
-				"width": 1200
+				"width": 1200,
+				"fileDropEnabled": false
 			}
 		]
 	}

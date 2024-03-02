@@ -1,11 +1,11 @@
-<script>
+<script lang="ts">
 	import { invoke } from '@tauri-apps/api/tauri';
 	import { Loader2 } from 'lucide-svelte';
 
 	let title = 'Running your script...';
 	let result = '';
 
-	invoke('run_script', {})
+	invoke<string>('run_script', {})
 		.then((response) => {
 			title = 'Done!';
 			result = response;
@@ -15,7 +15,8 @@
 		});
 
 	function tryVisitDashboard() {
-		window.location = 'http://localhost:5665';
+		window.location.href = 'http://localhost:5665';
+
 		setTimeout(tryVisitDashboard, 1000);
 	}
 

@@ -61,7 +61,7 @@
 			</Tooltip.Root>
 		</ToggleGroup.Root>
 		<Dialog.Footer>
-			<Button type="submit" on:click={() => goto('/test/edit')}>Create</Button>
+			<Button on:click={() => goto('/test/edit')}>Create</Button>
 		</Dialog.Footer>
 	</Dialog.Content>
 </Dialog.Root>
