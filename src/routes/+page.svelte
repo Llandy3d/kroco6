@@ -9,12 +9,6 @@
 	import * as ToggleGroup from '$lib/components/ui/toggle-group';
 	import * as Tooltip from '$lib/components/ui/tooltip';
 	import { goto } from '$app/navigation';
-	import { onMount } from 'svelte';
-
-	// Ugly hack to get to the editor... project management peeps, please fix this
-	onMount(() => {
-		goto('/test/edit');
-	});
 
 	let createTestDialogOpen = false;
 </script>

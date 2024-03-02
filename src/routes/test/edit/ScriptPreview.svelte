@@ -1,23 +1,20 @@
 <script lang="ts">
 	import { derived } from 'svelte/store';
-	import { blocksToTest } from '$lib/convert';
-	import { emitScript } from '$lib/codegen';
+	import { convertToScript } from '$lib/convert';
 	import Highlight, { LineNumbers } from 'svelte-highlight';
 	import typescript from 'svelte-highlight/languages/typescript';
 	import light from 'svelte-highlight/styles/github';
 	import dark from 'svelte-highlight/styles/github-dark';
 	import { mode } from 'mode-watcher';
-	import { blocks } from '$lib/store/test';
+	import { blockTest, blocks } from '$lib/store/test';
 
 	let error: unknown = null;
 
 	let script = derived(
-		blocks,
-		(blocks, set) => {
+		blockTest,
+		(test, set) => {
 			try {
-				const test = blocksToTest(blocks);
-
-				emitScript(test).then((script) => {
+				convertToScript(test).then((script) => {
 					console.log('generated script', { script });
 
 					error = null;

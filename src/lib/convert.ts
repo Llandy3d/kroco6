@@ -4,9 +4,11 @@ import type {
 	Block,
 	ExecutorBlock,
 	StepBlock,
-	HttpRequestBlock
+	HttpRequestBlock,
+	BlockTest
 } from './store/test/types';
 import type { Executor, HttpRequestStep, Step, Test } from './types';
+import { emitScript } from './codegen';
 
 function isExecutorBlock(block: Block): block is ExecutorBlock {
 	return block.type === 'executor';
@@ -45,7 +47,7 @@ function toHttpRequestStep(block: HttpRequestBlock): HttpRequestStep {
 	};
 }
 
-export function blocksToTest(blocks: Block[]): Test {
+function blocksToTest(blocks: Block[]): Test {
 	const scenarios = blocks.filter(isScenarioBlock);
 	const steps = blocks.filter(isStepBlock);
 	const executors = blocks.filter(isExecutorBlock);
@@ -105,3 +107,9 @@ export function blocksToTest(blocks: Block[]): Test {
 		})
 	};
 }
+
+function convertToScript(blockTest: BlockTest) {
+	return emitScript(blocksToTest(blockTest.blocks));
+}
+
+export { convertToScript };

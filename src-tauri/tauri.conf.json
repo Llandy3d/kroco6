@@ -20,6 +20,9 @@
 				"all": false,
 				"request": true,
 				"scope": ["http://*", "https://*"]
+			},
+			"shell": {
+				"open": true
 			}
 		},
 		"bundle": {
@@ -64,10 +67,10 @@
 		"windows": [
 			{
 				"fullscreen": false,
-				"height": 600,
+				"height": 800,
 				"resizable": true,
 				"title": "Kroco6",
-				"width": 800,
+				"width": 1200,
 				"fileDropEnabled": false
 			}
 		]

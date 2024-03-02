@@ -7,14 +7,22 @@
 <script>
 	import '../app.pcss';
 	import { Toaster } from '$lib/components/ui/sonner';
+	import { onMount } from 'svelte';
+
+	import { projects } from '$lib/stores/projects';
+	import { listProjects } from '$lib/backend-client';
+	import Sidebar from './Sidebar.svelte';
+
+	onMount(async () => {
+		const projectsList = await listProjects();
+
+		projects.update(() => projectsList);
+	});
 </script>
 
 <Toaster />
 
-<div class="flex h-full w-full flex-col">
-	<slot />
-</div>
-<!-- <div class="flex">
+<div class="flex">
 	<div class="w-1/5">
 		<Sidebar />
 	</div>
@@ -22,4 +30,4 @@
 	<div class=" w-4/5 p-4">
 		<slot />
 	</div>
-</div> -->
+</div>
