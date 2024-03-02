@@ -23,11 +23,11 @@
 <Toaster />
 
 <div class="flex">
-	<div class="w-1/5">
+	<div class="w-72">
 		<Sidebar />
 	</div>
 
-	<div class=" w-4/5 p-4">
+	<div class="flex flex-auto flex-col">
 		<slot />
 	</div>
 </div>

@@ -24,7 +24,11 @@
 	};
 </script>
 
-<div class="relative flex h-full w-full" use:dropzone={{ data: {} }} on:dropped={handleDrop}>
+<div
+	class="relative flex h-full w-full overflow-hidden"
+	use:dropzone={{ data: {} }}
+	on:dropped={handleDrop}
+>
 	<Toolbox />
 	<!-- svelte-ignore a11y-click-events-have-key-events -->
 	<!-- svelte-ignore a11y-no-static-element-interactions -->

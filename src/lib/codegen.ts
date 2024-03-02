@@ -98,7 +98,7 @@ function emitExecutors(scenario: Scenario) {
 		return '';
 	}
 
-	return `"${scenario.name}": ${executors.join(',\n')},`;
+	return `"${fn}": ${executors.join(',\n')},`;
 }
 
 function emitScenario(scenario: Scenario) {

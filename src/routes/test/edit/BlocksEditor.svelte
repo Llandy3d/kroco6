@@ -66,7 +66,7 @@
 	});
 </script>
 
-<div class="flex">
+<div class="flex flex-auto">
 	<Tabs.Root class="flex flex-auto flex-col" bind:value={tab}>
 		<Tabs.List class="flex justify-between">
 			<div>
