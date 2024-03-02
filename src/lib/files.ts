@@ -1,6 +1,6 @@
 import type { OpenAPIV3 } from "openapi-types";
-import type { OpenFile } from "./store/editor";
-import { EMPTY_BLOCK_TEST, type BlockTest } from "./store/test/types";
+import type { OpenFile } from "./stores/editor";
+import { EMPTY_BLOCK_TEST, type BlockTest } from "./stores/test/types";
 
 const NEW_BLOCKS_TEST = JSON.stringify(EMPTY_BLOCK_TEST);
 

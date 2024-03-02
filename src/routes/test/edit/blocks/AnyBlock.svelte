@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Block } from "$lib/store/test/types";
+  import type { Block } from "$lib/stores/test/types";
   import CheckBlock from "./CheckBlock.svelte";
   import ExecutorBlock from "./ExecutorBlock.svelte";
   import GroupBlock from "./GroupBlock.svelte";

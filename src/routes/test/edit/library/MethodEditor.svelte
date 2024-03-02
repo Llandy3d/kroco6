@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Label } from "$lib/components/ui/label";
-  import type { ApiOperation } from "$lib/store/test/types";
+  import type { ApiOperation } from "$lib/stores/test/types";
   import { Input } from "$lib/components/ui/input";
   import type { InputEvents } from "cmdk-sv";
 

@@ -1,13 +1,13 @@
 <script lang="ts">
   import Block from "./primitives/Block.svelte";
-  import { STEPS, type ScenarioBlock } from "$lib/store/test/types";
+  import { STEPS, type ScenarioBlock } from "$lib/stores/test/types";
   import Field from "./primitives/Field.svelte";
   import Collection, {
     type AppendBlockEvent,
     type InsertBlockEvent,
   } from "./primitives/Collection.svelte";
   import { derived } from "svelte/store";
-  import { appendBlock, blocks, insertBlock, updateBlock } from "$lib/store/test";
+  import { appendBlock, blocks, insertBlock, updateBlock } from "$lib/stores/test";
   import AnyBlock from "./AnyBlock.svelte";
   import StringInput, { type StringInputChangeEvent } from "./inputs/StringInput.svelte";
 

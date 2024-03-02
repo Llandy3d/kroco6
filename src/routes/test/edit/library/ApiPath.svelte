@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { ApiEndpoint, ApiOperation } from "$lib/store/test/types";
+  import type { ApiEndpoint, ApiOperation } from "$lib/stores/test/types";
   import MethodButton from "./MethodButton.svelte";
   import { Plus } from "lucide-svelte";
 

@@ -1,10 +1,10 @@
 <script lang="ts">
-  import type { CheckBlock, CheckExpression } from "$lib/store/test/types";
+  import type { CheckBlock, CheckExpression } from "$lib/stores/test/types";
   import AnyBlock from "./AnyBlock.svelte";
   import Block from "./primitives/Block.svelte";
   import BlockInset from "./primitives/BlockInset.svelte";
   import Field from "./primitives/Field.svelte";
-  import { updateBlock } from "$lib/store/test";
+  import { updateBlock } from "$lib/stores/test";
   import CheckInput from "./CheckInput.svelte";
   import { PlusSquare } from "lucide-svelte";
   import { nanoid } from "nanoid";

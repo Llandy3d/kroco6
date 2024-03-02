@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Input, type InputEvents } from "$lib/components/ui/input";
   import { Label } from "$lib/components/ui/label";
-  import { type ApiEndpoint, HTTP_METHODS, type ApiOperation } from "$lib/store/test/types";
+  import { type ApiEndpoint, HTTP_METHODS, type ApiOperation } from "$lib/stores/test/types";
   import { Tabs } from "bits-ui";
   import MethodEditor from "./MethodEditor.svelte";
   import { OpenAPIV3 } from "openapi-types";

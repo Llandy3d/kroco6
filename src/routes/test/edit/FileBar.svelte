@@ -5,7 +5,8 @@
     currentFile,
     type ScriptFile,
     type BlockFile,
-  } from "$lib/store/editor";
+    newFile,
+  } from "$lib/stores/editor";
   import { RadioGroup } from "bits-ui";
   import { PlusIcon, X } from "lucide-svelte";
   import { nanoid } from "nanoid";
@@ -23,40 +24,12 @@
     }
   };
 
-  function calculateNameClashes(name: string) {
-    return $openFiles.filter((file) => file.name.startsWith(name)).length;
-  }
-
-  const handleNewFile = (newFile: OpenFile) => {
-    $openFiles = [...$openFiles, newFile];
-
-    $currentFile = newFile;
-  };
-
   const handleNewBlocksFile = () => {
-    const nameClashes = calculateNameClashes("New Blocks");
-
-    const newFile: BlockFile = {
-      type: "block",
-      handle: nanoid(),
-      name: nameClashes === 0 ? "New Blocks" : `New Blocks (${nameClashes})`,
-      path: { type: "new" },
-    };
-
-    handleNewFile(newFile);
+    newFile("block");
   };
 
   const handleNewScriptFile = () => {
-    const nameClashes = calculateNameClashes("New Script");
-
-    const newFile: ScriptFile = {
-      type: "script",
-      handle: nanoid(),
-      name: nameClashes === 0 ? "New Script" : `New Script (${nameClashes})`,
-      path: { type: "new" },
-    };
-
-    handleNewFile(newFile);
+    newFile("script");
   };
 </script>
 

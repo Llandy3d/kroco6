@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { currentFile } from "$lib/store/editor";
+  import { currentFile } from "$lib/stores/editor";
   import BlocksEditor from "./blocks/BlocksEditor.svelte";
   import ScriptEditor from "./ScriptEditor.svelte";
 </script>

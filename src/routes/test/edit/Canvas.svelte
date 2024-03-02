@@ -1,11 +1,11 @@
 <script lang="ts">
-  import type { Block as BlockType } from "$lib/store/test/types";
+  import type { Block as BlockType } from "$lib/stores/test/types";
 
   import Root from "./blocks/Root.svelte";
   import { dropzone, type DroppedEvent } from "./blocks/primitives/dnd";
-  import { reparentBlock, roots, selected } from "$lib/store/test";
+  import { reparentBlock, roots, selected } from "$lib/stores/test";
   import AnyBlock from "./blocks/AnyBlock.svelte";
-  import Toolbox from "./Toolbox.svelte";
+  import Toolbox from "./blocks/Toolbox.svelte";
 
   const handleDrop = ({ detail }: CustomEvent<DroppedEvent<BlockType, {}>>) => {
     const dropped = detail.data.dropped;

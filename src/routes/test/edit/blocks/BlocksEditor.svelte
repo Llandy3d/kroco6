@@ -1,13 +1,13 @@
 <script lang="ts">
   import * as Tabs from "$lib/components/ui/tabs";
-  import type { BlockFile } from "$lib/store/editor";
+  import type { BlockFile } from "$lib/stores/editor";
   import { onDestroy, onMount } from "svelte";
   import Canvas from "../Canvas.svelte";
-  import ScriptPreview from "../ScriptPreview.svelte";
-  import { blockTest, loadBlockTest } from "$lib/store/test";
+  import ScriptPreview from "./ScriptPreview.svelte";
+  import { blockTest, loadBlockTest } from "$lib/stores/test";
   import { loadContent, storeContent } from "$lib/files";
   import Library from "../library/Library.svelte";
-  import { EMPTY_BLOCK_TEST, type BlockTest } from "$lib/store/test/types";
+  import { EMPTY_BLOCK_TEST, type BlockTest } from "$lib/stores/test/types";
   import { runScriptInCloud } from "$lib/backend-client";
   import { convertToScript } from "$lib/convert";
   import { invoke } from "@tauri-apps/api";

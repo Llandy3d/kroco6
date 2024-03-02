@@ -6,7 +6,7 @@ import type {
   StepBlock,
   HttpRequestBlock,
   BlockTest,
-} from "./store/test/types";
+} from "./stores/test/types";
 import type { Executor, HttpRequestStep, Step, Test } from "./types";
 import { emitScript } from "./codegen";
 

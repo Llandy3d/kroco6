@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { ExecutorBlock } from "$lib/store/test/types";
+  import type { ExecutorBlock } from "$lib/stores/test/types";
   import Block from "./primitives/Block.svelte";
   import Field from "./primitives/Field.svelte";
   import StringInput from "./inputs/StringInput.svelte";

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { isRootBlock, type Block } from "$lib/store/test/types";
+  import { isRootBlock, type Block } from "$lib/stores/test/types";
 
   export let root: Block;
 </script>

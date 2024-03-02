@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { ApiOperation } from "$lib/store/test/types";
+  import type { ApiOperation } from "$lib/stores/test/types";
   import ListButton from "./ListButton.svelte";
   import MethodBadge from "./MethodBadge.svelte";
 

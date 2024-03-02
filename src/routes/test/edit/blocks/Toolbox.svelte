@@ -91,10 +91,10 @@
 </script>
 
 <script lang="ts">
-  import type { Block, HttpRequestBlock } from "$lib/store/test/types";
-  import AnyBlock from "./blocks/AnyBlock.svelte";
-  import { dropmask } from "./blocks/primitives/dnd";
-  import { selected, library, blockTest } from "$lib/store/test";
+  import type { Block, HttpRequestBlock } from "$lib/stores/test/types";
+  import AnyBlock from "./AnyBlock.svelte";
+  import { dropmask } from "./primitives/dnd";
+  import { selected, library, blockTest } from "$lib/stores/test";
   import { exhaustive, isTruthy, type Falsy } from "$lib/utils/typescript";
   import { nanoid } from "nanoid";
   import { derived } from "svelte/store";
