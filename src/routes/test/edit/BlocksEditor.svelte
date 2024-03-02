@@ -6,7 +6,7 @@
 	}
 </script>
 
-<script>
+<script lang="ts">
 	// Import Blockly core.
 	import * as Blockly from 'blockly/core';
 	// Import the default blocks.
@@ -16,11 +16,11 @@
 	// Import a message file.
 	import * as En from 'blockly/msg/en';
 	import { onMount } from 'svelte';
-	import { Button } from '$lib/components/ui/button';
-	import { PlayCircle, UploadCloud } from 'lucide-svelte';
-	import * as Tooltip from '$lib/components/ui/tooltip';
 
 	import { invoke } from '@tauri-apps/api/tauri';
+	import { open } from '@tauri-apps/api/shell';
+	import TestToolbar from './TestToolbar.svelte';
+	import { runScriptInCloud } from '$lib/backend-client';
 
 	Blockly.setLocale(En);
 
@@ -128,7 +128,6 @@
 					]
 				}
 			],
-
 			previousStatement: null,
 			nextStatement: null
 		}
@@ -198,7 +197,6 @@
 	};
 
 	// workspace
-
 	const toolbox = {
 		// There are two kinds of toolboxes. The simpler one is a flyout toolbox.
 		kind: 'flyoutToolbox',
@@ -227,12 +225,32 @@
 		]
 	};
 
-	function open_run_window() {
+	function runTestLocally() {
 		const script = javascriptGenerator.workspaceToCode(workspace);
 
 		invoke('open_run_window', { script: script })
 			.then((response) => {
 				console.log(response);
+			})
+			.catch((error) => {
+				console.log(error);
+			});
+	}
+
+	function runTestInCloud(projectId: string) {
+		const script = javascriptGenerator.workspaceToCode(workspace);
+
+		runScriptInCloud({ script, projectId })
+			.then((response) => {
+				console.log(response);
+
+				let match = response.match(/output: (https?:\/\/[^\s]+)/);
+
+				if (match) {
+					open(match[1]);
+				} else {
+					throw new Error('No URL found in output');
+				}
 			})
 			.catch((error) => {
 				console.log(error);
@@ -246,8 +264,8 @@
 		let options_block = workspace.newBlock('options');
 		let request_block = workspace.newBlock('http_request');
 
-		k6_block.getInput('OPTIONS').connection.connect(options_block.outputConnection);
-		k6_block.getInput('REQUESTS').connection.connect(request_block.outputConnection);
+		k6_block.getInput('OPTIONS')?.connection?.connect(options_block.outputConnection);
+		k6_block.getInput('REQUESTS')?.connection?.connect(request_block.outputConnection);
 
 		// make it more centered in the workspace
 		k6_block.moveBy(40, 40);
@@ -260,31 +278,7 @@
 </script>
 
 <div class="-ml-4 h-[79vh]">
-	<p class="mt-4 text-center text-2xl text-gray-500">Create your script!</p>
-
-	<Tooltip.Root>
-		<Tooltip.Trigger>
-			<Button class="mb-1 mt-4 rounded-full" variant="secondary" on:click={open_run_window}>
-				<PlayCircle class="mr-2 h-4 w-4" />
-				Run
-			</Button>
-		</Tooltip.Trigger>
-		<Tooltip.Content>
-			<p>Run locally</p>
-		</Tooltip.Content>
-	</Tooltip.Root>
-
-	<Tooltip.Root>
-		<Tooltip.Trigger>
-			<Button class="mb-1 mt-4 rounded-full" variant="secondary" disabled>
-				<UploadCloud class="mr-2 h-4 w-4" />
-				Run in Cloud
-			</Button>
-		</Tooltip.Trigger>
-		<Tooltip.Content>
-			<p>Account required for cloud tests!</p>
-		</Tooltip.Content>
-	</Tooltip.Root>
+	<TestToolbar runTest={runTestLocally} {runTestInCloud} />
 
 	<div id="blocklyDiv" class="h-full"></div>
 </div>

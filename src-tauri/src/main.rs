@@ -10,13 +10,13 @@ use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::sync::Mutex;
 
-
 fn main() {
     let application_state = ApplicationState::default();
 
     // Initialize the application state's ProjectManager instance
     // to ensure that the underlying projects directory exists
-    application_state.project_manager
+    application_state
+        .project_manager
         .initialize()
         .expect("Failed to initialize application state");
 
@@ -25,8 +25,11 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             open_run_window,
             run_script,
+            run_script_in_cloud,
             list_projects,
-            create_project
+            create_project,
+            set_cloud_token,
+            get_cloud_token,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -57,8 +60,12 @@ async fn open_run_window(
 }
 
 #[tauri::command]
-async fn list_projects(state: tauri::State<'_, ApplicationState>) -> Result<Vec<models::Project>, String> {
-    state.project_manager.list_projects()
+async fn list_projects(
+    state: tauri::State<'_, ApplicationState>,
+) -> Result<Vec<models::Project>, String> {
+    state
+        .project_manager
+        .list_projects()
         .map_err(|e| e.to_string())
 }
 
@@ -68,7 +75,8 @@ async fn create_project(
     name: &str,
     description: Option<&str>,
 ) -> Result<models::Project, String> {
-    state.project_manager
+    state
+        .project_manager
         .create_project(models::Project::new(name, description))
         .map_err(|e| e.to_string())
 }
@@ -137,7 +145,7 @@ struct ApplicationState {
     pub project_manager: operations::LocalProjectManager,
 
     // Legacy: the script to run
-    script: Mutex<String>
+    script: Mutex<String>,
 }
 
 impl ApplicationState {
@@ -156,11 +164,55 @@ impl ApplicationState {
         Self {
             storage_path: storage_path.clone(),
             project_manager: operations::LocalProjectManager::new(storage_path),
-            script: Mutex::new(String::new())
+            script: Mutex::new(String::new()),
         }
     }
 
     pub fn default() -> Self {
         Self::new()
     }
+}
+
+#[tauri::command]
+async fn get_cloud_token() -> Result<String, String> {
+    Ok(std::env::var(String::from("K6_CLOUD_TOKEN")).unwrap_or(String::from("")))
+}
+
+#[tauri::command]
+fn set_cloud_token(token: String) -> Result<(), String> {
+    std::env::set_var("K6_CLOUD_TOKEN", token);
+    Ok(())
+}
+
+#[tauri::command]
+async fn run_script_in_cloud(script: String, project_id: String) -> Result<String, String> {
+    let mut child = Command::new("k6")
+        .arg("cloud")
+        .arg("-")
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .env(
+            "K6_CLOUD_TOKEN",
+            std::env::var(String::from("K6_CLOUD_TOKEN")).unwrap_or(String::from("")),
+        )
+        .env("K6_CLOUD_PROJECT_ID", project_id)
+        .env("K6_CLOUD_NAME", "kroco6 script.js")
+        .spawn()
+        .expect("Failed to execute command");
+
+    if let Some(mut stdin) = child.stdin.take() {
+        stdin
+            .write_all(script.as_bytes())
+            .expect("Failed to write script.");
+    }
+
+    let mut k6_output = String::new();
+    if let Some(mut stdout) = child.stdout.take() {
+        stdout
+            .read_to_string(&mut k6_output)
+            .expect("Failed to read stdout");
+    }
+
+    let _ = child.wait_with_output().expect("Failed to execute command");
+    Ok(k6_output)
 }
