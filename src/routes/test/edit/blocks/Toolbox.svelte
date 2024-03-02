@@ -55,15 +55,49 @@
       ],
     },
   ];
+
+  const requests = derived(blockTest, ($test) => {
+    const baseUrl = $test.library.servers?.[0]?.url ?? "";
+
+    return Object.entries($test.library.paths ?? {}).flatMap(([path, methods]) => {
+      if (methods === undefined) {
+        return [];
+      }
+
+      const a: Array<HttpRequestBlock | Falsy> = [
+        methods.get && {
+          type: "http-request",
+          id: nanoid(),
+          method: "get",
+          url: new URL(path, baseUrl).toString(),
+          name: methods.get.summary || `GET ${path}`,
+          parameters: {},
+          parent: { type: "toolbox" },
+        },
+        methods.post && {
+          type: "http-request",
+          id: nanoid(),
+          method: "post",
+          url: new URL(path, baseUrl).toString(),
+          name: methods.post.summary || `POST ${path}`,
+          parameters: {},
+          parent: { type: "toolbox" },
+        },
+      ];
+
+      return a.filter(isTruthy);
+    });
+  });
 </script>
 
 <script lang="ts">
-  import type { Block } from "$lib/store/test/types";
-  import AnyBlock from "./blocks/AnyBlock.svelte";
-  import { dropmask } from "./blocks/primitives/dnd";
-  import { selected, requests, library } from "$lib/store/test";
-  import { exhaustive } from "$lib/utils/typescript";
+  import type { Block, HttpRequestBlock } from "$lib/stores/test/types";
+  import AnyBlock from "./AnyBlock.svelte";
+  import { dropmask } from "./primitives/dnd";
+  import { selected, library, blockTest } from "$lib/stores/test";
+  import { exhaustive, isTruthy, type Falsy } from "$lib/utils/typescript";
   import { nanoid } from "nanoid";
+  import { derived } from "svelte/store";
 
   function isCompatible(block: Block, selected: Block | null) {
     if (selected === null) {

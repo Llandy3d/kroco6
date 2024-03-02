@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { appendBlock, blocks, insertBlock, updateBlock } from "$lib/store/test";
-  import { type GroupBlock, STEPS } from "$lib/store/test/types";
+  import { appendBlock, blocks, insertBlock, updateBlock } from "$lib/stores/test";
+  import { type GroupBlock, STEPS } from "$lib/stores/test/types";
   import { derived } from "svelte/store";
   import Block from "./primitives/Block.svelte";
   import Field from "./primitives/Field.svelte";
-  import StringInput, { type StringInputChangeEvent } from "../inputs/StringInput.svelte";
+  import StringInput, { type StringInputChangeEvent } from "./inputs/StringInput.svelte";
   import Collection, {
     type AppendBlockEvent,
     type InsertBlockEvent,

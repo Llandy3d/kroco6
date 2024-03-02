@@ -1,4 +1,4 @@
-import type { OpenAPIV3_1, OpenAPIV3 } from "openapi-types";
+import { OpenAPIV3 } from "openapi-types";
 
 interface CanvasParent {
   type: "canvas";
@@ -103,7 +103,7 @@ function isRootBlock<T extends Block>(block: T): block is T & { parent: CanvasPa
 
 const STEPS: Array<StepBlock["type"]> = ["http-request", "group", "check"];
 
-const EMPTY_LIBRARY: OpenAPIV3_1.Document = {
+const EMPTY_LIBRARY: OpenAPIV3.Document = {
   info: {
     title: "Untitled API",
     version: "1.0.0",
@@ -120,15 +120,43 @@ const EMPTY_BLOCK_TEST: BlockTest = {
 
 interface BlockTest {
   version: 0;
-  library: OpenAPIV3_1.Document | OpenAPIV3.Document;
+  library: OpenAPIV3.Document | OpenAPIV3.Document;
   blocks: Block[];
 }
+
+const HTTP_METHODS = [
+  OpenAPIV3.HttpMethods.GET,
+  OpenAPIV3.HttpMethods.PUT,
+  OpenAPIV3.HttpMethods.POST,
+  OpenAPIV3.HttpMethods.DELETE,
+  OpenAPIV3.HttpMethods.PATCH,
+  OpenAPIV3.HttpMethods.HEAD,
+  OpenAPIV3.HttpMethods.OPTIONS,
+  OpenAPIV3.HttpMethods.TRACE,
+];
+
+interface ApiEndpoint {
+  path: string;
+  details: OpenAPIV3.PathItemObject;
+  operations: ApiOperation[];
+}
+
+interface ApiOperation {
+  path: string;
+  method: OpenAPIV3.HttpMethods;
+  details: OpenAPIV3.OperationObject;
+}
+
+export {};
 
 export {
   isRootBlock,
   STEPS,
   EMPTY_LIBRARY,
   EMPTY_BLOCK_TEST,
+  HTTP_METHODS,
+  type ApiEndpoint,
+  type ApiOperation,
   type Block,
   type ScenarioBlock,
   type HttpRequestBlock,

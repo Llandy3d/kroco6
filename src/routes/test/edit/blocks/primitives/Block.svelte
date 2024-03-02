@@ -1,9 +1,9 @@
 <script lang="ts">
-  import type { Block } from "$lib/store/test/types";
+  import type { Block } from "$lib/stores/test/types";
   import { GripVertical, Key } from "lucide-svelte";
   import { draggable, type DragChangeEvent } from "./dnd";
   import { cn } from "$lib/utils";
-  import { deleteBlock, selected } from "$lib/store/test";
+  import { deleteBlock, selected } from "$lib/stores/test";
 
   export let type: string;
   export let block: Block;

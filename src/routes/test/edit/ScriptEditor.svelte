@@ -1,6 +1,6 @@
 <script lang="ts" context="module">
   import { loadContent, storeContent } from "$lib/files";
-  import type { ScriptFile } from "$lib/store/editor";
+  import type { ScriptFile } from "$lib/stores/editor";
   import * as monaco from "monaco-editor";
 </script>
 

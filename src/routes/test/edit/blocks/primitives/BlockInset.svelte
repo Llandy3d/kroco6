@@ -1,8 +1,8 @@
 <script lang="ts">
   import { dropzone, type DroppedEvent, type DroppingEvent } from "./dnd";
-  import { type Block as BlockType, type ImmediateParent } from "$lib/store/test/types";
+  import { type Block as BlockType, type ImmediateParent } from "$lib/stores/test/types";
   import { derived } from "svelte/store";
-  import { blocks, reparentBlock } from "$lib/store/test";
+  import { blocks, reparentBlock } from "$lib/stores/test";
 
   export let accepts: string[] | undefined = undefined;
   export let owner: BlockType;

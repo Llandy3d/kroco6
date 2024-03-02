@@ -6,7 +6,7 @@
   import light from "svelte-highlight/styles/github";
   import dark from "svelte-highlight/styles/github-dark";
   import { mode } from "mode-watcher";
-  import { blockTest, blocks } from "$lib/store/test";
+  import { blockTest, blocks } from "$lib/stores/test";
 
   let error: unknown = null;
 

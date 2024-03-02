@@ -6,10 +6,10 @@
 </script>
 
 <script lang="ts">
-  import StringInput, { type StringInputChangeEvent } from "../inputs/StringInput.svelte";
+  import StringInput, { type StringInputChangeEvent } from "./inputs/StringInput.svelte";
   import Field from "./primitives/Field.svelte";
   import * as Select from "$lib/components/ui/select";
-  import type { CheckExpression } from "$lib/store/test/types";
+  import type { CheckExpression } from "$lib/stores/test/types";
   import { createEventDispatcher } from "svelte";
   import type { Selected } from "bits-ui";
   import { exhaustive } from "$lib/utils/typescript";

@@ -10,7 +10,7 @@
 </script>
 
 <script lang="ts">
-  import type { Block as BlockType } from "$lib/store/test/types";
+  import type { Block as BlockType } from "$lib/stores/test/types";
   import { cn } from "$lib/utils";
   import { type DroppedEvent } from "./dnd";
   import DropZone from "./DropZone.svelte";

@@ -1,17 +1,17 @@
 <script lang="ts">
   import * as Tabs from "$lib/components/ui/tabs";
-  import type { BlockFile } from "$lib/store/editor";
+  import type { BlockFile } from "$lib/stores/editor";
   import { onDestroy, onMount } from "svelte";
-  import Canvas from "./Canvas.svelte";
+  import Canvas from "../Canvas.svelte";
   import ScriptPreview from "./ScriptPreview.svelte";
-  import { blockTest, loadBlockTest } from "$lib/store/test";
+  import { blockTest, loadBlockTest } from "$lib/stores/test";
   import { loadContent, storeContent } from "$lib/files";
-  import Library from "./Library.svelte";
-  import { EMPTY_BLOCK_TEST, type BlockTest } from "$lib/store/test/types";
-  import TestToolbar from "./TestToolbar.svelte";
-  import { invoke } from "@tauri-apps/api";
+  import Library from "../library/Library.svelte";
+  import { EMPTY_BLOCK_TEST, type BlockTest } from "$lib/stores/test/types";
   import { runScriptInCloud } from "$lib/backend-client";
   import { convertToScript } from "$lib/convert";
+  import { invoke } from "@tauri-apps/api";
+  import TestToolbar from "../TestToolbar.svelte";
 
   let tab = "library";
 
@@ -68,7 +68,7 @@
 
 <div class="flex flex-auto">
   <Tabs.Root class="flex flex-auto flex-col" bind:value={tab}>
-    <Tabs.List class="flex justify-between">
+    <Tabs.List class="flex justify-between rounded-none shadow-md">
       <div>
         <Tabs.Trigger value="library">Library</Tabs.Trigger>
         <Tabs.Trigger value="build">Build</Tabs.Trigger>
@@ -78,7 +78,7 @@
         <TestToolbar runTest={runTestLocally} {runTestInCloud} />
       </div>
     </Tabs.List>
-    <Tabs.Content value="library" class="flex-auto">
+    <Tabs.Content value="library" class="mt-0 flex-auto">
       <Library />
     </Tabs.Content>
     <Tabs.Content value="build" class="flex-auto">

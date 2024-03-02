@@ -1,4 +1,5 @@
-import { writable } from "svelte/store";
+import { nanoid } from "nanoid";
+import { get, writable } from "svelte/store";
 
 interface NewPath {
   type: "new";
@@ -36,11 +37,35 @@ const openFiles = writable<VirtualFile[]>([
     type: "block",
   },
 ]);
+
 const currentFile = writable<VirtualFile | null>(null);
+
+function calculateNameClashes(name: string) {
+  return get(openFiles).filter((file) => file.name.startsWith(name)).length;
+}
+
+function newFile(type: VirtualFile["type"], preferredName?: string) {
+  const name = preferredName ?? `New ${type === "block" ? "Test" : "Script"}`;
+  const clashes = calculateNameClashes(name);
+
+  const newFile: VirtualFile = {
+    handle: nanoid(),
+    name: clashes > 0 ? `${name} (${clashes + 1})` : name,
+    path: { type: "new" },
+    type,
+  };
+
+  openFiles.update((files) => {
+    return [...files, newFile];
+  });
+
+  currentFile.set(newFile);
+}
 
 export {
   openFiles,
   currentFile,
+  newFile,
   type VirtualFile as OpenFile,
   type BlockFile,
   type ScriptFile,
