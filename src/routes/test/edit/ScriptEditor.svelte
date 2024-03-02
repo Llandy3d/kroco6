@@ -1,37 +1,37 @@
 <script lang="ts" context="module">
-	import { loadContent, storeContent } from '$lib/files';
-	import type { ScriptFile } from '$lib/store/editor';
-	import * as monaco from 'monaco-editor';
+  import { loadContent, storeContent } from "$lib/files";
+  import type { ScriptFile } from "$lib/store/editor";
+  import * as monaco from "monaco-editor";
 </script>
 
 <script lang="ts">
-	import { onDestroy, onMount } from 'svelte';
+  import { onDestroy, onMount } from "svelte";
 
-	export let file: ScriptFile;
+  export let file: ScriptFile;
 
-	let container: HTMLDivElement;
-	let editor: monaco.editor.IStandaloneCodeEditor;
+  let container: HTMLDivElement;
+  let editor: monaco.editor.IStandaloneCodeEditor;
 
-	let script = '';
+  let script = "";
 
-	onMount(() => {
-		script = loadContent(file);
+  onMount(() => {
+    script = loadContent(file);
 
-		editor = monaco.editor.create(container, {
-			value: script,
-			language: 'javascript'
-		});
+    editor = monaco.editor.create(container, {
+      value: script,
+      language: "javascript",
+    });
 
-		editor.onDidChangeModelContent(() => {
-			script = editor.getValue();
-		});
-	});
+    editor.onDidChangeModelContent(() => {
+      script = editor.getValue();
+    });
+  });
 
-	onDestroy(() => {
-		storeContent(file, script);
+  onDestroy(() => {
+    storeContent(file, script);
 
-		editor.dispose();
-	});
+    editor.dispose();
+  });
 </script>
 
 <div class="full-w flex-auto" bind:this={container}></div>

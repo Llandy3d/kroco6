@@ -1,70 +1,70 @@
-import { exhaustive } from './utils/typescript';
-import type { Scenario, Step, Test } from './types';
-import * as prettier from 'prettier';
-import * as babelParser from 'prettier/parser-babel';
-import * as estreePlugin from 'prettier/plugins/estree';
+import { exhaustive } from "./utils/typescript";
+import type { Scenario, Step, Test } from "./types";
+import * as prettier from "prettier";
+import * as babelParser from "prettier/parser-babel";
+import * as estreePlugin from "prettier/plugins/estree";
 
 function sanitizeName(name: string) {
-	const parts = name
-		.split(' ')
-		.map((part) => part.replaceAll(/[^_a-zA-Z0-9]/g, ''))
-		.filter((part) => part !== '')
-		.map((part, index) =>
-			index > 0 ? part[0]?.toUpperCase() + part.slice(1) : part[0]?.toLowerCase() + part.slice(1)
-		);
+  const parts = name
+    .split(" ")
+    .map((part) => part.replaceAll(/[^_a-zA-Z0-9]/g, ""))
+    .filter((part) => part !== "")
+    .map((part, index) =>
+      index > 0 ? part[0]?.toUpperCase() + part.slice(1) : part[0]?.toLowerCase() + part.slice(1),
+    );
 
-	const sanitizied = parts.join('');
+  const sanitizied = parts.join("");
 
-	if (!/^[_a-z]/i.test(sanitizied)) {
-		return `_${sanitizied}`;
-	}
+  if (!/^[_a-z]/i.test(sanitizied)) {
+    return `_${sanitizied}`;
+  }
 
-	return sanitizied;
+  return sanitizied;
 }
 
 function emitStep(step: Step): string {
-	switch (step.type) {
-		case 'http-request':
-			return `http.${step.method.toLowerCase()}(${JSON.stringify(step.url)});`;
+  switch (step.type) {
+    case "http-request":
+      return `http.${step.method.toLowerCase()}(${JSON.stringify(step.url)});`;
 
-		case 'group':
-			return `
+    case "group":
+      return `
         group("${step.name}", () => {
-          ${step.steps.map(emitStep).join('\n\n')}
+          ${step.steps.map(emitStep).join("\n\n")}
         });
       `;
 
-		case 'check':
-			return `
+    case "check":
+      return `
         response = ${emitStep(step.target)}
 
 			  check(response, {
 					${step.checks
-						.map((check) => {
-							switch (check.type) {
-								case 'has-status':
-									return `status: (r) => r.status === ${check.status}`;
+            .map((check) => {
+              switch (check.type) {
+                case "has-status":
+                  return `status: (r) => r.status === ${check.status}`;
 
-								case 'body-contains':
-									return `body: (r) => r.body.includes(${JSON.stringify(check.value)})`;
-							}
-						})
-						.join(',')},
+                case "body-contains":
+                  return `body: (r) => r.body.includes(${JSON.stringify(check.value)})`;
+              }
+            })
+            .join(",")},
 				})
 			`;
 
-		default:
-			return exhaustive(step);
-	}
+    default:
+      return exhaustive(step);
+  }
 }
 
 function emitExecutors(scenario: Scenario) {
-	const fn = sanitizeName(scenario.name);
+  const fn = sanitizeName(scenario.name);
 
-	const executors = scenario.executors.map((executor) => {
-		switch (executor.type) {
-			case 'constant-vus':
-				return `
+  const executors = scenario.executors.map((executor) => {
+    switch (executor.type) {
+      case "constant-vus":
+        return `
           { 
             "executor": "constant-vus", 
             "vus": ${executor.vus}, 
@@ -73,66 +73,66 @@ function emitExecutors(scenario: Scenario) {
           }
         `;
 
-			case 'ramping-vus':
-				return `
+      case "ramping-vus":
+        return `
           { 
             "executor": "ramping-vus",
             "stages": [${executor.stages
-							.map(
-								(stage) => `{ 
+              .map(
+                (stage) => `{ 
               "target": ${stage.target}, 
               "duration": "${stage.duration}" 
-            }`
-							)
-							.join(', ')}], 
+            }`,
+              )
+              .join(", ")}], 
             "duration": "${executor.duration}" },
             "exec": "${fn}",
         `;
 
-			default:
-				exhaustive(executor);
-		}
-	});
+      default:
+        exhaustive(executor);
+    }
+  });
 
-	if (executors.length === 0) {
-		return '';
-	}
+  if (executors.length === 0) {
+    return "";
+  }
 
-	return `"${fn}": ${executors.join(',\n')},`;
+  return `"${fn}": ${executors.join(",\n")},`;
 }
 
 function emitScenario(scenario: Scenario) {
-	return ` 
+  return ` 
     export function ${sanitizeName(scenario.name)}() {
 			let response = null;
 
-      ${scenario.steps.map(emitStep).join('\n\n')}
+      ${scenario.steps.map(emitStep).join("\n\n")}
     }
   `;
 }
 
 function emitScript(test: Test) {
-	const scenarioOptions = test.scenarios.flatMap(emitExecutors);
+  const scenarioOptions = test.scenarios.flatMap(emitExecutors);
 
-	const scenarios = test.scenarios.map(emitScenario);
+  const scenarios = test.scenarios.map(emitScenario);
 
-	const code = `
+  const code = `
     import http from 'k6/http';
     import { group, check } from 'k6';
 
     export const options = {
       scenarios: { 
-        ${scenarioOptions.join('\n')}
+        ${scenarioOptions.join("\n")}
       },
     };
 
-    ${scenarios.join('\n\n')} 
+    ${scenarios.join("\n\n")} 
   `;
 
-	return prettier.format(code, {
-		parser: 'babel',
-		plugins: [babelParser, estreePlugin]
-	});
+  return prettier.format(code, {
+    parser: "babel",
+    plugins: [babelParser, estreePlugin],
+  });
 }
 
 export { emitScript };

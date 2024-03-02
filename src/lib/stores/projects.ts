@@ -1,6 +1,6 @@
-import { type Writable, writable } from 'svelte/store';
+import { type Writable, writable } from "svelte/store";
 
-import type { Project } from '$lib/backend-client';
+import type { Project } from "$lib/backend-client";
 
 /**
  * A store that contains the list of projects.
