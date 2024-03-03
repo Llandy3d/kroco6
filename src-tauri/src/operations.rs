@@ -1,10 +1,12 @@
-use std::{fs, io};
 use std::path;
+use std::{fs, io};
 
-use crate::models::{Project};
+use crate::models::{Environment, EnvironmentsData, Project};
+use std::collections::BTreeMap;
 
 const PROJECTS_DIR: &str = "projects";
 const DEFAULT_PROJECT_NAME: &str = "default";
+const ENVIRONMENT_FILE: &str = "environments.json";
 
 pub struct LocalProjectManager {
     base_path: path::PathBuf,
@@ -19,7 +21,7 @@ impl LocalProjectManager {
         // Ensure the underlying projects directory exists
         let projects_dir = &self.projects_dir();
         if !projects_dir.exists() {
-            fs::create_dir(&self.projects_dir())?;
+            fs::create_dir(self.projects_dir())?;
         }
 
         // Ensure the default project is created
@@ -38,7 +40,7 @@ impl LocalProjectManager {
         // under the base path
         if !projects_dir.exists() {
             // If it doesn't already exist, create it
-            fs::create_dir(&self.projects_dir())?;
+            fs::create_dir(self.projects_dir())?;
         }
 
         // Compute the path of the project in the "projects" directory
@@ -54,7 +56,10 @@ impl LocalProjectManager {
     pub fn list_projects(&self) -> io::Result<Vec<Project>> {
         let projects_dir = &self.projects_dir();
         if !projects_dir.exists() {
-            return Err(io::Error::new(io::ErrorKind::NotFound, "projects directory not found"))
+            return Err(io::Error::new(
+                io::ErrorKind::NotFound,
+                "projects directory not found",
+            ));
         }
 
         let mut projects = vec![];
@@ -72,5 +77,46 @@ impl LocalProjectManager {
 
     fn projects_dir(&self) -> path::PathBuf {
         path::Path::new(&self.base_path).join(PROJECTS_DIR)
+    }
+}
+
+pub struct EnvironmentManager {
+    file_path: path::PathBuf,
+}
+
+impl EnvironmentManager {
+    pub fn new(storage_path: path::PathBuf) -> Self {
+        let file_path = path::Path::new(&storage_path).join(ENVIRONMENT_FILE);
+        Self { file_path }
+    }
+
+    pub fn initialize(&self) -> io::Result<()> {
+        // if the file doesn't exist create the default environment
+        if !self.file_path.exists() {
+            let file = fs::File::create(&self.file_path)?;
+
+            let default_name = "default";
+            let default_environment =
+                Environment::new(default_name, "default environment", BTreeMap::new());
+
+            let environment_data = EnvironmentsData::new(vec![default_environment], default_name);
+
+            serde_json::to_writer_pretty(file, &environment_data)?;
+        }
+
+        Ok(())
+    }
+
+    pub fn load(&self) -> io::Result<EnvironmentsData> {
+        let file = fs::File::open(&self.file_path)?;
+        let environments_data = serde_json::from_reader(file)?;
+        Ok(environments_data)
+    }
+
+    pub fn save(&self, environments_data: &EnvironmentsData) -> io::Result<()> {
+        let file = fs::File::create(&self.file_path)?;
+        serde_json::to_writer_pretty(file, environments_data)?;
+
+        Ok(())
     }
 }

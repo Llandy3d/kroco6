@@ -1,5 +1,6 @@
+use serde::{Deserialize, Serialize};
+use std::collections::BTreeMap;
 use std::path::PathBuf;
-use serde::Serialize;
 
 // TestKind represents the kind of test we are dealing with
 // (e.g. a block test, a javascript test, etc.)
@@ -27,7 +28,7 @@ enum TestCollection {
     Test(Test),
 
     // A suite of tests
-    Suite(Vec<Test>)
+    Suite(Vec<Test>),
 }
 
 // A Project represents a collection of tests and suites
@@ -43,7 +44,6 @@ pub struct Project {
     // The (optional) description of the content
     // of the Project.
     pub description: Option<String>,
-
     // FIXME @oleiade: eventually, we want environment to be also definable
     // at the project level (and give it precedence) but for the hackathon
     // we start and stick with an app-wide "global" environment.
@@ -61,5 +61,42 @@ impl Project {
 
     pub fn default() -> Self {
         Self::new("default", None)
+    }
+}
+
+// Represents an Environment with its key/value variable pairs
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Environment {
+    name: String,
+    description: String,
+    variables: BTreeMap<String, String>,
+}
+
+impl Environment {
+    pub fn new(name: &str, description: &str, variables: BTreeMap<String, String>) -> Self {
+        Self {
+            name: name.to_string(),
+            description: description.to_string(),
+            variables,
+        }
+    }
+}
+
+// The environment data file, it includes the currently
+// active environment.
+#[derive(Debug, Serialize, Deserialize)]
+pub struct EnvironmentsData {
+    environments: Vec<Environment>,
+
+    // active environment name
+    pub active: String,
+}
+
+impl EnvironmentsData {
+    pub fn new(environments: Vec<Environment>, active: &str) -> Self {
+        Self {
+            environments,
+            active: active.to_string(),
+        }
     }
 }

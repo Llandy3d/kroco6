@@ -1,10 +1,10 @@
 <script lang="ts">
   import { PlusCircle, FlaskConical } from "lucide-svelte";
-  import { Check, ChevronsUpDown } from "lucide-svelte";
+  import { Check, ChevronsUpDown, Container } from "lucide-svelte";
   import { tick } from "svelte";
 
   import { goto } from "$app/navigation";
-  import { createProject } from "$lib/backend-client";
+  import { createProject, loadEnvironments, saveEnvironments } from "$lib/backend-client";
   import * as AlertDialog from "$lib/components/ui/alert-dialog";
   import { Badge } from "$lib/components/ui/badge";
   import * as Command from "$lib/components/ui/command";
@@ -37,6 +37,17 @@
     const createdProject = await createProject(createProjectValue);
     projects.update((p) => [...p, createdProject]);
     createProjectValue = "";
+  }
+
+  // TODO: remove
+  // Example usage of environments, load data from disk and
+  // overwrite it.
+  async function loadEnv() {
+    const envs = await loadEnvironments();
+    envs.active = "Bobby";
+    envs.environments[0].variables["blah"] = "2";
+    console.log(envs);
+    await saveEnvironments(envs);
   }
 </script>
 
@@ -92,6 +103,16 @@
   </Popover.Root>
 
   <Separator />
+
+  <Button variant="ghost" class="my-2" on:click={() => goto("/")}>
+    <FlaskConical class="mr-2 h-4 w-4" /> Go to tests
+  </Button>
+
+  <Separator />
+
+  <Button variant="ghost" class="my-2" on:click={loadEnv}>
+    <Container class="mr-2 h-4 w-4" /> Environments
+  </Button>
 </div>
 
 <AlertDialog.Root bind:open={showCreateDialog}>
