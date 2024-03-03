@@ -46,6 +46,7 @@
 		"blockly": "^10.3.1",
 		"clsx": "^2.1.0",
 		"cmdk-sv": "^0.0.13",
+		"dedent": "^1.5.1",
 		"embla-carousel-svelte": "^8.0.0-rc21",
 		"formsnap": "^0.4.3",
 		"lucide-svelte": "^0.316.0",

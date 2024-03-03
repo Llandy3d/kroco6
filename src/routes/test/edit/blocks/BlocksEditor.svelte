@@ -8,7 +8,7 @@
   import { loadContent, storeContent } from "$lib/files";
   import Library from "../library/Library.svelte";
   import { EMPTY_BLOCK_TEST, type BlockTest } from "$lib/stores/test/types";
-  import { runScriptInCloud } from "$lib/backend-client";
+  import { runScriptInCloud, runScriptLocally } from "$lib/backend-client";
   import { convertToScript } from "$lib/convert";
   import { invoke } from "@tauri-apps/api";
   import TestToolbar from "../TestToolbar.svelte";
@@ -20,7 +20,7 @@
   async function runTestLocally() {
     try {
       const script = await convertToScript($blockTest);
-      const response = await invoke("open_run_window", { script: script });
+      const response = await runScriptLocally(script);
 
       console.log(response);
     } catch (error) {
@@ -68,16 +68,15 @@
 
 <div class="flex flex-auto">
   <Tabs.Root class="flex flex-auto flex-col" bind:value={tab}>
-    <Tabs.List class="flex justify-between rounded-none shadow-md">
-      <div>
-        <Tabs.Trigger value="library">Library</Tabs.Trigger>
-        <Tabs.Trigger value="build">Build</Tabs.Trigger>
-        <Tabs.Trigger value="script">Script</Tabs.Trigger>
-      </div>
-      <div>
-        <TestToolbar runTest={runTestLocally} {runTestInCloud} />
-      </div>
-    </Tabs.List>
+    <TestToolbar runTest={runTestLocally} {runTestInCloud}>
+      <svelte:fragment slot="left">
+        <Tabs.List>
+          <Tabs.Trigger value="library">Library</Tabs.Trigger>
+          <Tabs.Trigger value="build">Build</Tabs.Trigger>
+          <Tabs.Trigger value="script">Script</Tabs.Trigger>
+        </Tabs.List>
+      </svelte:fragment>
+    </TestToolbar>
     <Tabs.Content value="library" class="mt-0 flex-auto">
       <Library />
     </Tabs.Content>

@@ -36,12 +36,16 @@ export async function saveToken(token: string): Promise<void> {
   return await invoke("set_cloud_token", { token });
 }
 
-export async function runScriptInCloud({
+export function runScriptLocally(script: string): Promise<string> {
+  return invoke("open_run_window", { script });
+}
+
+export function runScriptInCloud({
   script,
   projectId,
 }: {
   script: string;
   projectId: string;
 }): Promise<string> {
-  return await invoke("run_script_in_cloud", { script, projectId });
+  return invoke("run_script_in_cloud", { script, projectId });
 }
