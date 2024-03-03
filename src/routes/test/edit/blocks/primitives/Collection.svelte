@@ -58,12 +58,12 @@
       <div class={cn("w-2 bg-white", className)}></div>
       <ul class="separator flex w-6 flex-auto list-none flex-col">
         {#each items as item (item.id)}
-          <li class="relative border-slate-200">
+          <li class="relative z-0 border-slate-200">
             <DropZone {accepts} data={item} on:dropped={handleDropped} />
             <slot {item} />
           </li>
         {/each}
-        <li class="relative min-h-2">
+        <li class="relative z-0 min-h-2">
           <DropZone {accepts} data={null} on:dropped={handleDropped} />
         </li>
       </ul>

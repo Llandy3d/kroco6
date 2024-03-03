@@ -2,7 +2,7 @@
   import * as Tabs from "$lib/components/ui/tabs";
   import type { BlockFile } from "$lib/stores/editor";
   import { onDestroy, onMount } from "svelte";
-  import Canvas from "../Canvas.svelte";
+  import Canvas from "./Canvas.svelte";
   import ScriptPreview from "./ScriptPreview.svelte";
   import { blockTest, loadBlockTest } from "$lib/stores/test";
   import { loadContent, storeContent } from "$lib/files";
