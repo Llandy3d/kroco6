@@ -90,7 +90,7 @@
         {/each}
       </ul>
       <div class="flex gap-2">
-        <Button class="flex-1 gap-2" on:click={handleSyncClick}><Plus /> Add</Button>
+        <Button class="flex-1 gap-2"><Plus /> Add</Button>
       </div>
     </div>
     <div class="flex flex-auto flex-col p-4">

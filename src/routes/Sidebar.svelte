@@ -19,6 +19,8 @@
   let value = "default-project";
   let createProjectValue = "";
 
+  let showCreateDialog = false;
+
   $: selectedValue = $projects.find((f) => f.name === value)?.name ?? "Select a project...";
 
   // We want to refocus the trigger button when the user selects
@@ -38,8 +40,8 @@
   }
 </script>
 
-<div class="h-screen flex-col bg-gray-500 py-4 text-center">
-  <Badge class="block">Projects</Badge>
+<div class="flex h-screen flex-col bg-gray-500 py-4 text-center">
+  <h2>Projects</h2>
 
   <Popover.Root bind:open let:ids>
     <Popover.Trigger asChild let:builder>
@@ -48,13 +50,13 @@
         variant="outline"
         role="combobox"
         aria-expanded={open}
-        class="my-2"
+        class="self-strech m-2 flex justify-between"
       >
         {selectedValue}
         <ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
       </Button>
     </Popover.Trigger>
-    <Popover.Content class="w-[200px] p-0">
+    <Popover.Content class="rounded-none p-0" sameWidth>
       <Command.Root>
         <Command.Input placeholder="Search project..." />
         <Command.Empty>No project found.</Command.Empty>
@@ -64,6 +66,7 @@
               value={project.name}
               onSelect={(currentValue) => {
                 value = currentValue;
+
                 closeAndFocusTrigger(ids.trigger);
               }}
             >
@@ -74,38 +77,40 @@
         </Command.Group>
         <Separator />
         <Command.Group>
-          <AlertDialog.Root>
-            <AlertDialog.Trigger>
-              <Command.Item>
-                <PlusCircle class="mr-1" />
-                Create a new project
-              </Command.Item>
-            </AlertDialog.Trigger>
-
-            <AlertDialog.Content>
-              <AlertDialog.Header>
-                <AlertDialog.Title>Subscription required!</AlertDialog.Title>
-                <AlertDialog.Description>
-                  <div class="flex w-full max-w-sm items-center space-x-2">
-                    <Input type="text" placeholder="project name" bind:value={createProjectValue} />
-                    <Button type="submit" on:click={onCreateProject}>Create</Button>
-                  </div>
-                </AlertDialog.Description>
-              </AlertDialog.Header>
-
-              <AlertDialog.Footer>
-                <AlertDialog.Cancel>Close</AlertDialog.Cancel>
-              </AlertDialog.Footer>
-            </AlertDialog.Content>
-          </AlertDialog.Root>
+          <Command.Item
+            onSelect={() => {
+              showCreateDialog = true;
+              open = false;
+            }}
+          >
+            <PlusCircle class="mr-2" size={16} />
+            Create a new project
+          </Command.Item>
         </Command.Group>
       </Command.Root>
     </Popover.Content>
   </Popover.Root>
 
   <Separator />
-
-  <Button variant="ghost" class="my-2" on:click={() => goto("/")}>
-    <FlaskConical class="mr-2 h-4 w-4" /> Go to tests
-  </Button>
 </div>
+
+<AlertDialog.Root bind:open={showCreateDialog}>
+  <AlertDialog.Content>
+    <AlertDialog.Header>
+      <AlertDialog.Title>Create new project</AlertDialog.Title>
+      <AlertDialog.Description>
+        <Input
+          class="w-full"
+          type="text"
+          placeholder="Project name"
+          bind:value={createProjectValue}
+        />
+      </AlertDialog.Description>
+    </AlertDialog.Header>
+
+    <AlertDialog.Footer>
+      <AlertDialog.Cancel>Close</AlertDialog.Cancel>
+      <Button type="submit" on:click={onCreateProject}>Create</Button>
+    </AlertDialog.Footer>
+  </AlertDialog.Content>
+</AlertDialog.Root>
