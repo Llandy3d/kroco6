@@ -10,6 +10,7 @@
     type InsertBlockEvent,
   } from "./primitives/Collection.svelte";
   import AnyBlock from "./AnyBlock.svelte";
+  import { STEP_COLOR } from "./colors";
 
   export let block: GroupBlock;
 
@@ -33,15 +34,13 @@
   };
 </script>
 
-<Block type="group" handleClass="bg-amber-500" {block}>
-  <Field class="bg-amber-100"
-    >Grouped as <StringInput value={block.name} on:change={handleNameChange} />
-  </Field>
-  <Field class="bg-amber-100">do the following:</Field>
+<Block {block} type="group" connect="both" color={STEP_COLOR}>
+  <Field>Grouped as <StringInput value={block.name} on:change={handleNameChange} /></Field>
+  <Field>do the following:</Field>
   <Collection
-    class="bg-amber-100"
     accepts={STEPS}
     items={$children}
+    color={STEP_COLOR}
     on:append={append}
     on:insert={insert}
     let:item

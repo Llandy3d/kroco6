@@ -6,6 +6,8 @@
   import { reparentBlock, roots, selected } from "$lib/stores/test";
   import AnyBlock from "./AnyBlock.svelte";
   import Toolbox from "./Toolbox.svelte";
+  import Bottom from "./primitives/connections/Bottom.svelte";
+  import Top from "./primitives/connections/Top.svelte";
 
   const handleDrop = ({ detail }: CustomEvent<DroppedEvent<BlockType, {}>>) => {
     const dropped = detail.data.dropped;

@@ -3,11 +3,12 @@
   import Field from "./primitives/Field.svelte";
   import Block from "./primitives/Block.svelte";
   import StringInput from "./inputs/StringInput.svelte";
+  import { STEP_COLOR } from "./colors";
 
   export let block: HttpRequestBlock;
 </script>
 
-<Block type="http-request" handleClass="bg-orange-500" class="bg-orange-200" {block}>
+<Block type="http-request" connect="both" color={STEP_COLOR} {block}>
   <Field>
     {block.name}
   </Field>

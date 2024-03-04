@@ -12,16 +12,16 @@
 <script lang="ts">
   import type { Block as BlockType } from "$lib/stores/test/types";
   import { cn } from "$lib/utils";
+  import Bottom from "./connections/Bottom.svelte";
   import { type DroppedEvent } from "./dnd";
   import DropZone from "./DropZone.svelte";
   import { createEventDispatcher } from "svelte";
+  import { toBlockColorStyle, type BlockColor } from "./types";
 
   export let accepts: string[] | undefined;
   export let items: BlockType[];
 
-  let className = "";
-
-  export { className as class };
+  export let color: BlockColor;
 
   const dispatch = createEventDispatcher<{
     insert: InsertBlockEvent;
@@ -52,11 +52,15 @@
 </script>
 
 <div class="collection-root">
-  <div class={cn("h-2 w-full rounded-br-md  bg-white shadow-md shadow-slate-400", className)}></div>
+  <div class="header h-2 w-full"></div>
   <div class="select-none">
     <div class="flex rounded-l-md">
-      <div class={cn("w-2 bg-white", className)}></div>
-      <ul class="separator flex w-6 flex-auto list-none flex-col">
+      <div class="padding w-2"></div>
+      <ul
+        class="separator relative flex w-6 flex-auto list-none flex-col"
+        style={toBlockColorStyle(color)}
+      >
+        <Bottom collection />
         {#each items as item (item.id)}
           <li class="relative z-0 border-slate-200">
             <DropZone {accepts} data={item} on:dropped={handleDropped} />
@@ -69,16 +73,17 @@
       </ul>
     </div>
   </div>
-  <div
-    class={cn(
-      "collection-footer h-2 w-full rounded-tr-md bg-white shadow-md shadow-slate-400",
-      className,
-    )}
-  ></div>
+  <div class="footer h-2 w-full rounded-tr-md"></div>
 </div>
 
 <style>
-  .collection-root:last-child .collection-footer {
+  .header,
+  .footer,
+  .padding {
+    background-color: var(--block-bg-secondary);
+  }
+
+  .collection-root:last-child .footer {
     border-bottom-right-radius: 0.25rem;
   }
 

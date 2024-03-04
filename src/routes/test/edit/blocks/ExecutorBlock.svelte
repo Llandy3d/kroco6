@@ -7,9 +7,14 @@
   export let block: ExecutorBlock;
 </script>
 
-<Block type="executor" handleClass={"bg-green-500"} {block}>
+<Block
+  {block}
+  type="executor"
+  connect="both"
+  color={{ primary: "rgb(34 197 94)", secondary: "rgb(187 247 208)" }}
+>
   {#if block.executor.type === "constant-vus"}
-    <Field class="bg-green-200"
+    <Field
       ><StringInput size={3} value={block.executor.vus} /> VUs for <StringInput
         size={3}
         value={block.executor.duration}

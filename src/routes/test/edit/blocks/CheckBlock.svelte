@@ -39,8 +39,13 @@
   };
 </script>
 
-<Block handleClass="bg-orange-500" type="check" {block}>
-  <Field class="bg-orange-200">
+<Block
+  type="check"
+  connect="both"
+  {block}
+  color={{ primary: "rgb(249 115 22)", secondary: "rgb(254 215 170)" }}
+>
+  <Field>
     Check that <BlockInset accepts={["http-request"]} owner={block} let:block>
       {#if block !== undefined}
         <AnyBlock {block} />
@@ -50,7 +55,7 @@
   {#each block.checks as check (check.id)}
     <CheckInput {check} on:change={handleCheckChange} on:remove={handleRemoveCheck} />
   {/each}
-  <Field class="bg-orange-200">
+  <Field>
     <button on:click={handleAddCheck}><PlusSquare size={14} /></button>
   </Field>
 </Block>

@@ -4,14 +4,20 @@
   import { draggable, type DragChangeEvent } from "./dnd";
   import { cn } from "$lib/utils";
   import { deleteBlock, selected } from "$lib/stores/test";
+  import Bottom from "./connections/Bottom.svelte";
+  import Top from "./connections/Top.svelte";
+  import { toBlockColorStyle, type BlockColor } from "./types";
 
   export let type: string;
   export let block: Block;
 
+  export let connect: "top" | "bottom" | "both" | "none" = "none";
+
+  export let color: BlockColor;
+
   let dragging = false;
 
   let className = "";
-  let handleClass = "";
 
   const handleDragChange = (ev: CustomEvent<DragChangeEvent>) => {
     dragging = ev.detail.dragging;
@@ -47,9 +53,8 @@
 <div
   tabindex="0"
   id={block.id}
-  use:draggable={{ type, data: block }}
   class={cn(
-    "block-root z-10 flex w-min items-center rounded-r-md outline-2 outline-indigo-500 focus:outline",
+    "block-root z-10 flex w-min flex-col rounded-r-md shadow-md shadow-slate-400 outline-2 outline-indigo-500 focus:outline",
     className,
   )}
   class:dragging
@@ -58,22 +63,29 @@
     : block.parent.type === "toolbox"
       ? "toolbox"
       : block.parent.id}
+  use:draggable={{ type, data: block }}
   on:keypress={handleKeyPress}
   on:dragchange={handleDragChange}
+  style={toBlockColorStyle(color)}
 >
-  <div
-    class={cn(
-      "drag-handle flex cursor-pointer select-none items-center self-stretch bg-indigo-400 p-1 text-white shadow-md shadow-slate-400",
-      handleClass,
-    )}
-    role="presentation"
-    data-drag-handle
-    on:click={handleClick}
-  >
-    <GripVertical size={18} />
-  </div>
-  <div class="block-content flex flex-col">
-    <slot />
+  <div class="flex items-center">
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <div
+      class="drag-handle relative flex cursor-pointer select-none items-center self-stretch p-1 text-white"
+      data-drag-handle
+      on:click={handleClick}
+    >
+      <GripVertical size={18} />
+    </div>
+    <div class="block-content relative flex flex-col">
+      {#if connect === "top" || connect === "both"}
+        <Top />
+      {/if}
+      <slot />
+      {#if connect === "bottom" || connect === "both"}
+        <Bottom />
+      {/if}
+    </div>
   </div>
 </div>
 
@@ -84,6 +96,10 @@
 
   .block-content > :global(*:last-child) {
     border-bottom-right-radius: 0.25rem;
+  }
+
+  .drag-handle {
+    background-color: var(--block-bg-primary);
   }
 
   .dragging {

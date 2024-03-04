@@ -10,6 +10,7 @@
   import { appendBlock, blocks, insertBlock, updateBlock } from "$lib/stores/test";
   import AnyBlock from "./AnyBlock.svelte";
   import StringInput, { type StringInputChangeEvent } from "./inputs/StringInput.svelte";
+  import { STEP_COLOR } from "./colors";
 
   export let block: ScenarioBlock;
 
@@ -38,22 +39,33 @@
   };
 </script>
 
-<Block type="scenario" {block}>
-  <Field class="bg-white"
+<Block type="scenario" color={{ primary: "rgb(129 140 248)", secondary: "white" }} {block}>
+  <Field
     >Run <StringInput placeholder="Scenario name" value={block.name} on:change={handleNameChange} />
     with
   </Field>
   <Collection
     accepts={["executor"]}
     items={$executors}
+    color={{ primary: "rgb(34 197 94)", secondary: "rgb(187 247 208)" }}
     on:append={append}
     on:insert={insert}
     let:item
   >
     <AnyBlock block={item} />
   </Collection>
-  <Field class="bg-white">and do the following:</Field>
-  <Collection accepts={STEPS} items={$steps} on:append={append} on:insert={insert} let:item>
+  <Field>and do the following:</Field>
+  <Collection
+    accepts={STEPS}
+    items={$steps}
+    color={STEP_COLOR}
+    on:append={append}
+    on:insert={insert}
+    let:item
+  >
     <AnyBlock block={item} />
   </Collection>
 </Block>
+
+<style>
+</style>
