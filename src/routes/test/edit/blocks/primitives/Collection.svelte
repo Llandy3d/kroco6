@@ -11,15 +11,15 @@
 
 <script lang="ts">
   import type { Block as BlockType } from "$lib/stores/test/types";
-  import { cn } from "$lib/utils";
   import Bottom from "./connections/Bottom.svelte";
   import { type DroppedEvent } from "./dnd";
-  import DropZone from "./DropZone.svelte";
   import { createEventDispatcher } from "svelte";
   import { toBlockColorStyle, type BlockColor } from "./types";
 
-  export let accepts: string[] | undefined;
-  export let items: BlockType[];
+  export let accepts: string[];
+
+  export let owner: BlockType | null;
+  export let child: BlockType | null;
 
   export let color: BlockColor;
 
@@ -28,8 +28,8 @@
     append: AppendBlockEvent;
   }>();
 
-  const handleDropped = (ev: CustomEvent<DroppedEvent<BlockType, BlockType | null>>) => {
-    const { dropped, target } = ev.detail.data;
+  const handleDropped = (ev: DroppedEvent<BlockType, BlockType | null>) => {
+    const { dropped, target } = ev.data;
 
     // If we are dropping an item before itself, then we don't need to do anything.
     if (dropped.id === target?.id) {
@@ -56,21 +56,13 @@
   <div class="select-none">
     <div class="flex rounded-l-md">
       <div class="padding w-2"></div>
-      <ul
+      <div
         class="separator relative flex w-6 flex-auto list-none flex-col"
         style={toBlockColorStyle(color)}
       >
-        <Bottom collection />
-        {#each items as item (item.id)}
-          <li class="relative z-0 border-slate-200">
-            <DropZone {accepts} data={item} on:dropped={handleDropped} />
-            <slot {item} />
-          </li>
-        {/each}
-        <li class="relative z-0 min-h-4">
-          <DropZone {accepts} data={null} on:dropped={handleDropped} />
-        </li>
-      </ul>
+        <Bottom {accepts} data={owner} connected={child !== null} onDrop={handleDropped} />
+        <slot item={child} />
+      </div>
     </div>
   </div>
   <div class="footer h-2 w-full rounded-tr-md"></div>

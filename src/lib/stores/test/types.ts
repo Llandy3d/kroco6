@@ -52,6 +52,7 @@ interface HttpRequestBlock extends BlockBase {
   parameters: {
     [name: string]: HttpRequestParameter;
   };
+  next: StepBlock | null;
 }
 
 interface ConstantVusExecutor {
@@ -70,6 +71,7 @@ interface ExecutorBlock extends BlockBase {
 interface GroupBlock extends BlockBase {
   type: "group";
   name: string;
+  next: StepBlock | null;
 }
 
 interface CheckBase {
@@ -91,6 +93,7 @@ type CheckExpression = StatusCheck | BodyContainsCheck;
 interface CheckBlock extends BlockBase {
   type: "check";
   checks: CheckExpression[];
+  next: StepBlock | null;
 }
 
 type Block = ScenarioBlock | GroupBlock | HttpRequestBlock | ExecutorBlock | CheckBlock;

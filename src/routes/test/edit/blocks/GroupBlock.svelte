@@ -14,10 +14,6 @@
 
   export let block: GroupBlock;
 
-  const children = derived(blocks, ($blocks) => {
-    return $blocks.filter((b) => b.parent.type === "collection" && b.parent.id === block.id);
-  });
-
   const append = ({ detail }: CustomEvent<AppendBlockEvent>) => {
     appendBlock(block, detail.target);
   };
@@ -38,13 +34,16 @@
   <Field>Grouped as <StringInput value={block.name} on:change={handleNameChange} /></Field>
   <Field>do the following:</Field>
   <Collection
+    owner={block}
+    child={null}
     accepts={STEPS}
-    items={$children}
     color={STEP_COLOR}
     on:append={append}
     on:insert={insert}
     let:item
   >
-    <AnyBlock block={item} />
+    {#if item !== null}
+      <AnyBlock block={item} />
+    {/if}
   </Collection>
 </Block>

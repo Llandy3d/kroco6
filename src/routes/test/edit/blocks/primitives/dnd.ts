@@ -119,6 +119,7 @@ interface DragChangeEvent {
 }
 
 interface AcceptingEvent {
+  source: DragSource<any> | null;
   accepting: boolean;
 }
 
@@ -239,6 +240,7 @@ function dropzone<TargetData>(
     node.dispatchEvent(
       new CustomEvent<AcceptingEvent>("accepting", {
         detail: {
+          source: state,
           accepting: state !== null,
         },
       }),

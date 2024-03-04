@@ -4,6 +4,7 @@
   import Block from "./primitives/Block.svelte";
   import StringInput from "./inputs/StringInput.svelte";
   import { STEP_COLOR } from "./colors";
+  import AnyBlock from "./AnyBlock.svelte";
 
   export let block: HttpRequestBlock;
 </script>
@@ -19,4 +20,7 @@
       </Field>
     {/if}
   {/each}
+  {#if block.next !== null}
+    <AnyBlock slot="next" block={block.next} />
+  {/if}
 </Block>

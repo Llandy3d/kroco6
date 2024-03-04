@@ -1,7 +1,7 @@
-<script lang="ts">
+<script lang="ts" generics="TBlock extends Block">
   import type { Block } from "$lib/stores/test/types";
-  import { GripVertical, Key } from "lucide-svelte";
-  import { draggable, type DragChangeEvent } from "./dnd";
+  import { GripVertical } from "lucide-svelte";
+  import { draggable, type DragChangeEvent, type DroppedEvent } from "./dnd";
   import { cn } from "$lib/utils";
   import { deleteBlock, selected } from "$lib/stores/test";
   import Bottom from "./connections/Bottom.svelte";
@@ -9,7 +9,7 @@
   import { toBlockColorStyle, type BlockColor } from "./types";
 
   export let type: string;
-  export let block: Block;
+  export let block: TBlock;
 
   export let connect: "top" | "bottom" | "both" | "none" = "none";
 
@@ -19,11 +19,11 @@
 
   let className = "";
 
-  const handleDragChange = (ev: CustomEvent<DragChangeEvent>) => {
+  function handleDragChange(ev: CustomEvent<DragChangeEvent>) {
     dragging = ev.detail.dragging;
-  };
+  }
 
-  const handleClick = (ev: MouseEvent) => {
+  function handleClick(ev: MouseEvent) {
     if (ev.target instanceof HTMLElement) {
       ev.stopPropagation();
       ev.preventDefault();
@@ -32,9 +32,9 @@
 
       selected.set(block);
     }
-  };
+  }
 
-  const handleKeyPress = (ev: KeyboardEvent) => {
+  function handleKeyPress(ev: KeyboardEvent) {
     if (ev.key === "Backspace") {
       ev.preventDefault();
       ev.stopPropagation();
@@ -43,7 +43,9 @@
 
       $selected = null;
     }
-  };
+  }
+
+  function handleDrop(ev: DroppedEvent<Block, Block>) {}
 
   export { className as class, handleClass };
 </script>
@@ -68,7 +70,7 @@
   on:dragchange={handleDragChange}
   style={toBlockColorStyle(color)}
 >
-  <div class="flex items-center">
+  <div class="relative flex items-center">
     <!-- svelte-ignore a11y-click-events-have-key-events -->
     <div
       class="drag-handle relative flex cursor-pointer select-none items-center self-stretch p-1 text-white shadow-md shadow-slate-400"
@@ -82,11 +84,14 @@
         <Top />
       {/if}
       <slot />
-      {#if connect === "bottom" || connect === "both"}
-        <Bottom />
-      {/if}
     </div>
   </div>
+  {#if connect === "bottom" || connect === "both"}
+    <Bottom data={block} onDrop={handleDrop} />
+  {/if}
+</div>
+<div>
+  <slot name="next" />
 </div>
 
 <style>

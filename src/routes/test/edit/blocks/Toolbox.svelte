@@ -39,6 +39,7 @@
           type: "group",
           name: "",
           parent: { type: "toolbox" },
+          next: null,
         },
         {
           id: "check-template",
@@ -51,6 +52,7 @@
             },
           ],
           parent: { type: "toolbox" },
+          next: null,
         },
       ],
     },
@@ -73,6 +75,7 @@
           name: methods.get.summary || `GET ${path}`,
           parameters: {},
           parent: { type: "toolbox" },
+          next: null,
         },
         methods.post && {
           type: "http-request",
@@ -82,6 +85,7 @@
           name: methods.post.summary || `POST ${path}`,
           parameters: {},
           parent: { type: "toolbox" },
+          next: null,
         },
       ];
 
