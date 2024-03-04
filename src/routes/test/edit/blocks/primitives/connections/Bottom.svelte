@@ -21,6 +21,7 @@
   .bottom {
     height: 4px;
     background-color: var(--block-bg-primary);
+    border-bottom-right-radius: 4px;
   }
 
   .collection svg {

@@ -22,6 +22,7 @@
   .top > .right-fill {
     flex: 1 1 auto;
     background: var(--block-bg-primary);
+    border-top-right-radius: 4px;
   }
 
   .top > svg {

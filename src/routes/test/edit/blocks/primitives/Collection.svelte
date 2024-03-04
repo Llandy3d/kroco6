@@ -67,7 +67,7 @@
             <slot {item} />
           </li>
         {/each}
-        <li class="relative z-0 min-h-2">
+        <li class="relative z-0 min-h-4">
           <DropZone {accepts} data={null} on:dropped={handleDropped} />
         </li>
       </ul>

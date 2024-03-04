@@ -54,7 +54,7 @@
   tabindex="0"
   id={block.id}
   class={cn(
-    "block-root z-10 flex w-min flex-col rounded-r-md shadow-md shadow-slate-400 outline-2 outline-indigo-500 focus:outline",
+    "block-root z-10 flex w-min flex-col rounded-r-md outline-2 outline-indigo-500 focus:outline",
     className,
   )}
   class:dragging
@@ -71,7 +71,7 @@
   <div class="flex items-center">
     <!-- svelte-ignore a11y-click-events-have-key-events -->
     <div
-      class="drag-handle relative flex cursor-pointer select-none items-center self-stretch p-1 text-white"
+      class="drag-handle relative flex cursor-pointer select-none items-center self-stretch p-1 text-white shadow-md shadow-slate-400"
       data-drag-handle
       on:click={handleClick}
     >
