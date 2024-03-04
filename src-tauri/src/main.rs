@@ -6,10 +6,12 @@ mod operations;
 
 use std::fs;
 use std::io::{Read, Write};
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::process::{Command, Stdio};
 use std::sync::Mutex;
 use tauri::{Window, Manager};
+
+use crate::operations::ProjectManager;
 
 fn main() {
     let application_state = ApplicationState::default();
@@ -37,6 +39,7 @@ fn main() {
             run_script,
             run_script_in_cloud,
             list_projects,
+            get_project,
             create_project,
             set_cloud_token,
             get_cloud_token,
@@ -108,6 +111,17 @@ async fn create_project(
     state
         .project_manager
         .create_project(models::Project::new(name, description))
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn get_project(
+    state: tauri::State<'_, ApplicationState>,
+    name: &str,
+) -> Result<models::Project, String> {
+    state
+        .project_manager
+        .get_project(name)
         .map_err(|e| e.to_string())
 }
 
@@ -221,7 +235,7 @@ async fn run_script(state: tauri::State<'_, ApplicationState>) -> Result<String,
 // and life cycle.
 struct ApplicationState {
     // The path where the application stores its data
-    pub storage_path: PathBuf,
+    // pub storage_path: PathBuf,
 
     // The project manager used to interact with local projects
     // exposing operations such as listing, creating, deleting, etc.
@@ -248,7 +262,7 @@ impl ApplicationState {
         }
 
         Self {
-            storage_path: storage_path.clone(),
+            // storage_path: storage_path.clone(),
             project_manager: operations::LocalProjectManager::new(storage_path.clone()),
             environment_manager: operations::EnvironmentManager::new(storage_path.clone()),
             script: Mutex::new(String::new()),
