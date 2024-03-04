@@ -1,5 +1,8 @@
 import dedent from "dedent";
 
+
+// Auhtentication/Authorization
+
 export const BASIC_AUTHENTICATION = dedent`
 import encoding from 'k6/encoding'
 import http from 'k6/http'
@@ -80,6 +83,8 @@ export default function () {
   sleep(1)
 }
 `;
+
+// API CRUD operations
 
 export const CORE_K6_API = dedent`
 import http from 'k6/http'
@@ -204,6 +209,8 @@ export default (authToken) => {
 }
 `;
 
+// Cookies
+
 export const COOKIES_HEADER = dedent`
 import http from 'k6/http'
 import { check } from 'k6'
@@ -290,6 +297,8 @@ export default function () {
 }
 `;
 
+// Correlation
+
 export const EXTRACT_JSON = dedent`
 import http from 'k6/http'
 import { check } from 'k6'
@@ -312,17 +321,3 @@ export default function () {
   // Now we could use the "slide1" variable in subsequent requests...
 }
 `;
-
-export const SCRIPT_MAP: Record<string, string> = {
-    // Auhtentication/Authorization
-    "BASIC_AUTHENTICATION": BASIC_AUTHENTICATION,
-    "DIGEST_AUTHENTICATION": DIGEST_AUTHENTICATION,
-    // API CRUD operations
-    "CORE_K6_API": CORE_K6_API,
-    // Cookies
-    "COOKIES_HEADER": COOKIES_HEADER,
-    "COOKIES_LOG_RESPONSE": COOKIES_LOG_RESPONSE,
-    "COOKIES_SET_JAR": COOKIES_SET_JAR,
-    // Correlation
-    "EXTRACT_JSON": EXTRACT_JSON,
-};
