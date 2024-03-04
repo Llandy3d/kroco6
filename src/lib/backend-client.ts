@@ -5,6 +5,18 @@ export interface Project {
   description?: string;
 }
 
+export interface Environment {
+  name: string;
+  description?: string;
+  variables: Record<string, string>;
+}
+
+export interface EnvironmentsData {
+  active: string;
+  environments: Array<Environment>;
+}
+
+
 /**
  * List all projects
  *
@@ -48,4 +60,14 @@ export function runScriptInCloud({
   projectId: string;
 }): Promise<string> {
   return invoke("run_script_in_cloud", { script, projectId });
+}
+
+// load environments from disk
+export async function loadEnvironments(): Promise<EnvironmentsData> {
+  return await invoke("load_environments", {});
+}
+
+// save environments to disk
+export async function saveEnvironments(environmentsData: EnvironmentsData): Promise<void> {
+  return await invoke("save_environments", { environmentsData });
 }

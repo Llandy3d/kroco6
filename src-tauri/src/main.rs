@@ -20,6 +20,13 @@ fn main() {
         .initialize()
         .expect("Failed to initialize application state");
 
+    // Initialize the application state's EnvironmentManager instance
+    // to ensure that the underlying environment file exists
+    application_state
+        .environment_manager
+        .initialize()
+        .expect("Failed to initialize application state");
+
     tauri::Builder::default()
         .manage(application_state)
         .invoke_handler(tauri::generate_handler![
@@ -30,6 +37,8 @@ fn main() {
             create_project,
             set_cloud_token,
             get_cloud_token,
+            load_environments,
+            save_environments,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -78,6 +87,27 @@ async fn create_project(
     state
         .project_manager
         .create_project(models::Project::new(name, description))
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn load_environments(
+    state: tauri::State<'_, ApplicationState>,
+) -> Result<models::EnvironmentsData, String> {
+    state
+        .environment_manager
+        .load()
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn save_environments(
+    state: tauri::State<'_, ApplicationState>,
+    environments_data: models::EnvironmentsData,
+) -> Result<(), String> {
+    state
+        .environment_manager
+        .save(&environments_data)
         .map_err(|e| e.to_string())
 }
 
@@ -144,6 +174,9 @@ struct ApplicationState {
     // exposing operations such as listing, creating, deleting, etc.
     pub project_manager: operations::LocalProjectManager,
 
+    // The environment manager used to interact with environments
+    pub environment_manager: operations::EnvironmentManager,
+
     // Legacy: the script to run
     script: Mutex<String>,
 }
@@ -163,7 +196,8 @@ impl ApplicationState {
 
         Self {
             storage_path: storage_path.clone(),
-            project_manager: operations::LocalProjectManager::new(storage_path),
+            project_manager: operations::LocalProjectManager::new(storage_path.clone()),
+            environment_manager: operations::EnvironmentManager::new(storage_path.clone()),
             script: Mutex::new(String::new()),
         }
     }
