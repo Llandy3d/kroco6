@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
-use std::{fs, io, path};
+use std::{fs, io};
 
 use crate::models::{Environment, EnvironmentsData, Project, Test, TestKind};
 
@@ -49,11 +49,11 @@ trait ProjectManager {
 }
 
 pub struct LocalProjectManager {
-    base_path: path::PathBuf,
+    base_path: PathBuf,
 }
 
 impl LocalProjectManager {
-    pub fn new(base_path: path::PathBuf) -> Self {
+    pub fn new(base_path: PathBuf) -> Self {
         Self { base_path }
     }
 
@@ -251,18 +251,18 @@ impl LocalProjectManager {
         })
     }
 
-    fn projects_dir(&self) -> path::PathBuf {
-        path::Path::new(&self.base_path).join(PROJECTS_DIR)
+    fn projects_dir(&self) -> PathBuf {
+        Path::new(&self.base_path).join(PROJECTS_DIR)
     }
 }
 
 pub struct EnvironmentManager {
-    file_path: path::PathBuf,
+    file_path: PathBuf,
 }
 
 impl EnvironmentManager {
-    pub fn new(storage_path: path::PathBuf) -> Self {
-        let file_path = path::Path::new(&storage_path).join(ENVIRONMENT_FILE);
+    pub fn new(storage_path: PathBuf) -> Self {
+        let file_path = Path::new(&storage_path).join(ENVIRONMENT_FILE);
         Self { file_path }
     }
 
