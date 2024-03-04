@@ -16,7 +16,7 @@ pub enum TestKind {
 impl Display for TestKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let str = match self {
-            TestKind::Blocks => "blocks".to_string(),
+            TestKind::Blocks => "blocks6".to_string(),
             TestKind::OpenAPI => "openapi".to_string(),
             TestKind::Javascript => "js".to_string(),
         };
@@ -29,7 +29,7 @@ impl FromStr for TestKind {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "blocks" => Ok(TestKind::Blocks),
+            "blocks6" => Ok(TestKind::Blocks),
             "openapi" => Ok(TestKind::OpenAPI),
             "js" => Ok(TestKind::Javascript),
             _ => Err(format!("{} is not a valid TestKind", s)),
