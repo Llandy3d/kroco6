@@ -1,7 +1,6 @@
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 use std::fmt::Display;
-use std::path::PathBuf;
 use std::str::FromStr;
 
 // TestKind represents the kind of test we are dealing with
@@ -72,8 +71,10 @@ impl Test {
 // A Collection represents either a single test, or
 // a suite of tests (many tests meant to be ran sequentially
 // or in parallel).
+// FIXME @oleiade: put this to use and drop the dead_code allowance
+#[allow(dead_code)]
 #[derive(Clone, Debug, Serialize)]
-enum TestCollection {
+pub enum TestCollection {
     // A single test
     Test(Test),
 

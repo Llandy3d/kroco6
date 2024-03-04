@@ -9,7 +9,7 @@ const PROJECTS_DIR: &str = "projects";
 const DEFAULT_PROJECT_NAME: &str = "default";
 const ENVIRONMENT_FILE: &str = "environments.json";
 
-trait ProjectManager {
+pub trait ProjectManager {
     // Initialize the project manager, ensuring that the underlying
     // projects storage is set up correctly.
     fn initialize(&self) -> io::Result<()>;
@@ -57,7 +57,14 @@ impl LocalProjectManager {
         Self { base_path }
     }
 
-    pub fn initialize(&self) -> io::Result<()> {
+    // Returns the path of the projects directory
+    fn projects_dir(&self) -> PathBuf {
+        Path::new(&self.base_path).join(PROJECTS_DIR)
+    }
+}
+
+impl ProjectManager for LocalProjectManager {
+    fn initialize(&self) -> io::Result<()> {
         // Ensure the underlying projects directory exists
         let projects_dir = &self.projects_dir();
         if !projects_dir.exists() {
@@ -72,38 +79,8 @@ impl LocalProjectManager {
         Ok(())
     }
 
-    // Create a new local project
-    pub fn create_project(&self, project: Project) -> io::Result<Project> {
-        let projects_dir = &self.projects_dir();
-
-        // We store projects in a directory called "projects"
-        // under the base path
-        if !projects_dir.exists() {
-            // If it doesn't already exist, create it
-            fs::create_dir(projects_dir)?;
-        }
-
-        // Compute the path of the project in the "projects" directory
-        let project_path = projects_dir.join(&project.name);
-
-        // Create the underlying directory for the project
-        fs::create_dir(project_path)?;
-
-        Ok(project.clone())
-    }
-
-    // Get a project by name
-    pub fn get_project(&self, name: &str) -> io::Result<Project> {
-        let project_path = self.projects_dir().join(name);
-        if !project_path.exists() {
-            return Err(io::Error::new(io::ErrorKind::NotFound, "project not found"));
-        }
-
-        Ok(Project::new(name, None))
-    }
-
     // List local projects
-    pub fn list_projects(&self) -> io::Result<Vec<Project>> {
+    fn list_projects(&self) -> io::Result<Vec<Project>> {
         let projects_dir = &self.projects_dir();
         if !projects_dir.exists() {
             return Err(io::Error::new(
@@ -131,7 +108,37 @@ impl LocalProjectManager {
         Ok(projects)
     }
 
-    pub fn list_tests(&self, project_name: &str) -> io::Result<Vec<Test>> {
+    // Get a project by name
+    fn get_project(&self, name: &str) -> io::Result<Project> {
+        let project_path = self.projects_dir().join(name);
+        if !project_path.exists() {
+            return Err(io::Error::new(io::ErrorKind::NotFound, "project not found"));
+        }
+
+        Ok(Project::new(name, None))
+    }
+
+    // Create a new local project
+    fn create_project(&self, project: Project) -> io::Result<Project> {
+        let projects_dir = &self.projects_dir();
+
+        // We store projects in a directory called "projects"
+        // under the base path
+        if !projects_dir.exists() {
+            // If it doesn't already exist, create it
+            fs::create_dir(projects_dir)?;
+        }
+
+        // Compute the path of the project in the "projects" directory
+        let project_path = projects_dir.join(&project.name);
+
+        // Create the underlying directory for the project
+        fs::create_dir(project_path)?;
+
+        Ok(project.clone())
+    }
+
+    fn list_tests(&self, project_name: &str) -> io::Result<Vec<Test>> {
         let project_path = self.projects_dir().join(project_name);
         if !project_path.exists() {
             return Err(io::Error::new(io::ErrorKind::NotFound, "project not found"));
@@ -170,13 +177,14 @@ impl LocalProjectManager {
                 // Read the content of the file
                 let content = fs::read_to_string(&path)?;
 
-                let test = Test {
-                    name,
-                    kind: TestKind::from_str(kind).map_err(|_| {
+                let test = Test::new(
+                    &name,
+                    TestKind::from_str(kind).map_err(|_| {
                         io::Error::new(io::ErrorKind::InvalidData, "invalid test kind")
                     })?,
-                    content,
-                };
+                    &content,
+                );
+
                 tests.push(test);
             }
         }
@@ -184,7 +192,7 @@ impl LocalProjectManager {
         Ok(tests)
     }
 
-    pub fn get_test(&self, project_name: &str, test_name: &str) -> io::Result<Test> {
+    fn get_test(&self, project_name: &str, test_name: &str) -> io::Result<Test> {
         let project_path = self.projects_dir().join(project_name);
         if !project_path.exists() {
             return Err(io::Error::new(io::ErrorKind::NotFound, "project not found"));
@@ -206,19 +214,21 @@ impl LocalProjectManager {
 
                 let content = fs::read_to_string(&test_path)?;
 
-                Ok(Test {
-                    name: test_name.to_string(),
-                    kind: TestKind::from_str(kind).map_err(|_| {
+                let test = Test::new(
+                    test_name,
+                    TestKind::from_str(kind).map_err(|_| {
                         io::Error::new(io::ErrorKind::InvalidData, "invalid test kind")
                     })?,
-                    content,
-                })
+                    &content,
+                );
+
+                Ok(test)
             }
             None => Err(io::Error::new(io::ErrorKind::NotFound, "test not found")),
         }
     }
 
-    pub fn create_test(&self, project_name: &str, test: Test) -> io::Result<Test> {
+    fn create_test(&self, project_name: &str, test: Test) -> io::Result<Test> {
         let project_path = self.projects_dir().join(project_name);
         if !project_path.exists() {
             return Err(io::Error::new(io::ErrorKind::NotFound, "project not found"));
@@ -241,18 +251,9 @@ impl LocalProjectManager {
             ));
         }
 
-        println!("Creating test at {:?}", test_path);
         fs::write(&test_path, &test.content)?;
 
-        Ok(Test {
-            name: test.name,
-            kind: test.kind,
-            content: test.content,
-        })
-    }
-
-    fn projects_dir(&self) -> PathBuf {
-        Path::new(&self.base_path).join(PROJECTS_DIR)
+        Ok(Test::new(&test.name, test.kind, &test.content))
     }
 }
 
