@@ -49,7 +49,7 @@
   id={block.id}
   use:draggable={{ type, data: block }}
   class={cn(
-    "block-root flex w-min items-center rounded-r-md outline-2 outline-indigo-500 focus:outline",
+    "block-root z-10 flex w-min items-center rounded-r-md outline-2 outline-indigo-500 focus:outline",
     className,
   )}
   class:dragging

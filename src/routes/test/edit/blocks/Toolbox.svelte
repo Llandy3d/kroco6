@@ -129,7 +129,7 @@
   }
 </script>
 
-<div class="toolbox flex flex-col" use:dropmask>
+<div class="toolbox absolute bottom-0 top-0 flex flex-col" use:dropmask>
   <div class="m-4 mr-6 flex flex-auto list-none flex-col rounded-md bg-slate-200 p-0 shadow-md">
     {#each CATEGORIES as category (category.id)}
       <h2 class="p-2 font-bold">{category.name}</h2>
