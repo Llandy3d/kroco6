@@ -80,7 +80,7 @@ impl LocalProjectManager {
         // under the base path
         if !projects_dir.exists() {
             // If it doesn't already exist, create it
-            fs::create_dir(self.projects_dir())?;
+            fs::create_dir(projects_dir)?;
         }
 
         // Compute the path of the project in the "projects" directory
