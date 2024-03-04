@@ -117,8 +117,14 @@ impl LocalProjectManager {
             let entry = entry?;
             let path = entry.path();
             if path.is_dir() {
-                let project = Project::new(path.file_name().unwrap().to_str().unwrap(), None);
-                projects.push(project);
+                let file_name = path
+                    .file_name()
+                    .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidData, "missing file name"))?
+                    .to_str()
+                    .ok_or_else(|| {
+                        io::Error::new(io::ErrorKind::InvalidData, "invalid UTF-8 in file name")
+                    })?;
+                projects.push(Project::new(file_name, None));
             }
         }
 
