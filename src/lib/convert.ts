@@ -1,41 +1,35 @@
 import { exhaustive } from "./utils/typescript";
-import type {
-  ScenarioBlock,
-  Block,
-  ExecutorBlock,
-  StepBlock,
-  HttpRequestBlock,
-  BlockTest,
+import {
+  type Block,
+  type StepBlock,
+  type HttpRequestBlock,
+  type BlockTest,
+  isScenarioBlock,
+  isStepBlock,
+  type GroupBlock,
+  isHttpRequestBlock,
+  type CheckBlock,
 } from "./stores/test/types";
-import type { Executor, HttpRequestStep, Step, Test } from "./types";
+import type { GroupStep, HttpRequestStep, Step, Test } from "./types";
 import { emitScript } from "./codegen";
 
-function isExecutorBlock(block: Block): block is ExecutorBlock {
-  return block.type === "executor";
+interface BlockLookup {
+  [id: string]: {
+    next?: Block | undefined;
+    collections: {
+      [name: string]: Block;
+    };
+  };
 }
 
-function isScenarioBlock(block: Block): block is ScenarioBlock {
-  return block.type === "scenario";
-}
+function* enumerate(start: Block | undefined, lookup: BlockLookup): Generator<Block> {
+  let current = start;
 
-function isStepBlock(block: Block): block is StepBlock {
-  return block.type === "http-request" || block.type === "group" || block.type === "check";
-}
+  while (current !== undefined) {
+    yield current;
 
-function byParentId<T extends Block>(id: string) {
-  return (value: T) => value.parent.type === "collection" && value.parent.id === id;
-}
-
-function toExecutor(block: ExecutorBlock): Executor {
-  return block.executor;
-}
-
-function required<T>(value: T | undefined): T {
-  if (value === undefined) {
-    throw new Error("Value is required");
+    current = lookup[current.id]?.next;
   }
-
-  return value;
 }
 
 function toHttpRequestStep(block: HttpRequestBlock): HttpRequestStep {
@@ -47,62 +41,104 @@ function toHttpRequestStep(block: HttpRequestBlock): HttpRequestStep {
   };
 }
 
-function blocksToTest(blocks: Block[]): Test {
-  const scenarios = blocks.filter(isScenarioBlock);
-  const steps = blocks.filter(isStepBlock);
-  const executors = blocks.filter(isExecutorBlock);
+function toGroupStep(lookup: BlockLookup, block: GroupBlock): GroupStep {
+  const firstStep = lookup[block.id]?.collections["steps"];
 
-  function toStep(block: StepBlock): Step {
-    switch (block.type) {
-      case "check":
-        return {
-          type: "check",
-          target: toHttpRequestStep(
-            required(
-              steps.find((step) => step.parent.type === "immediate" && step.parent.id === block.id),
-            ) as HttpRequestBlock,
-          ),
-          checks: block.checks.map((check) => {
-            switch (check.type) {
-              case "has-status":
-                return {
-                  type: "has-status",
-                  status: check.status,
-                };
+  return {
+    type: "group",
+    name: block.name,
+    steps: [...enumerate(firstStep, lookup)]
+      .filter(isStepBlock)
+      .map((step) => toStep(lookup, step)),
+  };
+}
 
-              case "body-contains":
-                return {
-                  type: "body-contains",
-                  value: check.value,
-                };
+function toCheckStep(lookup: BlockLookup, block: CheckBlock): Step {
+  const target = lookup[block.id]?.collections["target"];
 
-              default:
-                return exhaustive(check);
-            }
-          }),
-        };
-
-      case "http-request":
-        return toHttpRequestStep(block);
-
-      case "group":
-        return {
-          type: "group",
-          name: block.name,
-          steps: steps.filter(byParentId(block.id)).map(toStep),
-        };
-
-      default:
-        return exhaustive(block);
-    }
+  if (!isHttpRequestBlock(target)) {
+    throw new Error("Expected target to be an http request.");
   }
 
   return {
+    type: "check",
+    target: toHttpRequestStep(target),
+    checks: block.checks.map((check) => {
+      switch (check.type) {
+        case "has-status":
+          return {
+            type: "has-status",
+            status: check.status,
+          };
+
+        case "body-contains":
+          return {
+            type: "body-contains",
+            value: check.value,
+          };
+
+        default:
+          return exhaustive(check);
+      }
+    }),
+  };
+}
+
+function toStep(lookup: BlockLookup, block: StepBlock): Step {
+  switch (block.type) {
+    case "check":
+      return toCheckStep(lookup, block);
+
+    case "http-request":
+      return toHttpRequestStep(block);
+
+    case "group":
+      return toGroupStep(lookup, block);
+
+    default:
+      return exhaustive(block);
+  }
+}
+
+function blocksToTest(blocks: Block[]): Test {
+  const lookup = blocks.reduce<BlockLookup>((acc, block) => {
+    acc[block.id] = acc[block.id] ?? { collections: {} };
+
+    if (block.parent.type === "collection") {
+      const parent = acc[block.parent.ownerId] ?? { collections: {} };
+
+      parent.collections[block.parent.name] = block;
+
+      acc[block.parent.ownerId] = parent;
+
+      return acc;
+    }
+
+    if (block.parent.type === "block") {
+      const parent = acc[block.parent.id] ?? { collections: {} };
+
+      parent.next = block;
+
+      acc[block.parent.id] = parent;
+
+      return acc;
+    }
+
+    return acc;
+  }, {});
+
+  const scenarios = blocks.filter(isScenarioBlock);
+
+  return {
     scenarios: scenarios.map((scenario) => {
+      const firstStep = lookup[scenario.id]?.collections["steps"];
+
       return {
         name: scenario.name,
-        steps: steps.filter(byParentId(scenario.id)).map(toStep),
-        executors: executors.filter(byParentId(scenario.id)).map(toExecutor),
+        executors: [],
+        steps: [...enumerate(firstStep, lookup)]
+          .filter(isStepBlock)
+          .map((step) => toStep(lookup, step)),
       };
     }),
   };

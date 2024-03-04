@@ -1,34 +1,32 @@
 <script lang="ts">
-  import type { Block as BlockType } from "$lib/stores/test/types";
+  import { isBlock, type Block, type Parent } from "$lib/stores/test/types";
 
   import Root from "./Root.svelte";
   import { dropzone, type DroppedEvent } from "./primitives/dnd";
   import { reparentBlock, roots, selected } from "$lib/stores/test";
-  import AnyBlock from "./AnyBlock.svelte";
   import Toolbox from "./Toolbox.svelte";
-  import Bottom from "./primitives/connections/Bottom.svelte";
-  import Top from "./primitives/connections/Top.svelte";
+  import AnyBlock from "./AnyBlock.svelte";
 
-  const handleDrop = ({ detail }: CustomEvent<DroppedEvent<BlockType, {}>>) => {
+  function handleDrop({ detail }: CustomEvent<DroppedEvent<Block, {}>>) {
     const dropped = detail.data.dropped;
 
-    const parent = {
+    const parent: Parent = {
       type: "canvas",
       top: detail.top,
       left: detail.left,
-    } as const;
+    };
 
     reparentBlock(parent, dropped);
-  };
+  }
 
-  const handleClick = () => {
+  function handleClick() {
     selected.set(null);
-  };
+  }
 </script>
 
 <div
   class="relative flex h-full w-full overflow-hidden"
-  use:dropzone={{ data: {} }}
+  use:dropzone={{ accepts: isBlock, data: "canvas" }}
   on:dropped={handleDrop}
 >
   <Toolbox />

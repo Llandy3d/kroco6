@@ -2,9 +2,10 @@ import { derived, writable as readable, writable } from "svelte/store";
 import {
   type Block,
   type BlockTest,
-  type BlockParent,
   EMPTY_BLOCK_TEST,
   type ApiEndpoint,
+  isStepBlock,
+  type Parent,
 } from "./types";
 import { nanoid } from "nanoid";
 import type { OpenAPIV3 } from "openapi-types";
@@ -14,99 +15,79 @@ const blockTest = writable<BlockTest>(EMPTY_BLOCK_TEST);
 const selected = readable<Block | null>(null);
 
 const blocks = derived(blockTest, (test) => test.blocks);
-const library = derived(blockTest, (test) => test.library);
+const steps = derived(blocks, (blocks) => blocks.filter(isStepBlock));
 
 const roots = derived(blocks, (blocks) => {
   return blocks.filter((block) => block.parent.type === "canvas");
 });
 
-function instantiateBlock(block: Block) {
-  return block.parent.type === "toolbox" ? { ...block, id: nanoid() } : block;
+const library = derived(blockTest, (test) => test.library);
+
+function byBlockParent<T extends Block>(id: string) {
+  return (blocks: T[]) => {
+    return blocks.find((block) => block.parent.type === "block" && block.parent.id === id) ?? null;
+  };
 }
 
-function updateBlocksInTest(callback: (blocks: Block[]) => Block[]) {
+function byCollectionParent<T extends Block>(blockId: string, name: string) {
+  return (blocks: T[]) => {
+    return (
+      blocks.find(
+        (block) =>
+          block.parent.type === "collection" &&
+          block.parent.ownerId === blockId &&
+          block.parent.name === name,
+      ) ?? null
+    );
+  };
+}
+
+function updateInBlocks(fn: (blocks: Block[]) => Block[]) {
   blockTest.update((test) => {
     return {
       ...test,
-      blocks: callback(test.blocks),
+      blocks: fn(test.blocks),
     };
   });
 }
 
-function appendBlock(owner: Block, block: Block) {
-  updateBlocksInTest((blocks) => {
-    const target = instantiateBlock(block);
-
-    return [
-      ...blocks.filter((current) => current.id !== target.id),
-      {
-        ...target,
-        parent: {
-          type: "collection",
-          id: owner.id,
-        },
-      },
-    ];
+function updateBlock(target: Block) {
+  updateInBlocks((blocks) => {
+    return blocks.map((block) => (block.id === target.id ? target : block));
   });
 }
 
-function insertBlock(owner: Block, before: Block, block: Block) {
-  updateBlocksInTest((blocks) => {
-    const target = instantiateBlock(block);
+function instantiateBlock(block: Block) {
+  return block.parent.type === "toolbox" ? { ...block, id: nanoid() } : block;
+}
 
-    return blocks.flatMap((current) => {
-      if (current.id === target.id) {
-        return [];
-      }
-
-      if (current.id !== before.id) {
-        return [current];
-      }
-
-      const newBlock: Block = {
-        ...target,
-        parent: {
-          type: "collection",
-          id: owner.id,
-        },
-      };
-
-      return [newBlock, current];
-    });
+function deleteBlock(target: Block) {
+  updateInBlocks((blocks) => {
+    return blocks.filter((block) => block.id !== target.id);
   });
 }
 
-function updateBlock(block: Block) {
-  updateBlocksInTest((blocks) => {
-    return blocks.map((current) => (current.id === block.id ? block : current));
-  });
-}
+function reparentBlock(parent: Parent, target: Block) {
+  updateInBlocks((blocks) => {
+    const newBlock = {
+      ...instantiateBlock(target),
+      parent,
+    };
 
-function deleteBlock(block: Block | null) {
-  if (block === null) {
-    return;
-  }
-
-  updateBlocksInTest((blocks) => {
-    const newChildren = blocks.map((current) =>
-      current.parent.type === "collection" && current.parent.id === block.id
-        ? { ...current, parent: block.parent }
-        : current,
-    );
-
-    return newChildren.filter((current) => current.id !== block?.id);
-  });
-}
-
-function reparentBlock(parent: BlockParent, block: Block) {
-  updateBlocksInTest((blocks) => {
-    if (block.parent.type === "toolbox") {
-      const newBlock = instantiateBlock(block);
-
-      return [...blocks, { ...newBlock, parent }];
+    if (target.parent.type === "toolbox") {
+      return [...blocks, newBlock];
     }
 
-    return blocks.map((current) => (current.id === block.id ? { ...block, parent } : current));
+    return blocks.map((block) => {
+      if (block.id === target.id) {
+        return {
+          ...block,
+          parent: parent,
+        };
+      }
+
+      return block;
+    });
   });
 }
 
@@ -150,15 +131,16 @@ function updateEndpoint(previous: ApiEndpoint, next: ApiEndpoint) {
 }
 
 export {
-  instantiateBlock,
-  appendBlock,
-  insertBlock,
-  reparentBlock,
   updateBlock,
   deleteBlock,
+  reparentBlock,
+  byBlockParent,
+  instantiateBlock,
+  byCollectionParent,
   syncLibrary,
   loadBlockTest,
   updateEndpoint,
+  steps,
   selected,
   blockTest,
   library,

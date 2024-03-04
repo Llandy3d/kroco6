@@ -4,23 +4,20 @@
   export let connected = false;
 
   export let data: Target;
-  export let accepts: string[] | undefined = undefined;
-  export let onDrop: (ev: DroppedEvent<any, Target>) => void;
+
+  export let accepts: (value: unknown) => value is Dropped;
+  export let onDrop: (ev: DroppedEvent<Dropped, Target>) => void;
 
   let accepting = false;
   let dropping = false;
   let height = 0;
 
-  function handleAccepting(ev: CustomEvent<AcceptingEvent>) {
-    if (ev.detail.source !== null && ev.detail.source?.data === data) {
-      return;
-    }
-
+  function handleAccepting(ev: CustomEvent<AcceptingEvent<Dropped>>) {
     accepting = ev.detail.accepting;
     height = ev.detail.source?.node.getBoundingClientRect().height ?? 0;
   }
 
-  function handleDropping(ev: CustomEvent<DroppingEvent>) {
+  function handleDropping(ev: CustomEvent<DroppingEvent<Dropped>>) {
     dropping = ev.detail.dropping;
   }
 

@@ -6,25 +6,26 @@ interface CanvasParent {
   left: number;
 }
 
-interface CollectionParent {
-  type: "collection";
-  id: string;
-}
-
 interface ToolboxParent {
   type: "toolbox";
 }
 
-interface ImmediateParent {
-  type: "immediate";
+interface BlockParent {
+  type: "block";
   id: string;
 }
 
-type BlockParent = CanvasParent | CollectionParent | ToolboxParent | ImmediateParent;
+interface CollectionParent {
+  type: "collection";
+  ownerId: string;
+  name: string;
+}
+
+type Parent = CanvasParent | ToolboxParent | BlockParent | CollectionParent;
 
 interface BlockBase {
   id: string;
-  parent: BlockParent;
+  parent: Parent;
 }
 
 interface ScenarioBlock extends BlockBase {
@@ -52,7 +53,6 @@ interface HttpRequestBlock extends BlockBase {
   parameters: {
     [name: string]: HttpRequestParameter;
   };
-  next: StepBlock | null;
 }
 
 interface ConstantVusExecutor {
@@ -71,7 +71,6 @@ interface ExecutorBlock extends BlockBase {
 interface GroupBlock extends BlockBase {
   type: "group";
   name: string;
-  next: StepBlock | null;
 }
 
 interface CheckBase {
@@ -93,12 +92,35 @@ type CheckExpression = StatusCheck | BodyContainsCheck;
 interface CheckBlock extends BlockBase {
   type: "check";
   checks: CheckExpression[];
-  next: StepBlock | null;
 }
 
 type Block = ScenarioBlock | GroupBlock | HttpRequestBlock | ExecutorBlock | CheckBlock;
 
 type StepBlock = HttpRequestBlock | GroupBlock | CheckBlock;
+
+function isBlock(value: unknown): value is Block {
+  return typeof value === "object" && value !== null && "type" in value;
+}
+
+function isScenarioBlock(value: unknown): value is ScenarioBlock {
+  return isBlock(value) && value.type === "scenario";
+}
+
+function isExecutorBlock(value: unknown): value is ExecutorBlock {
+  return isBlock(value) && value.type === "executor";
+}
+
+function isStepBlock(value: unknown): value is StepBlock {
+  if (!isBlock(value)) {
+    return false;
+  }
+
+  return value.type === "group" || value.type === "check" || value.type === "http-request";
+}
+
+function isHttpRequestBlock(value: unknown): value is HttpRequestBlock {
+  return isBlock(value) && value.type === "http-request";
+}
 
 function isRootBlock<T extends Block>(block: T): block is T & { parent: CanvasParent } {
   return block.parent.type === "canvas";
@@ -154,10 +176,16 @@ export {};
 
 export {
   isRootBlock,
+  isBlock,
+  isStepBlock,
+  isExecutorBlock,
+  isHttpRequestBlock,
+  isScenarioBlock,
   STEPS,
   EMPTY_LIBRARY,
   EMPTY_BLOCK_TEST,
   HTTP_METHODS,
+  type Parent,
   type ApiEndpoint,
   type ApiOperation,
   type Block,
@@ -168,7 +196,9 @@ export {
   type StepBlock,
   type BlockTest,
   type BlockParent,
-  type ImmediateParent,
+  type CollectionParent,
   type CheckBlock,
   type CheckExpression,
+  type CanvasParent,
+  type ToolboxParent,
 };

@@ -1,54 +1,38 @@
-<script lang="ts" context="module">
-  export interface InsertBlockEvent {
-    target: BlockType;
-    before: BlockType;
-  }
-
-  export interface AppendBlockEvent {
-    target: BlockType;
-  }
-</script>
-
 <script lang="ts">
-  import type { Block as BlockType } from "$lib/stores/test/types";
+  import {
+    isBlock,
+    type Block,
+    type BlockParent,
+    type CollectionParent,
+  } from "$lib/stores/test/types";
   import Bottom from "./connections/Bottom.svelte";
-  import { type DroppedEvent } from "./dnd";
-  import { createEventDispatcher } from "svelte";
+  import { type AcceptsCallback, type DroppedEvent } from "./dnd";
   import { toBlockColorStyle, type BlockColor } from "./types";
+  import { derived } from "svelte/store";
+  import { blocks, byCollectionParent, reparentBlock } from "$lib/stores/test";
 
-  export let accepts: string[];
+  export let owner: Block;
+  export let name: string;
 
-  export let owner: BlockType | null;
-  export let child: BlockType | null;
+  export let accepts: AcceptsCallback<Block>;
+
+  const child = derived(blocks, byCollectionParent(owner.id, name));
 
   export let color: BlockColor;
 
-  const dispatch = createEventDispatcher<{
-    insert: InsertBlockEvent;
-    append: AppendBlockEvent;
-  }>();
+  function handleDropped(ev: DroppedEvent<Block, Block | null>) {
+    const parent: CollectionParent = {
+      type: "collection",
+      name,
+      ownerId: owner.id,
+    };
 
-  const handleDropped = (ev: DroppedEvent<BlockType, BlockType | null>) => {
-    const { dropped, target } = ev.data;
+    reparentBlock(parent, ev.data.dropped);
+  }
 
-    // If we are dropping an item before itself, then we don't need to do anything.
-    if (dropped.id === target?.id) {
-      return;
-    }
-
-    if (target === null) {
-      dispatch("append", {
-        target: dropped,
-      });
-
-      return;
-    }
-
-    dispatch("insert", {
-      target: dropped,
-      before: target,
-    });
-  };
+  function acceptsBlock(value: unknown): value is Block {
+    return isBlock(value) && accepts(value);
+  }
 </script>
 
 <div class="collection-root">
@@ -60,8 +44,13 @@
         class="separator relative flex w-6 flex-auto list-none flex-col"
         style={toBlockColorStyle(color)}
       >
-        <Bottom {accepts} data={owner} connected={child !== null} onDrop={handleDropped} />
-        <slot item={child} />
+        <Bottom
+          accepts={acceptsBlock}
+          data={owner}
+          connected={child !== null}
+          onDrop={handleDropped}
+        />
+        <slot child={$child} />
       </div>
     </div>
   </div>

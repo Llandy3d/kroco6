@@ -1,36 +1,31 @@
 <script lang="ts">
-  import { dropzone, type DroppedEvent, type DroppingEvent } from "./dnd";
-  import { type Block as BlockType, type ImmediateParent } from "$lib/stores/test/types";
+  import { dropzone, type DroppedEvent, type DroppingEvent, type AcceptsCallback } from "./dnd";
+  import { type Block, type BlockParent } from "$lib/stores/test/types";
   import { derived } from "svelte/store";
   import { blocks, reparentBlock } from "$lib/stores/test";
 
-  export let accepts: string[] | undefined = undefined;
-  export let owner: BlockType;
+  export let owner: Block;
+  export let accepts: AcceptsCallback<Block>;
 
   let dropping = false;
 
   const current = derived(blocks, (blocks) => {
-    return blocks.find(
-      (block) => block.parent.type === "immediate" && block.parent.id === owner.id,
-    );
+    return blocks.find((block) => block.parent.type === "block" && block.parent.id === owner.id);
   });
 
-  const handleDropped = (ev: CustomEvent<DroppedEvent<BlockType, {}>>) => {
-    if ($current !== undefined) {
-      return;
-    }
-
-    const { dropped } = ev.detail.data;
-
-    const parent: ImmediateParent = {
-      type: "immediate",
-      id: owner.id,
-    };
-
-    reparentBlock(parent, dropped);
+  const handleDropped = (ev: CustomEvent<DroppedEvent<Block, {}>>) => {
+    // if ($current !== undefined) {
+    //   return;
+    // }
+    // const { dropped } = ev.detail.data;
+    // const parent: BlockParent = {
+    //   type: "immediate",
+    //   id: owner.id,
+    // };
+    // reparentBlock(parent, dropped);
   };
 
-  const handleDropping = (ev: CustomEvent<DroppingEvent>) => {
+  const handleDropping = (ev: CustomEvent<DroppingEvent<unknown>>) => {
     dropping = ev.detail.dropping;
   };
 </script>

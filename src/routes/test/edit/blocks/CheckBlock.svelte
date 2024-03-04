@@ -1,5 +1,10 @@
 <script lang="ts">
-  import type { CheckBlock, CheckExpression } from "$lib/stores/test/types";
+  import {
+    isStepBlock,
+    type CheckBlock,
+    type CheckExpression,
+    isHttpRequestBlock,
+  } from "$lib/stores/test/types";
   import AnyBlock from "./AnyBlock.svelte";
   import Block from "./primitives/Block.svelte";
   import BlockInset from "./primitives/BlockInset.svelte";
@@ -8,17 +13,18 @@
   import CheckInput from "./CheckInput.svelte";
   import { PlusSquare } from "lucide-svelte";
   import { nanoid } from "nanoid";
+  import { STEP_COLOR } from "./colors";
 
   export let block: CheckBlock;
 
-  const handleCheckChange = (event: CustomEvent<CheckExpression>) => {
+  function handleCheckChange(event: CustomEvent<CheckExpression>) {
     updateBlock({
       ...block,
       checks: block.checks.map((check) => (check.id === event.detail.id ? event.detail : check)),
     });
-  };
+  }
 
-  const handleAddCheck = () => {
+  function handleAddCheck() {
     const newCheck: CheckExpression = {
       id: nanoid(),
       type: "has-status",
@@ -29,33 +35,35 @@
       ...block,
       checks: [...block.checks, newCheck],
     });
-  };
+  }
 
-  const handleRemoveCheck = (event: CustomEvent<CheckExpression>) => {
+  function handleRemoveCheck(event: CustomEvent<CheckExpression>) {
     updateBlock({
       ...block,
       checks: block.checks.filter((check) => check.id !== event.detail.id),
     });
-  };
+  }
 </script>
 
-<Block
-  type="check"
-  connect="both"
-  {block}
-  color={{ primary: "rgb(249 115 22)", secondary: "rgb(254 215 170)" }}
->
-  <Field>
-    Check that <BlockInset accepts={["http-request"]} owner={block} let:block>
-      {#if block !== undefined}
-        <AnyBlock {block} />
-      {/if}
-    </BlockInset>
-  </Field>
-  {#each block.checks as check (check.id)}
-    <CheckInput {check} on:change={handleCheckChange} on:remove={handleRemoveCheck} />
-  {/each}
-  <Field>
-    <button on:click={handleAddCheck}><PlusSquare size={14} /></button>
-  </Field>
+<Block {block} color={STEP_COLOR} top={true} bottom={isStepBlock}>
+  <svelte:fragment>
+    <Field>
+      Check that <BlockInset owner={block} accepts={isHttpRequestBlock} let:block>
+        {#if block !== undefined}
+          <AnyBlock {block} />
+        {/if}
+      </BlockInset>
+    </Field>
+    {#each block.checks as check (check.id)}
+      <CheckInput {check} on:change={handleCheckChange} on:remove={handleRemoveCheck} />
+    {/each}
+    <Field>
+      <button on:click={handleAddCheck}><PlusSquare size={14} /></button>
+    </Field>
+  </svelte:fragment>
+  <svelte:fragment slot="next" let:child>
+    {#if child !== null}
+      <AnyBlock block={child} />
+    {/if}
+  </svelte:fragment>
 </Block>

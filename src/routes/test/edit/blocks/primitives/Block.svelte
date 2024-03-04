@@ -1,22 +1,25 @@
-<script lang="ts" generics="TBlock extends Block">
-  import type { Block } from "$lib/stores/test/types";
+<script lang="ts" generics="TBlock extends Block, TBottom extends Block">
+  import { derived } from "svelte/store";
+
+  import { isBlock, type Block, type BlockParent } from "$lib/stores/test/types";
   import { GripVertical } from "lucide-svelte";
-  import { draggable, type DragChangeEvent, type DroppedEvent } from "./dnd";
+  import { draggable, type DragChangeEvent, type DroppedEvent, type AcceptsCallback } from "./dnd";
   import { cn } from "$lib/utils";
-  import { deleteBlock, selected } from "$lib/stores/test";
+  import { blocks, byBlockParent, deleteBlock, reparentBlock, selected } from "$lib/stores/test";
   import Bottom from "./connections/Bottom.svelte";
   import Top from "./connections/Top.svelte";
   import { toBlockColorStyle, type BlockColor } from "./types";
 
-  export let type: string;
   export let block: TBlock;
 
-  export let connect: "top" | "bottom" | "both" | "none" = "none";
+  export let top: AcceptsCallback | boolean = false;
+  export let bottom: AcceptsCallback | null = null;
 
   export let color: BlockColor;
 
-  let dragging = false;
+  const next = derived(blocks, byBlockParent(block.id));
 
+  let dragging = false;
   let className = "";
 
   function handleDragChange(ev: CustomEvent<DragChangeEvent>) {
@@ -45,7 +48,42 @@
     }
   }
 
-  function handleDrop(ev: DroppedEvent<Block, Block>) {}
+  function acceptsTop(value: unknown) {
+    if (value === "canvas") {
+      return true;
+    }
+
+    if (!isBlock(value)) {
+      return false;
+    }
+
+    if (value.id === block.id) {
+      return false;
+    }
+
+    if (typeof top === "boolean") {
+      return top;
+    }
+
+    return top(value);
+  }
+
+  function acceptsBottom(value: unknown): value is TBottom {
+    if (bottom === null) {
+      return false;
+    }
+
+    return isBlock(value) && bottom(value);
+  }
+
+  function handleDrop(ev: DroppedEvent<TBottom, Block>) {
+    const parent: BlockParent = {
+      type: "block",
+      id: block.id,
+    };
+
+    reparentBlock(parent, ev.data.dropped);
+  }
 
   export { className as class, handleClass };
 </script>
@@ -60,12 +98,10 @@
     className,
   )}
   class:dragging
-  data-parent={block.parent.type === "canvas"
-    ? "canvas"
-    : block.parent.type === "toolbox"
-      ? "toolbox"
-      : block.parent.id}
-  use:draggable={{ type, data: block }}
+  use:draggable={{
+    data: block,
+    accepts: acceptsTop,
+  }}
   on:keypress={handleKeyPress}
   on:dragchange={handleDragChange}
   style={toBlockColorStyle(color)}
@@ -80,18 +116,18 @@
       <GripVertical size={18} />
     </div>
     <div class="block-content relative flex flex-col">
-      {#if connect === "top" || connect === "both"}
+      {#if top !== null}
         <Top />
       {/if}
       <slot />
     </div>
   </div>
-  {#if connect === "bottom" || connect === "both"}
-    <Bottom data={block} onDrop={handleDrop} />
+  {#if bottom !== null}
+    <Bottom data={block} accepts={acceptsBottom} onDrop={handleDrop} />
   {/if}
-</div>
-<div>
-  <slot name="next" />
+  <div>
+    <slot name="next" child={$next} />
+  </div>
 </div>
 
 <style>
