@@ -13,6 +13,16 @@
             margin-top: 30px;
         }
     </style>
+    <script>
+      const invoke = window.__TAURI__.invoke
+
+      // show the splashscreen
+      document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(() => {
+          invoke('show_splashscreen');
+        }, 500);
+      });
+    </script>
   </head>
   <body>
       <div id="splashscreen">

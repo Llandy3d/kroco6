@@ -31,6 +31,7 @@ fn main() {
     tauri::Builder::default()
         .manage(application_state)
         .invoke_handler(tauri::generate_handler![
+            show_splashscreen,
             close_splashscreen,
             open_run_window,
             run_script,
@@ -53,6 +54,12 @@ async fn close_splashscreen(window: Window) {
 
     // Show main window
     window.get_window("main").expect("no window labeled 'main' found").show().unwrap();
+}
+
+#[tauri::command]
+async fn show_splashscreen(window: Window) {
+    // Show splashscreen
+    window.get_window("splashscreen").expect("no window labeled 'splashscreen' found").show().unwrap();
 }
 
 #[tauri::command]
