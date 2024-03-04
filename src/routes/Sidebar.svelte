@@ -16,7 +16,7 @@
   import { cn } from "$lib/utils";
 
   let open = false;
-  let value = "default-project";
+  let value = "default";
   let createProjectValue = "";
 
   let showCreateDialog = false;
