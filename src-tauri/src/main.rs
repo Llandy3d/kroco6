@@ -9,6 +9,7 @@ use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::sync::Mutex;
+use tauri::{Window, Manager};
 
 fn main() {
     let application_state = ApplicationState::default();
@@ -30,6 +31,7 @@ fn main() {
     tauri::Builder::default()
         .manage(application_state)
         .invoke_handler(tauri::generate_handler![
+            close_splashscreen,
             open_run_window,
             run_script,
             run_script_in_cloud,
@@ -42,6 +44,15 @@ fn main() {
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
+}
+
+#[tauri::command]
+async fn close_splashscreen(window: Window) {
+    // Close splashscreen
+    window.get_window("splashscreen").expect("no window labeled 'splashscreen' found").close().unwrap();
+
+    // Show main window
+    window.get_window("main").expect("no window labeled 'main' found").show().unwrap();
 }
 
 #[tauri::command]

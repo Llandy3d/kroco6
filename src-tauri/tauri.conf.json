@@ -71,8 +71,16 @@
 				"resizable": true,
 				"title": "Kroco6",
 				"width": 1200,
-				"fileDropEnabled": false
-			}
+				"fileDropEnabled": false,
+                "visible": false
+			},
+            {
+              "width": 400,
+              "height": 200,
+              "decorations": false,
+              "url": "/splashscreen.html",
+              "label": "splashscreen"
+            }
 		]
 	}
 }
