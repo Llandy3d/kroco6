@@ -39,6 +39,9 @@ fn main() {
             get_cloud_token,
             load_environments,
             save_environments,
+            create_test,
+            list_tests,
+            get_test
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -94,10 +97,7 @@ async fn create_project(
 async fn load_environments(
     state: tauri::State<'_, ApplicationState>,
 ) -> Result<models::EnvironmentsData, String> {
-    state
-        .environment_manager
-        .load()
-        .map_err(|e| e.to_string())
+    state.environment_manager.load().map_err(|e| e.to_string())
 }
 
 #[tauri::command]
@@ -108,6 +108,41 @@ async fn save_environments(
     state
         .environment_manager
         .save(&environments_data)
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn create_test(
+    state: tauri::State<'_, ApplicationState>,
+    project_name: &str,
+    test: models::Test,
+) -> Result<models::Test, String> {
+    state
+        .project_manager
+        .create_test(project_name, test)
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn list_tests(
+    state: tauri::State<'_, ApplicationState>,
+    project_name: &str,
+) -> Result<Vec<models::Test>, String> {
+    state
+        .project_manager
+        .list_tests(project_name)
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn get_test(
+    state: tauri::State<'_, ApplicationState>,
+    project_name: &str,
+    test_name: &str,
+) -> Result<models::Test, String> {
+    state
+        .project_manager
+        .get_test(project_name, test_name)
         .map_err(|e| e.to_string())
 }
 

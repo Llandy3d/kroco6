@@ -1,21 +1,16 @@
-<script context="module">
-  import { setMode } from "mode-watcher";
-
-  setMode("light");
-</script>
-
-<script>
+<script lang="ts">
   import "../app.pcss";
   import { Toaster } from "$lib/components/ui/sonner";
+  import { ModeWatcher } from "mode-watcher";
+  import Sidebar from "./Sidebar.svelte";
   import { onMount } from "svelte";
 
   import { projects } from "$lib/stores/projects";
   import { listProjects } from "$lib/backend-client";
-  import Sidebar from "./Sidebar.svelte";
+  import TestToolbar from "./test/edit/TestToolbar.svelte";
 
   onMount(async () => {
     const projectsList = await listProjects();
-
     projects.update(() => projectsList);
   });
 </script>

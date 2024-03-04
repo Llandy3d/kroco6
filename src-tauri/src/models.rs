@@ -1,22 +1,72 @@
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
+use std::fmt::Display;
 use std::path::PathBuf;
+use std::str::FromStr;
 
 // TestKind represents the kind of test we are dealing with
 // (e.g. a block test, a javascript test, etc.)
-#[derive(Clone, Debug, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub enum TestKind {
-    Block,
+    Blocks,
+    OpenAPI,
     Javascript,
+}
+
+impl Display for TestKind {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let str = match self {
+            TestKind::Blocks => "blocks".to_string(),
+            TestKind::OpenAPI => "openapi".to_string(),
+            TestKind::Javascript => "js".to_string(),
+        };
+        write!(f, "{}", str)
+    }
+}
+
+impl FromStr for TestKind {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "blocks" => Ok(TestKind::Blocks),
+            "openapi" => Ok(TestKind::OpenAPI),
+            "js" => Ok(TestKind::Javascript),
+            _ => Err(format!("{} is not a valid TestKind", s)),
+        }
+    }
 }
 
 // Test represents a single test that can be ran
 // either independently or as part of a suite.
-#[derive(Clone, Debug, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Test {
-    kind: TestKind,
-    name: String,
-    file_path: PathBuf,
+    // Name of the test
+    pub name: String,
+
+    // The kind of test, e.g. block, javascript, OpenAPI, etc.
+    pub kind: TestKind,
+
+    // The content of the test
+    //
+    // This is the actual content of the test, as defined
+    // in the user-interface, either through blocks, openAPI,
+    // or javascript.
+    //
+    // This is stored as a string under the hood for convenience.
+    // The default value is "".
+    pub content: String,
+}
+
+impl Test {
+    pub fn new(name: &str, kind: TestKind, content: &str) -> Self {
+        Self {
+            name: name.to_string(),
+            kind,
+            content: content.to_string(),
+            // file_path: PathBuf::new(),
+        }
+    }
 }
 
 // A Collection represents either a single test, or
