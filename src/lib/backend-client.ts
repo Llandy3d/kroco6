@@ -104,6 +104,22 @@ export async function getTest(projectName: string, testName: string): Promise<Te
   return await invoke("get_test", { projectName, testName });
 }
 
+/**
+ * Save the test and updates its content with the new content as provided
+ * by the UI.
+ *
+ * @param projectName The name of the parent project
+ * @param testName The name of the test to save the content of
+ * @param newContent The new content of the test to save
+ */
+export async function saveTest(
+  projectName: string,
+  testName: string,
+  newContent: string,
+): Promise<void> {
+  return await invoke("save_test", { projectName, testName, newContent });
+}
+
 export function runScriptLocally(script: string): Promise<string> {
   return invoke("open_run_window", { script });
 }

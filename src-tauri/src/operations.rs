@@ -46,6 +46,12 @@ pub trait ProjectManager {
     //
     // Returns the newly created test.
     fn create_test(&self, project_name: &str, test: Test) -> io::Result<Test>;
+
+    // Saves the content of a test in a project.
+    //
+    // This is meant to be used on the client side to save the content of a test
+    // that has been edited in the UI.
+    fn save_test(&self, project_name: &str, test_name: &str, new_content: &str) -> io::Result<()>;
 }
 
 pub struct LocalProjectManager {
@@ -60,6 +66,10 @@ impl LocalProjectManager {
     // Returns the path of the projects directory
     fn projects_dir(&self) -> PathBuf {
         Path::new(&self.base_path).join(PROJECTS_DIR)
+    }
+
+    fn project_path(&self, name: &str) -> PathBuf {
+        self.projects_dir().join(name)
     }
 }
 
@@ -254,6 +264,22 @@ impl ProjectManager for LocalProjectManager {
         fs::write(&test_path, &test.content)?;
 
         Ok(Test::new(&test.name, test.kind, &test.content))
+    }
+
+    fn save_test(&self, project_name: &str, test_name: &str, new_content: &str) -> io::Result<()> {
+        let project_path = self.project_path(project_name);
+        if !project_path.exists() {
+            return Err(io::Error::new(io::ErrorKind::NotFound, "project not found"));
+        }
+
+        let test_path = get_file_with_basename(&project_path, test_name);
+        match test_path {
+            Some(path) => {
+                fs::write(path, new_content)?;
+                Ok(())
+            }
+            None => Err(io::Error::new(io::ErrorKind::NotFound, "test not found")),
+        }
     }
 }
 
