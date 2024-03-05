@@ -24,7 +24,7 @@ function sanitizeName(name: string) {
 
 function emitStep(step: Step): string {
   switch (step.type) {
-    case "http-request":
+    case "library":
       return `http.${step.method.toLowerCase()}(${JSON.stringify(step.url)});`;
 
     case "group":

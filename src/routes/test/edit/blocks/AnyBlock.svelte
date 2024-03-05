@@ -4,7 +4,7 @@
   import CheckBlock from "./CheckBlock.svelte";
   import ExecutorBlock from "./ExecutorBlock.svelte";
   import GroupBlock from "./GroupBlock.svelte";
-  import HttpRequestBlock from "./HttpRequestBlock.svelte";
+  import HttpRequestBlock from "./LibraryBlock.svelte";
   import ScenarioBlock from "./ScenarioBlock.svelte";
   import SleepBlock from "./SleepBlock.svelte";
 
@@ -15,7 +15,7 @@
   <ScenarioBlock {block} />
 {:else if block.type === "executor"}
   <ExecutorBlock {block} />
-{:else if block.type === "http-request"}
+{:else if block.type === "library"}
   <HttpRequestBlock {block} />
 {:else if block.type === "group"}
   <GroupBlock {block} />

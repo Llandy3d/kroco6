@@ -1,4 +1,4 @@
-import type { Block, HttpRequestBlock, ScenarioBlock, StepBlock } from "./model/strict";
+import type { Block, LibraryBlock, ScenarioBlock, StepBlock } from "./model/strict";
 
 function isBlock(value: unknown): value is Block {
   return typeof value === "object" && value !== null && "type" in value;
@@ -20,17 +20,17 @@ function isStepBlock(value: unknown): value is StepBlock {
   return (
     value.type === "check" ||
     value.type === "group" ||
-    value.type === "http-request" ||
+    value.type === "library" ||
     value.type === "sleep"
   );
 }
 
-function isHttpRequestBlock(value: unknown): value is HttpRequestBlock {
+function isHttpRequestBlock(value: unknown): value is LibraryBlock {
   if (!isBlock(value)) {
     return false;
   }
 
-  return value.type === "http-request";
+  return value.type === "library";
 }
 
 export { isBlock, isHttpRequestBlock, isScenarioBlock, isStepBlock };

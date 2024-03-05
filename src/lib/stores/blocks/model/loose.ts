@@ -12,7 +12,7 @@ type GroupBlock = Omit<strict.GroupBlock, "next" | "step"> & {
   next: Block | null;
 };
 
-type HttpRequestBlock = Omit<strict.HttpRequestBlock, "next"> & {
+type LibraryBlock = Omit<strict.LibraryBlock, "next"> & {
   next: Block | null;
 };
 
@@ -33,7 +33,7 @@ type ExecutorBlock = strict.ExecutorBlock;
 
 type Block =
   | WithTemplate<GroupBlock>
-  | WithTemplate<HttpRequestBlock>
+  | WithTemplate<LibraryBlock>
   | WithTemplate<CheckBlock>
   | WithTemplate<ScenarioBlock>
   | WithTemplate<ExecutorBlock>
@@ -84,7 +84,7 @@ export {
   type CheckBlock,
   type ExecutorBlock,
   type GroupBlock,
-  type HttpRequestBlock,
+  type LibraryBlock,
   type Root,
   type ScenarioBlock,
   type SleepBlock,

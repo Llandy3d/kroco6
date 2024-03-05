@@ -77,9 +77,9 @@
         return [];
       }
 
-      const a: Array<HttpRequestBlock | Falsy> = [
+      const a: Array<LibraryBlock | Falsy> = [
         methods.get && {
-          type: "http-request",
+          type: "library",
           id: nanoid(),
           method: "get",
           url: new URL(path, baseUrl).toString(),
@@ -88,7 +88,7 @@
           next: null,
         },
         methods.post && {
-          type: "http-request",
+          type: "library",
           id: nanoid(),
           method: "post",
           url: new URL(path, baseUrl).toString(),
@@ -105,7 +105,7 @@
 
 <script lang="ts">
   import { test } from "$lib/stores/blocks";
-  import type { HttpRequestBlock } from "$lib/stores/blocks/model/strict";
+  import type { LibraryBlock } from "$lib/stores/blocks/model/strict";
   import { isTruthy, type Falsy } from "$lib/utils/typescript";
   import { nanoid } from "nanoid";
   import { derived } from "svelte/store";

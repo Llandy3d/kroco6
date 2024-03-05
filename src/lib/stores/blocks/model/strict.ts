@@ -64,8 +64,8 @@ const parameter = union([stringParameter, numberParameter, booleanParameter]);
 
 type Parameter = Output<typeof parameter>;
 
-interface HttpRequestBlock extends ChainableBlock {
-  type: "http-request";
+interface LibraryBlock extends ChainableBlock {
+  type: "library";
   name: string;
   url: string;
   method: string;
@@ -73,10 +73,10 @@ interface HttpRequestBlock extends ChainableBlock {
   next: StepBlock | null;
 }
 
-const httpRequest: BaseSchema<HttpRequestBlock> = merge([
+const libraryBlock: BaseSchema<LibraryBlock> = merge([
   blockBase,
   object({
-    type: literal("http-request"),
+    type: literal("library"),
     name: string(),
     method: string(),
     url: string(),
@@ -111,7 +111,7 @@ type Check = Output<typeof check>;
 
 interface CheckBlock extends ChainableBlock {
   type: "check";
-  target: HttpRequestBlock;
+  target: LibraryBlock;
   checks: Check[];
   next: StepBlock | null;
 }
@@ -120,7 +120,7 @@ const checkBlock: BaseSchema<CheckBlock> = merge([
   blockBase,
   object({
     type: literal("check"),
-    target: httpRequest,
+    target: libraryBlock,
     checks: array(check),
     next: nullable(lazy(() => stepBlock)),
   }),
@@ -141,7 +141,7 @@ const sleepBlock: BaseSchema<SleepBlock> = merge([
   }),
 ]);
 
-const stepBlock = union([groupBlock, httpRequest, checkBlock, sleepBlock]);
+const stepBlock = union([groupBlock, libraryBlock, checkBlock, sleepBlock]);
 
 type StepBlock = Output<typeof stepBlock>;
 
@@ -176,7 +176,7 @@ type ScenarioBlock = Output<typeof scenarioBlock>;
 
 const block = union([
   groupBlock,
-  httpRequest,
+  libraryBlock,
   checkBlock,
   executorBlock,
   scenarioBlock,
@@ -216,7 +216,7 @@ export {
   type CheckBlock,
   type ExecutorBlock,
   type GroupBlock,
-  type HttpRequestBlock,
+  type LibraryBlock,
   type Root,
   type ScenarioBlock,
   type SleepBlock,

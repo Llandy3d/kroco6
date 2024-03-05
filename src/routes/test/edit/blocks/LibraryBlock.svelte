@@ -1,6 +1,6 @@
 <script lang="ts">
   import { insertNext, test } from "$lib/stores/blocks";
-  import { type Block as BlockType, type HttpRequestBlock } from "$lib/stores/blocks/model/loose";
+  import { type Block as BlockType, type LibraryBlock } from "$lib/stores/blocks/model/loose";
   import { isStepBlock } from "$lib/stores/blocks/utils";
   import AnyBlock from "./AnyBlock.svelte";
   import { STEP_COLOR } from "./colors";
@@ -8,7 +8,7 @@
   import Block from "./primitives/Block.svelte";
   import Field from "./primitives/Field.svelte";
 
-  export let block: HttpRequestBlock;
+  export let block: LibraryBlock;
 
   function handleNextDrop(next: BlockType) {
     if (!isStepBlock(next)) {
