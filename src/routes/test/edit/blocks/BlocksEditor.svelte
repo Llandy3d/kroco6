@@ -7,7 +7,9 @@
   import { convertToScript } from "$lib/stores/blocks/convert";
   import { parse } from "$lib/stores/blocks/model/strict";
   import type { BlockFile } from "$lib/stores/editor";
+  import { open } from "@tauri-apps/api/shell";
   import { onDestroy, onMount } from "svelte";
+  import { toast } from "svelte-sonner";
   import TestToolbar from "../TestToolbar.svelte";
   import Library from "../library/Library.svelte";
   import Canvas from "./Canvas.svelte";
@@ -31,16 +33,11 @@
   async function runTestInCloud(projectId: string) {
     try {
       const script = await convertToScript($test);
-      const response = await runScriptInCloud({ script, projectId });
+      const results = await runScriptInCloud({ script, projectId });
 
-      const match = response.match(/output: (https?:\/\/[^\s]+)/);
-
-      if (match === null) {
-        throw new Error("No URL found in output");
-      }
-
-      open(match[1]);
+      open(results);
     } catch (error) {
+      toast.error("Error running test in cloud. Check your configuration.");
       console.error(error);
     }
   }

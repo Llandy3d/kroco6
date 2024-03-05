@@ -29,14 +29,7 @@ interface ScriptFile extends OpenFileBase {
 
 type VirtualFile = BlockFile | ScriptFile;
 
-const openFiles = writable<VirtualFile[]>([
-  {
-    handle: "1",
-    name: "Untitled Test",
-    path: { type: "new" },
-    type: "block",
-  },
-]);
+const openFiles = writable<VirtualFile[]>([]);
 
 const currentFile = writable<VirtualFile | null>(null);
 

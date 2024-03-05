@@ -1493,6 +1493,8 @@ name = "kroco6"
 version = "0.1.0"
 dependencies = [
  "dirs",
+ "regex",
+ "reqwest",
  "serde",
  "serde_json",
  "tauri",

@@ -3,12 +3,18 @@
 
 mod models;
 mod operations;
+mod cloud;
 
+use core::fmt;
 use std::fs;
-use std::io::{Read, Write};
-use std::path::{Path, PathBuf};
+use std::io::{Read, Write, BufRead, BufReader};
+use std::path::Path;
 use std::process::{Command, Stdio};
 use std::sync::Mutex;
+use tauri::{Manager, Window};
+use regex::Regex;
+
+use crate::operations::ProjectManager;
 
 fn main() {
     let application_state = ApplicationState::default();
@@ -20,19 +26,85 @@ fn main() {
         .initialize()
         .expect("Failed to initialize application state");
 
+    // Initialize the application state's EnvironmentManager instance
+    // to ensure that the underlying environment file exists
+    application_state
+        .environment_manager
+        .initialize()
+        .expect("Failed to initialize application state");
+
+
     tauri::Builder::default()
         .manage(application_state)
         .invoke_handler(tauri::generate_handler![
+            get_cloud_tests,
+            show_splashscreen,
+            close_splashscreen,
             open_run_window,
             run_script,
             run_script_in_cloud,
             list_projects,
+            get_project,
             create_project,
             set_cloud_token,
             get_cloud_token,
+            load_environments,
+            save_environments,
+            create_test,
+            list_tests,
+            get_test,
+            save_test,
+            load_project_config,
+            save_project_config,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
+}
+
+#[tauri::command]
+async fn get_cloud_tests(state: tauri::State<'_, ApplicationState>, project: models::Project) -> Result<Vec<models::CloudTest>, String> {
+    let project_config = state
+        .project_manager
+        .load_project_config(project)
+        .map_err(|e| e.to_string())?;
+
+    if project_config.cloud_token.is_none() || project_config.cloud_project_id.is_none() {
+        return Err("missing cloud_token/cloud_project_id config".to_string());
+    }
+    let cloud_token = project_config.cloud_token.unwrap();
+    let cloud_project_id = project_config.cloud_project_id.unwrap();
+
+    let cloud_tests: Vec<models::CloudTest> = cloud::get_cloud_tests(&cloud_token, &cloud_project_id)
+        .await
+        .map_err(|e| {
+            e.to_string()
+        })?;
+    Ok(cloud_tests)
+}
+
+#[tauri::command]
+async fn close_splashscreen(window: Window) {
+    // Close splashscreen
+    if let Some(window) = window.get_window("splashscreen") {
+        window.close().unwrap();
+    }
+
+    // Show main window
+    window
+        .get_window("main")
+        .expect("no window labeled 'main' found")
+        .show()
+        .unwrap();
+}
+
+#[tauri::command]
+async fn show_splashscreen(window: Window) {
+    // Show splashscreen
+    window
+        .get_window("splashscreen")
+        .expect("no window labeled 'splashscreen' found")
+        .show()
+        .unwrap();
 }
 
 #[tauri::command]
@@ -78,6 +150,106 @@ async fn create_project(
     state
         .project_manager
         .create_project(models::Project::new(name, description))
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn get_project(
+    state: tauri::State<'_, ApplicationState>,
+    name: &str,
+) -> Result<models::Project, String> {
+    state
+        .project_manager
+        .get_project(name)
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn load_project_config(
+    state: tauri::State<'_, ApplicationState>,
+    project: models::Project,
+) -> Result<models::ProjectConfig, String> {
+    state
+        .project_manager
+        .load_project_config(project)
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn save_project_config(
+    state: tauri::State<'_, ApplicationState>,
+    project: models::Project,
+    project_config: models::ProjectConfig,
+) -> Result<(), String> {
+    state
+        .project_manager
+        .save_project_config(project, project_config)
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn load_environments(
+    state: tauri::State<'_, ApplicationState>,
+) -> Result<models::EnvironmentsData, String> {
+    state.environment_manager.load().map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn save_environments(
+    state: tauri::State<'_, ApplicationState>,
+    environments_data: models::EnvironmentsData,
+) -> Result<(), String> {
+    state
+        .environment_manager
+        .save(&environments_data)
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn create_test(
+    state: tauri::State<'_, ApplicationState>,
+    project_name: &str,
+    test: models::Test,
+) -> Result<models::Test, String> {
+    state
+        .project_manager
+        .create_test(project_name, test)
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn list_tests(
+    state: tauri::State<'_, ApplicationState>,
+    project_name: &str,
+) -> Result<Vec<models::Test>, String> {
+    state
+        .project_manager
+        .list_tests(project_name)
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn get_test(
+    state: tauri::State<'_, ApplicationState>,
+    project_name: &str,
+    test_name: &str,
+) -> Result<models::Test, String> {
+    state
+        .project_manager
+        .get_test(project_name, test_name)
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn save_test(
+    state: tauri::State<'_, ApplicationState>,
+    project_name: &str,
+    test_name: &str,
+    new_content: &str,
+) -> Result<(), String> {
+    state
+        .project_manager
+        .save_test(project_name, test_name, new_content)
         .map_err(|e| e.to_string())
 }
 
@@ -138,11 +310,14 @@ async fn run_script(state: tauri::State<'_, ApplicationState>) -> Result<String,
 // and life cycle.
 struct ApplicationState {
     // The path where the application stores its data
-    pub storage_path: PathBuf,
+    // pub storage_path: PathBuf,
 
     // The project manager used to interact with local projects
     // exposing operations such as listing, creating, deleting, etc.
     pub project_manager: operations::LocalProjectManager,
+
+    // The environment manager used to interact with environments
+    pub environment_manager: operations::EnvironmentManager,
 
     // Legacy: the script to run
     script: Mutex<String>,
@@ -162,8 +337,9 @@ impl ApplicationState {
         }
 
         Self {
-            storage_path: storage_path.clone(),
-            project_manager: operations::LocalProjectManager::new(storage_path),
+            // storage_path: storage_path.clone(),
+            project_manager: operations::LocalProjectManager::new(storage_path.clone()),
+            environment_manager: operations::EnvironmentManager::new(storage_path.clone()),
             script: Mutex::new(String::new()),
         }
     }
@@ -206,13 +382,17 @@ async fn run_script_in_cloud(script: String, project_id: String) -> Result<Strin
             .expect("Failed to write script.");
     }
 
-    let mut k6_output = String::new();
-    if let Some(mut stdout) = child.stdout.take() {
-        stdout
-            .read_to_string(&mut k6_output)
-            .expect("Failed to read stdout");
+    let re = Regex::new(r"output: (https?://[^\s]+)").unwrap();
+    if let Some(stdout) = child.stdout.take() {
+        let reader = BufReader::new(stdout);
+        for line in reader.lines() {
+            let line = line.expect("Failed to read line");
+            if let Some(cap) = re.captures(&line) {
+                return Ok(cap[1].to_string());
+            }
+        }
     }
 
     let _ = child.wait_with_output().expect("Failed to execute command");
-    Ok(k6_output)
+    Err("No URL found in output".to_string())
 }
