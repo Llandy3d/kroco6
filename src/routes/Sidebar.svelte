@@ -7,7 +7,9 @@
   import {
     type Environment as IEnvironment,
     createProject,
+    listTests,
     type EnvironmentsData,
+    Test,
   } from "$lib/backend-client";
   import * as AlertDialog from "$lib/components/ui/alert-dialog";
   import * as Command from "$lib/components/ui/command";
@@ -18,6 +20,7 @@
   import { Separator } from "$lib/components/ui/separator";
   import { cn } from "$lib/utils";
   import EnvironmentList from "$lib/components/EnvironmentList.svelte";
+  import TestList from "$lib/components/TestList.svelte";
 
   // envs holds the active environment and the list of environments
   // that the user can switch between.
@@ -29,12 +32,19 @@
   $: environments = environmentsData?.environments;
 
   let open = false;
-  let value = "default";
+  let activeProject = "default";
   let createProjectValue = "";
 
   let showCreateDialog = false;
 
-  $: selectedValue = $projects.find((f) => f.name === value)?.name ?? "Select a project...";
+  $: selectedProject =
+    $projects.find((f) => f.name === activeProject)?.name ?? "Select a project...";
+
+  let activeProjectTests: Test[] = [];
+  $: activeProject,
+    listTests(activeProject).then((tests) => {
+      activeProjectTests = tests;
+    });
 
   // We want to refocus the trigger button when the user selects
   // an item from the list so users can continue navigating the
@@ -65,7 +75,7 @@
         aria-expanded={open}
         class="self-strech m-2 flex justify-between"
       >
-        {selectedValue}
+        {selectedProject}
         <ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
       </Button>
     </Popover.Trigger>
@@ -78,12 +88,14 @@
             <Command.Item
               value={project.name}
               onSelect={(currentValue) => {
-                value = currentValue;
+                activeProject = currentValue;
 
                 closeAndFocusTrigger(ids.trigger);
               }}
             >
-              <Check class={cn("mr-2 h-4 w-4", value !== project.name && "text-transparent")} />
+              <Check
+                class={cn("mr-2 h-4 w-4", activeProject !== project.name && "text-transparent")}
+              />
               {project.name}
             </Command.Item>
           {/each}
@@ -107,8 +119,10 @@
   <Separator />
 
   <Button variant="ghost" class="my-2" on:click={() => goto("/")}>
-    <FlaskConical class="mr-2 h-4 w-4" /> Go to tests
+    <FlaskConical class="mr-2 h-4 w-4" />Project's Tests
   </Button>
+
+  <TestList tests={activeProjectTests} />
 
   <Separator />
 
