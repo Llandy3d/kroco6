@@ -11,6 +11,13 @@ export interface EnvironmentsData {
   environments: Array<Environment>;
 }
 
+export interface CloudTest {
+  id: string;
+  name: string;
+  project_id: string;
+  script: string | null;
+}
+
 // load environments from disk
 export async function loadEnvironments(): Promise<EnvironmentsData> {
   return await invoke("load_environments", {});
@@ -157,4 +164,8 @@ export async function loadProjectConfig(project: Project): Promise<ProjectConfig
 // save project config
 export async function saveProjectConfig(project: Project, projectConfig: ProjectConfig): Promise<void> {
   return await invoke("save_project_config", { project, projectConfig });
+}
+
+export async function getCloudTests(project: Project): Promise<Array<CloudTest>> {
+  return await invoke("get_cloud_tests", { project });
 }

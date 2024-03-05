@@ -3,7 +3,9 @@
 
 mod models;
 mod operations;
+mod cloud;
 
+use core::fmt;
 use std::fs;
 use std::io::{Read, Write, BufRead, BufReader};
 use std::path::Path;
@@ -31,9 +33,11 @@ fn main() {
         .initialize()
         .expect("Failed to initialize application state");
 
+
     tauri::Builder::default()
         .manage(application_state)
         .invoke_handler(tauri::generate_handler![
+            get_cloud_tests,
             show_splashscreen,
             close_splashscreen,
             open_run_window,
@@ -58,13 +62,32 @@ fn main() {
 }
 
 #[tauri::command]
+async fn get_cloud_tests(state: tauri::State<'_, ApplicationState>, project: models::Project) -> Result<Vec<models::CloudTest>, String> {
+    let project_config = state
+        .project_manager
+        .load_project_config(project)
+        .map_err(|e| e.to_string())?;
+
+    if project_config.cloud_token.is_none() || project_config.cloud_project_id.is_none() {
+        return Err("missing cloud_token/cloud_project_id config".to_string());
+    }
+    let cloud_token = project_config.cloud_token.unwrap();
+    let cloud_project_id = project_config.cloud_project_id.unwrap();
+
+    let cloud_tests: Vec<models::CloudTest> = cloud::get_cloud_tests(&cloud_token, &cloud_project_id)
+        .await
+        .map_err(|e| {
+            e.to_string()
+        })?;
+    Ok(cloud_tests)
+}
+
+#[tauri::command]
 async fn close_splashscreen(window: Window) {
     // Close splashscreen
-    window
-        .get_window("splashscreen")
-        .expect("no window labeled 'splashscreen' found")
-        .close()
-        .unwrap();
+    if let Some(window) = window.get_window("splashscreen") {
+        window.close().unwrap();
+    }
 
     // Show main window
     window
