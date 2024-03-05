@@ -3,10 +3,11 @@ use std::path::{Path, PathBuf};
 use std::str::FromStr;
 use std::{fs, io};
 
-use crate::models::{Environment, EnvironmentsData, Project, Test, TestKind};
+use crate::models::{Environment, EnvironmentsData, Project, ProjectConfig, Test, TestKind};
 
 const PROJECTS_DIR: &str = "projects";
 const DEFAULT_PROJECT_NAME: &str = "default";
+const PROJECT_CONFIG_FILE: &str = "project_config.json";
 const ENVIRONMENT_FILE: &str = "environments.json";
 
 pub trait ProjectManager {
@@ -52,6 +53,16 @@ pub trait ProjectManager {
     // This is meant to be used on the client side to save the content of a test
     // that has been edited in the UI.
     fn save_test(&self, project_name: &str, test_name: &str, new_content: &str) -> io::Result<()>;
+
+    // TODO: document
+    fn load_project_config(&self, project: Project) -> io::Result<ProjectConfig>;
+
+    // TODO: document
+    fn save_project_config(
+        &self,
+        project: Project,
+        project_config: ProjectConfig,
+    ) -> io::Result<()>;
 }
 
 pub struct LocalProjectManager {
@@ -146,6 +157,47 @@ impl ProjectManager for LocalProjectManager {
         fs::create_dir(project_path)?;
 
         Ok(project.clone())
+    }
+
+    // Load project config
+    fn load_project_config(&self, project: Project) -> io::Result<ProjectConfig> {
+        let project_config_path = self
+            .projects_dir()
+            .join(project.name)
+            .join(PROJECT_CONFIG_FILE);
+        if !project_config_path.exists() {
+            return Err(io::Error::new(
+                io::ErrorKind::NotFound,
+                "project config not found",
+            ));
+        }
+
+        let file = fs::File::open(&project_config_path)?;
+        let project_config = serde_json::from_reader(file)?;
+        Ok(project_config)
+    }
+
+    // Save project config
+    fn save_project_config(
+        &self,
+        project: Project,
+        project_config: ProjectConfig,
+    ) -> io::Result<()> {
+        let project_config_path = self
+            .projects_dir()
+            .join(project.name)
+            .join(PROJECT_CONFIG_FILE);
+        if !project_config_path.exists() {
+            return Err(io::Error::new(
+                io::ErrorKind::NotFound,
+                "project config not found",
+            ));
+        }
+
+        let file = fs::File::create(&project_config_path)?;
+        serde_json::to_writer_pretty(file, &project_config)?;
+
+        Ok(())
     }
 
     fn list_tests(&self, project_name: &str) -> io::Result<Vec<Test>> {

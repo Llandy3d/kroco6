@@ -21,9 +21,15 @@ export async function saveEnvironments(environmentsData: EnvironmentsData): Prom
   return await invoke("save_environments", { environmentsData });
 }
 
+export interface ProjectConfig {
+  cloud_token: string;
+  cloud_project_id: string
+}
+
 export interface Project {
   name: string;
   description?: string;
+  project_config?: ProjectConfig,
 }
 
 export class Test {
@@ -140,4 +146,14 @@ export async function getToken(): Promise<string> {
 
 export async function saveToken(token: string): Promise<void> {
   return await invoke("set_cloud_token", { token });
+}
+
+// load project config
+export async function loadProjectConfig(project: Project): Promise<ProjectConfig> {
+  return await invoke("load_project_config", { project });
+}
+
+// save project config
+export async function saveProjectConfig(project: Project, projectConfig: ProjectConfig): Promise<void> {
+  return await invoke("save_project_config", { project, projectConfig });
 }
