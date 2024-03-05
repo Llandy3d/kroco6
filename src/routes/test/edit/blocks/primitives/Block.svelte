@@ -83,31 +83,38 @@
   on:dragchange={handleDragChange}
   style={toBlockColorStyle(color)}
 >
-  <div class="relative flex items-center">
-    <!-- svelte-ignore a11y-click-events-have-key-events -->
-    <div
-      class="drag-handle relative flex cursor-pointer select-none items-center self-stretch p-1 text-white shadow-md shadow-slate-400"
-      data-drag-handle
-      on:click={handleClick}
-    >
-      <GripVertical size={18} />
+  <div class="w-min">
+    <div class="relative flex items-center">
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
+      <div
+        class="drag-handle relative flex cursor-pointer select-none items-center self-stretch p-1 text-white shadow-md shadow-slate-400"
+        data-drag-handle
+        on:click={handleClick}
+      >
+        <GripVertical size={18} />
+      </div>
+      <div class="block-content relative flex flex-col">
+        {#if top}
+          <Top />
+        {/if}
+        <slot />
+      </div>
     </div>
-    <div class="block-content relative flex flex-col">
-      {#if top}
-        <Top />
-      {/if}
-      <slot />
-    </div>
+    {#if bottom !== null}
+      <Bottom data={block} accepts={acceptsBottom} onDrop={handleDropBottom} />
+    {/if}
   </div>
-  {#if bottom !== null}
-    <Bottom data={block} accepts={acceptsBottom} onDrop={handleDropBottom} />
-    <div>
+  <div>
+    {#if bottom !== null}
       <slot name="next" next={bottom.block} />
-    </div>
-  {/if}
+    {/if}
+  </div>
 </div>
 
 <style>
+  .block-root {
+    margin-top: 0.1rem;
+  }
   .block-content > :global(*:first-child) {
     border-top-right-radius: 0.25rem;
   }

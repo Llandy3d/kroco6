@@ -4,7 +4,7 @@
 <div class="top">
   <div class="left-fill"></div>
   <svg viewBox="0 0 100 50">
-    <polygon points="0,0 0,50 100,50 100,0 50,30" />
+    <polygon points="0,0 0,51 100,51 100,0 51,25" />
   </svg>
   <div class="right-fill"></div>
 </div>

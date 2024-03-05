@@ -1,5 +1,5 @@
 <script lang="ts" generics="Dropped, Target">
-  import { dropzone, type DroppedEvent, type DroppingEvent, type AcceptingEvent } from "../dnd";
+  import { dropzone, type AcceptingEvent, type DroppedEvent, type DroppingEvent } from "../dnd";
 
   export let connected = false;
 
@@ -57,7 +57,7 @@
 
   svg {
     position: absolute;
-    top: 100%;
+    top: 3px;
     left: 58px;
     fill: var(--block-bg-primary);
   }

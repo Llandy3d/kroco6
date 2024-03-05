@@ -27,7 +27,7 @@
     <div class="flex rounded-l-md">
       <div class="padding w-2"></div>
       <div
-        class="separator relative mb-4 flex w-6 flex-auto list-none flex-col"
+        class="relative mb-4 flex w-6 flex-auto list-none flex-col"
         style={toBlockColorStyle(color)}
       >
         <Bottom
@@ -52,9 +52,5 @@
 
   .collection-root:last-child .footer {
     border-bottom-right-radius: 0.25rem;
-  }
-
-  .separator {
-    gap: 1px;
   }
 </style>

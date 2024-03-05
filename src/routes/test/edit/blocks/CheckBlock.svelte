@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { detachBlock, updateBlock } from "$lib/stores/blocks";
+  import { detachBlock, insertNext, test, updateBlock } from "$lib/stores/blocks";
   import {
     instantiate,
     type Block as BlockType,
@@ -19,10 +19,12 @@
   export let block: CheckBlock;
 
   function handleCheckChange(target: Check) {
-    updateBlock({
-      ...block,
-      checks: block.checks.map((check) => (check.id === target.id ? target : check)),
-    });
+    test.update((test) =>
+      updateBlock(test, {
+        ...block,
+        checks: block.checks.map((check) => (check.id === target.id ? target : check)),
+      }),
+    );
   }
 
   function handleAddCheck() {
@@ -32,17 +34,21 @@
       value: 200,
     };
 
-    updateBlock({
-      ...block,
-      checks: [...block.checks, newCheck],
-    });
+    test.update((test) =>
+      updateBlock(test, {
+        ...block,
+        checks: [...block.checks, newCheck],
+      }),
+    );
   }
 
   function handleRemoveCheck(target: Check) {
-    updateBlock({
-      ...block,
-      checks: block.checks.filter((check) => check.id !== target.id),
-    });
+    test.update((test) =>
+      updateBlock(test, {
+        ...block,
+        checks: block.checks.filter((check) => check.id !== target.id),
+      }),
+    );
   }
 
   function handleTargetDrop(target: BlockType) {
@@ -50,10 +56,11 @@
       return;
     }
 
-    detachBlock(target);
-    updateBlock({
-      ...block,
-      target: instantiate(target),
+    test.update((test) => {
+      return updateBlock(detachBlock(test, target), {
+        ...block,
+        target: instantiate(target),
+      });
     });
   }
 
@@ -62,11 +69,7 @@
       return;
     }
 
-    detachBlock(next);
-    updateBlock({
-      ...block,
-      next: instantiate(next),
-    });
+    test.update((test) => insertNext(test, block, next));
   }
 </script>
 

@@ -1,10 +1,6 @@
 <script lang="ts">
-  import { detachBlock, updateBlock } from "$lib/stores/blocks";
-  import {
-    instantiate,
-    type Block as BlockType,
-    type GroupBlock,
-  } from "$lib/stores/blocks/model/loose";
+  import { insertNext, insertStep, test, updateBlock } from "$lib/stores/blocks";
+  import { type Block as BlockType, type GroupBlock } from "$lib/stores/blocks/model/loose";
   import { isStepBlock } from "$lib/stores/blocks/utils";
   import AnyBlock from "./AnyBlock.svelte";
   import { STEP_COLOR } from "./colors";
@@ -16,10 +12,12 @@
   export let block: GroupBlock;
 
   function handleNameChange(ev: CustomEvent<StringInputChangeEvent>) {
-    updateBlock({
-      ...block,
-      name: ev.detail.value,
-    });
+    test.update((test) =>
+      updateBlock(test, {
+        ...block,
+        name: ev.detail.value,
+      }),
+    );
   }
 
   function handleDropStep(step: BlockType) {
@@ -27,14 +25,7 @@
       return;
     }
 
-    detachBlock(step);
-    updateBlock({
-      ...block,
-      step: {
-        ...instantiate(step),
-        next: block.step,
-      },
-    });
+    test.update((test) => insertStep(test, block, step));
   }
 
   function handleDropNext(next: BlockType) {
@@ -42,14 +33,7 @@
       return;
     }
 
-    detachBlock(next);
-    updateBlock({
-      ...block,
-      next: {
-        ...instantiate(next),
-        next: block.next,
-      },
-    });
+    test.update((test) => insertNext(test, block, next));
   }
 </script>
 

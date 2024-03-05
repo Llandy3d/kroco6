@@ -4,6 +4,7 @@ import {
   instantiate,
   isTemplate,
   type Block,
+  type Chainable,
   type GroupBlock,
   type Root,
   type ScenarioBlock,
@@ -58,52 +59,44 @@ function dropOnCanvas(target: Block, position: { top: number; left: number }) {
   });
 }
 
-function detachBlock(block: Block) {
-  test.update((test) => {
-    if (isTemplate(block)) {
-      return test;
-    }
+function detachBlock(test: Test, block: Block) {
+  if (isTemplate(block)) {
+    return test;
+  }
 
-    const roots = test.roots
-      .filter((root) => root.block.id !== block.id)
-      .map((root) => ({
-        ...root,
-        block: detach(root.block, block),
-      }));
-
-    return { ...test, roots };
-  });
-}
-
-function updateBlock(block: Block) {
-  test.update((test) => {
-    const roots = test.roots.map((root) => ({
+  const roots = test.roots
+    .filter((root) => root.block.id !== block.id)
+    .map((root) => ({
       ...root,
-      block: root.block.id === block.id ? block : replace(root.block, block, block),
+      block: detach(root.block, block),
     }));
 
-    return { ...test, roots };
-  });
+  return { ...test, roots };
 }
 
-function insertStep(block: ScenarioBlock | GroupBlock, step: StepBlock) {
-  detachBlock(step);
+function updateBlock(test: Test, block: Block) {
+  const roots = test.roots.map((root) => ({
+    ...root,
+    block: root.block.id === block.id ? block : replace(root.block, block, block),
+  }));
 
+  return { ...test, roots };
+}
+
+function insertStep(test: Test, block: ScenarioBlock | GroupBlock, step: StepBlock) {
   const newStep = instantiate(step);
 
-  updateBlock({
-    ...block,
+  return updateBlock(detachBlock(test, step), {
+    ...detach(block, step),
     step: block.step !== null ? concat(newStep, block.step) : newStep,
   });
 }
 
-function insertNext(block: StepBlock, next: StepBlock) {
-  detachBlock(next);
-
+function insertNext(test: Test, block: Chainable, next: StepBlock) {
   const newNext = instantiate(next);
 
-  updateBlock({
-    ...block,
+  return updateBlock(detachBlock(test, next), {
+    ...detach(block, next),
     next: block.next !== null ? concat(newNext, block.next) : newNext,
   });
 }

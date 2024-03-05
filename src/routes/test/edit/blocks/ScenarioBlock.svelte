@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { insertStep, updateBlock } from "$lib/stores/blocks";
+  import { insertStep, test, updateBlock } from "$lib/stores/blocks";
   import { type Block as BlockType, type ScenarioBlock } from "$lib/stores/blocks/model/loose";
   import { isStepBlock } from "$lib/stores/blocks/utils";
   import AnyBlock from "./AnyBlock.svelte";
@@ -12,10 +12,12 @@
   export let block: ScenarioBlock;
 
   function handleNameChange(ev: CustomEvent<StringInputChangeEvent>) {
-    updateBlock({
-      ...block,
-      name: ev.detail.value,
-    });
+    test.update((test) =>
+      updateBlock(test, {
+        ...block,
+        name: ev.detail.value,
+      }),
+    );
   }
 
   function handleDropStep(step: BlockType) {
@@ -23,7 +25,7 @@
       return;
     }
 
-    insertStep(block, step);
+    test.update((test) => insertStep(test, block, step));
   }
 </script>
 

@@ -56,13 +56,18 @@ function isTemplate(block: Block): boolean {
 }
 
 function instantiate<T extends Block>(block: T): T {
-  return isTemplate(block)
-    ? {
-        ...block,
-        [template]: undefined,
-        id: nanoid(),
-      }
-    : block;
+  if (!isTemplate(block)) {
+    return block;
+  }
+
+  const instance = {
+    ...block,
+    id: nanoid(),
+  };
+
+  delete instance[template];
+
+  return instance;
 }
 
 export {

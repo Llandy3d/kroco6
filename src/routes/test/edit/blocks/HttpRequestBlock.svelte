@@ -1,10 +1,6 @@
 <script lang="ts">
-  import { detachBlock, updateBlock } from "$lib/stores/blocks";
-  import {
-    instantiate,
-    type Block as BlockType,
-    type HttpRequestBlock,
-  } from "$lib/stores/blocks/model/loose";
+  import { insertNext, test } from "$lib/stores/blocks";
+  import { type Block as BlockType, type HttpRequestBlock } from "$lib/stores/blocks/model/loose";
   import { isStepBlock } from "$lib/stores/blocks/utils";
   import AnyBlock from "./AnyBlock.svelte";
   import { STEP_COLOR } from "./colors";
@@ -19,14 +15,7 @@
       return;
     }
 
-    detachBlock(next);
-    updateBlock({
-      ...block,
-      next: {
-        ...instantiate(next),
-        next: block.next,
-      },
-    });
+    test.update((test) => insertNext(test, block, next));
   }
 </script>
 

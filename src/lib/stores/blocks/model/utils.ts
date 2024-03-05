@@ -76,7 +76,7 @@ function replace(current: Block, target: Block, replacement: Block): Block {
   }
 }
 
-function detach(current: Block, target: Block): Block {
+function detach<T extends Block>(current: T, target: Block): T {
   switch (current.type) {
     case "scenario":
       if (current.step === null) {

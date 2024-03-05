@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { updateBlock } from "$lib/stores/blocks";
+  import { test, updateBlock } from "$lib/stores/blocks";
   import type { ExecutorBlock } from "$lib/stores/blocks/model/loose";
   import StringInput, { type StringInputChangeEvent } from "./inputs/StringInput.svelte";
   import Block from "./primitives/Block.svelte";
@@ -8,22 +8,26 @@
   export let block: ExecutorBlock;
 
   function handleVUsChange(ev: CustomEvent<StringInputChangeEvent>) {
-    updateBlock({
-      ...block,
-      executor: {
-        ...block.executor,
-        vus: +ev.detail.value,
-      },
+    test.update((test) => {
+      return updateBlock(test, {
+        ...block,
+        executor: {
+          ...block.executor,
+          vus: +ev.detail.value,
+        },
+      });
     });
   }
 
   function handleDurationChange(ev: CustomEvent<StringInputChangeEvent>) {
-    updateBlock({
-      ...block,
-      executor: {
-        ...block.executor,
-        duration: ev.detail.value,
-      },
+    test.update((test) => {
+      return updateBlock(test, {
+        ...block,
+        executor: {
+          ...block.executor,
+          duration: ev.detail.value,
+        },
+      });
     });
   }
 </script>
