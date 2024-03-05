@@ -3,6 +3,7 @@
   import type { Block as BlockType, HttpRequestBlock } from "$lib/stores/blocks/model/loose";
   import { isStepBlock } from "$lib/stores/blocks/utils";
   import { HTTP_METHODS } from "$lib/stores/library/constants";
+  import AnyBlock from "./AnyBlock.svelte";
   import { STEP_COLOR } from "./colors";
   import SelectInput from "./inputs/SelectInput.svelte";
   import StringInput from "./inputs/StringInput.svelte";
@@ -45,8 +46,15 @@
   top={true}
   bottom={{ block: block.next, accepts: isStepBlock, onDrop: handleNextDrop }}
 >
-  <Field
-    ><SelectInput value={block.method} items={methods} onChange={handleMethodChange} />
-    <StringInput placeholder="Url" value={block.url} onChange={handleUrlChange} /></Field
-  >
+  <svelte:fragment>
+    <Field
+      ><SelectInput value={block.method} items={methods} onChange={handleMethodChange} />
+      <StringInput placeholder="Url" value={block.url} onChange={handleUrlChange} /></Field
+    >
+  </svelte:fragment>
+  <svelte:fragment slot="next" let:next>
+    {#if next !== null}
+      <AnyBlock block={next} />
+    {/if}
+  </svelte:fragment>
 </Block>

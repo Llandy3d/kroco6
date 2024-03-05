@@ -2,6 +2,7 @@
   import { insertNext, test, updateBlock } from "$lib/stores/blocks";
   import type { Block as BlockType, SleepBlock } from "$lib/stores/blocks/model/loose";
   import { isStepBlock } from "$lib/stores/blocks/utils";
+  import AnyBlock from "./AnyBlock.svelte";
   import { STEP_COLOR } from "./colors";
   import StringInput from "./inputs/StringInput.svelte";
   import Block from "./primitives/Block.svelte";
@@ -33,7 +34,14 @@
   top={true}
   bottom={{ block: block.next, accepts: isStepBlock, onDrop: handleNextDrop }}
 >
-  <Field
-    >Wait for <StringInput size={3} value={block.seconds} onChange={handleSecondsChange} /> seconds</Field
-  >
+  <svelte:fragment>
+    <Field
+      >Wait for <StringInput size={3} value={block.seconds} onChange={handleSecondsChange} /> seconds</Field
+    >
+  </svelte:fragment>
+  <svelte:fragment slot="next" let:next>
+    {#if next !== null}
+      <AnyBlock block={next} />
+    {/if}
+  </svelte:fragment>
 </Block>
