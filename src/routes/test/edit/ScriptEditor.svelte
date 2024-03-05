@@ -14,6 +14,8 @@
   import * as Card from "$lib/components/ui/card";
   import * as HoverCard from "$lib/components/ui/hover-card";
   import { Button } from "$lib/components/ui/button";
+  import { open } from "@tauri-apps/api/shell";
+  import { toast } from "svelte-sonner";
 
   export let file: ScriptFile;
 
@@ -49,16 +51,10 @@
 
   async function runTestInCloud(projectId: string) {
     try {
-      const response = await runScriptInCloud({ script, projectId });
-
-      const match = response.match(/output: (https?:\/\/[^\s]+)/);
-
-      if (match === null) {
-        throw new Error("No URL found in output");
-      }
-
-      open(match[1]);
+      const results = await runScriptInCloud({ script, projectId });
+      open(results);
     } catch (error) {
+      toast.error("Error running test in cloud. Check your configuration.");
       console.error(error);
     }
   }
@@ -95,25 +91,39 @@
       <DropdownMenu.Group>
         <DropdownMenu.Label>Authentication/Authorization</DropdownMenu.Label>
         <DropdownMenu.Separator />
-        <DropdownMenu.Item on:click={() => handleExScript(scripts.BASIC_AUTHENTICATION)}>Basic Authentication</DropdownMenu.Item>
-        <DropdownMenu.Item on:click={() => handleExScript(scripts.DIGEST_AUTHENTICATION)}>Digest Authentication</DropdownMenu.Item>
+        <DropdownMenu.Item on:click={() => handleExScript(scripts.BASIC_AUTHENTICATION)}
+          >Basic Authentication</DropdownMenu.Item
+        >
+        <DropdownMenu.Item on:click={() => handleExScript(scripts.DIGEST_AUTHENTICATION)}
+          >Digest Authentication</DropdownMenu.Item
+        >
       </DropdownMenu.Group>
       <DropdownMenu.Group>
         <DropdownMenu.Label>API CRUD operations</DropdownMenu.Label>
         <DropdownMenu.Separator />
-        <DropdownMenu.Item on:click={() => handleExScript(scripts.CORE_K6_API)}>Core k6 APIs example</DropdownMenu.Item>
+        <DropdownMenu.Item on:click={() => handleExScript(scripts.CORE_K6_API)}
+          >Core k6 APIs example</DropdownMenu.Item
+        >
       </DropdownMenu.Group>
       <DropdownMenu.Group>
         <DropdownMenu.Label>Cookies</DropdownMenu.Label>
         <DropdownMenu.Separator />
-        <DropdownMenu.Item on:click={() => handleExScript(scripts.COOKIES_HEADER)}>Accessing a cookie set in response headers</DropdownMenu.Item>
-        <DropdownMenu.Item on:click={() => handleExScript(scripts.COOKIES_LOG_RESPONSE)}>Logging all cookies in response</DropdownMenu.Item>
-        <DropdownMenu.Item on:click={() => handleExScript(scripts.COOKIES_SET_JAR)}>Setting a cookie in VU cookie jar</DropdownMenu.Item>
+        <DropdownMenu.Item on:click={() => handleExScript(scripts.COOKIES_HEADER)}
+          >Accessing a cookie set in response headers</DropdownMenu.Item
+        >
+        <DropdownMenu.Item on:click={() => handleExScript(scripts.COOKIES_LOG_RESPONSE)}
+          >Logging all cookies in response</DropdownMenu.Item
+        >
+        <DropdownMenu.Item on:click={() => handleExScript(scripts.COOKIES_SET_JAR)}
+          >Setting a cookie in VU cookie jar</DropdownMenu.Item
+        >
       </DropdownMenu.Group>
       <DropdownMenu.Group>
         <DropdownMenu.Label>Correlation</DropdownMenu.Label>
         <DropdownMenu.Separator />
-        <DropdownMenu.Item on:click={() => handleExScript(scripts.EXTRACT_JSON)}>Extracting values from JSON response</DropdownMenu.Item>
+        <DropdownMenu.Item on:click={() => handleExScript(scripts.EXTRACT_JSON)}
+          >Extracting values from JSON response</DropdownMenu.Item
+        >
       </DropdownMenu.Group>
     </DropdownMenu.Content>
   </DropdownMenu.Root>

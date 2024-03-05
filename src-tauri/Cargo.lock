@@ -1494,6 +1494,7 @@ version = "0.1.0"
 dependencies = [
  "dirs",
  "reqwest",
+ "regex",
  "serde",
  "serde_json",
  "tauri",
