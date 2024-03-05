@@ -37,7 +37,7 @@
 </div>
 <div class="relative">
   <div
-    class="absolute w-full"
+    class="absolute max-h-4 w-full"
     class:connected
     class:dropping
     style={`height: ${height}px`}
@@ -65,10 +65,10 @@
   .dropping {
     position: relative;
     background-color: #000;
+    max-height: none;
     opacity: 0.2;
   }
 
   .connected {
-    max-height: 16px;
   }
 </style>

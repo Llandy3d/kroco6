@@ -40,7 +40,7 @@
       </div>
     </div>
   </div>
-  <div class="footer h-2 w-full rounded-tr-md"></div>
+  <div class="footer h-2 w-full rounded-tr-md shadow-md shadow-slate-400"></div>
 </div>
 
 <style>
