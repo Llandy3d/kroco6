@@ -48,7 +48,9 @@ fn main() {
             create_test,
             list_tests,
             get_test,
-            save_test
+            save_test,
+            load_project_config,
+            save_project_config,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -135,6 +137,29 @@ async fn get_project(
     state
         .project_manager
         .get_project(name)
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn load_project_config(
+    state: tauri::State<'_, ApplicationState>,
+    project: models::Project,
+) -> Result<models::ProjectConfig, String> {
+    state
+        .project_manager
+        .load_project_config(project)
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn save_project_config(
+    state: tauri::State<'_, ApplicationState>,
+    project: models::Project,
+    project_config: models::ProjectConfig,
+) -> Result<(), String> {
+    state
+        .project_manager
+        .save_project_config(project, project_config)
         .map_err(|e| e.to_string())
 }
 

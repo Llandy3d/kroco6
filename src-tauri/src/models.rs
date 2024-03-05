@@ -73,7 +73,7 @@ impl Test {
 // or in parallel).
 // FIXME @oleiade: put this to use and drop the dead_code allowance
 #[allow(dead_code)]
-#[derive(Clone, Debug, Serialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum TestCollection {
     // A single test
     Test(Test),
@@ -84,7 +84,7 @@ pub enum TestCollection {
 
 // A Project represents a collection of tests and suites
 // that can be ran.
-#[derive(Clone, Debug, Serialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Project {
     // The test resources that are part of the project
     pub test_collections: Vec<TestCollection>,
@@ -99,6 +99,7 @@ pub struct Project {
     // at the project level (and give it precedence) but for the hackathon
     // we start and stick with an app-wide "global" environment.
     // environment: Environment,
+    pub project_config: Option<ProjectConfig>,
 }
 
 impl Project {
@@ -107,11 +108,28 @@ impl Project {
             test_collections: vec![],
             name: name.to_string(),
             description: description.map(|s| s.to_string()),
+            project_config: None,
         }
     }
 
     pub fn default() -> Self {
         Self::new("default", None)
+    }
+}
+
+// project configuration
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct ProjectConfig {
+    cloud_token: Option<String>,
+    cloud_project_id: Option<String>,
+}
+
+impl ProjectConfig {
+    pub fn new() -> Self {
+        Self {
+            cloud_token: None,
+            cloud_project_id: None,
+        }
     }
 }
 
@@ -131,6 +149,19 @@ impl Environment {
             variables,
         }
     }
+
+    // pub fn load(&self) -> io::Result<ProjectConfig> {
+    //     let file = fs::File::open(&self.file_path)?;
+    //     let environments_data = serde_json::from_reader(file)?;
+    //     Ok(environments_data)
+    // }
+
+    // pub fn save(&self, project_config: &ProjectConfig) -> io::Result<()> {
+    //     let file = fs::File::create(&self.file_path)?;
+    //     serde_json::to_writer_pretty(file, environments_data)?;
+
+    //     Ok(())
+    // }
 }
 
 // The environment data file, it includes the currently
