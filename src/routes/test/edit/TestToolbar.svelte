@@ -15,7 +15,7 @@
   let modalOpen = false;
   let projectConfig: ProjectConfig;
 
-  $: canRunTestsInCloud = token !== "" && projectId !== "";
+  $: canRunTestsInCloud = projectConfig.cloud_token !== "" && projectConfig.cloud_project_id !== "";
 
   onMount(async () => {
     // TODO: we need to know the current active project
