@@ -28,7 +28,7 @@ interface SleepStep {
 }
 
 interface HttpRequestStep {
-  type: "library";
+  type: "http-request";
   name: string;
   method: string;
   url: string;
