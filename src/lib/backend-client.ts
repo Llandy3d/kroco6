@@ -28,6 +28,7 @@ export interface ProjectConfig {
 
 export interface Project {
   name: string;
+  test_collections?: Array<Test>;
   description?: string;
   project_config?: ProjectConfig,
 }
