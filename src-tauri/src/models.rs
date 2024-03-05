@@ -120,8 +120,8 @@ impl Project {
 // project configuration
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ProjectConfig {
-    cloud_token: Option<String>,
-    cloud_project_id: Option<String>,
+    pub cloud_token: Option<String>,
+    pub cloud_project_id: Option<String>,
 }
 
 impl ProjectConfig {
@@ -181,4 +181,18 @@ impl EnvironmentsData {
             active: active.to_string(),
         }
     }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct CloudTest {
+    id: u32,
+    name: String,
+    project_id: u32,
+    script: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct CloudTestListResponse {
+    #[serde(rename(deserialize = "k6-tests"))]
+    pub k6_tests: Vec<CloudTest>,
 }
