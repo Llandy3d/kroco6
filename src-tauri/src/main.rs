@@ -5,11 +5,12 @@ mod models;
 mod operations;
 
 use std::fs;
-use std::io::{Read, Write};
+use std::io::{Read, Write, BufRead, BufReader};
 use std::path::Path;
 use std::process::{Command, Stdio};
 use std::sync::Mutex;
 use tauri::{Manager, Window};
+use regex::Regex;
 
 use crate::operations::ProjectManager;
 
@@ -358,13 +359,17 @@ async fn run_script_in_cloud(script: String, project_id: String) -> Result<Strin
             .expect("Failed to write script.");
     }
 
-    let mut k6_output = String::new();
-    if let Some(mut stdout) = child.stdout.take() {
-        stdout
-            .read_to_string(&mut k6_output)
-            .expect("Failed to read stdout");
+    let re = Regex::new(r"output: (https?://[^\s]+)").unwrap();
+    if let Some(stdout) = child.stdout.take() {
+        let reader = BufReader::new(stdout);
+        for line in reader.lines() {
+            let line = line.expect("Failed to read line");
+            if let Some(cap) = re.captures(&line) {
+                return Ok(cap[1].to_string());
+            }
+        }
     }
 
     let _ = child.wait_with_output().expect("Failed to execute command");
-    Ok(k6_output)
+    Err("No URL found in output".to_string())
 }
