@@ -9,7 +9,7 @@ use std::io::{Read, Write};
 use std::path::Path;
 use std::process::{Command, Stdio};
 use std::sync::Mutex;
-use tauri::{Window, Manager};
+use tauri::{Manager, Window};
 
 use crate::operations::ProjectManager;
 
@@ -47,7 +47,8 @@ fn main() {
             save_environments,
             create_test,
             list_tests,
-            get_test
+            get_test,
+            save_test
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -56,16 +57,28 @@ fn main() {
 #[tauri::command]
 async fn close_splashscreen(window: Window) {
     // Close splashscreen
-    window.get_window("splashscreen").expect("no window labeled 'splashscreen' found").close().unwrap();
+    window
+        .get_window("splashscreen")
+        .expect("no window labeled 'splashscreen' found")
+        .close()
+        .unwrap();
 
     // Show main window
-    window.get_window("main").expect("no window labeled 'main' found").show().unwrap();
+    window
+        .get_window("main")
+        .expect("no window labeled 'main' found")
+        .show()
+        .unwrap();
 }
 
 #[tauri::command]
 async fn show_splashscreen(window: Window) {
     // Show splashscreen
-    window.get_window("splashscreen").expect("no window labeled 'splashscreen' found").show().unwrap();
+    window
+        .get_window("splashscreen")
+        .expect("no window labeled 'splashscreen' found")
+        .show()
+        .unwrap();
 }
 
 #[tauri::command]
@@ -175,6 +188,19 @@ async fn get_test(
     state
         .project_manager
         .get_test(project_name, test_name)
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn save_test(
+    state: tauri::State<'_, ApplicationState>,
+    project_name: &str,
+    test_name: &str,
+    new_content: &str,
+) -> Result<(), String> {
+    state
+        .project_manager
+        .save_test(project_name, test_name, new_content)
         .map_err(|e| e.to_string())
 }
 
