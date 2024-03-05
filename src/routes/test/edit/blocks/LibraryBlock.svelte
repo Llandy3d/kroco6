@@ -32,7 +32,7 @@
     {#each Object.entries(block.parameters) as [key, param] (key)}
       {#if param.type === "string"}
         <Field>
-          {key}: <StringInput value={param.value} />
+          {key}: <StringInput value={param.value} onChange={() => {}} />
         </Field>
       {/if}
     {/each}

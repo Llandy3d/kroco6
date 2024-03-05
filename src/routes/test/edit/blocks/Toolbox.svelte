@@ -47,6 +47,15 @@
           next: null,
         }),
         defineTemplate({
+          id: "http-request-template",
+          type: "http-request",
+          method: "get",
+          url: "",
+          name: "",
+          parameters: {},
+          next: null,
+        }),
+        defineTemplate({
           id: "check-template",
           type: "check",
           target: null,

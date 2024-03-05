@@ -4,18 +4,18 @@
   import { isStepBlock } from "$lib/stores/blocks/utils";
   import AnyBlock from "./AnyBlock.svelte";
   import { STEP_COLOR } from "./colors";
-  import StringInput, { type StringInputChangeEvent } from "./inputs/StringInput.svelte";
+  import StringInput from "./inputs/StringInput.svelte";
   import Block from "./primitives/Block.svelte";
   import Collection from "./primitives/Collection.svelte";
   import Field from "./primitives/Field.svelte";
 
   export let block: GroupBlock;
 
-  function handleNameChange(ev: CustomEvent<StringInputChangeEvent>) {
+  function handleNameChange(value: string) {
     test.update((test) =>
       updateBlock(test, {
         ...block,
-        name: ev.detail.value,
+        name: value,
       }),
     );
   }
@@ -44,7 +44,7 @@
   bottom={{ block: block.next, accepts: isStepBlock, onDrop: handleDropNext }}
 >
   <svelte:fragment>
-    <Field>Grouped as <StringInput value={block.name} on:change={handleNameChange} /></Field>
+    <Field>Grouped as <StringInput value={block.name} onChange={handleNameChange} /></Field>
     <Field>do the following:</Field>
     <Collection
       owner={block}

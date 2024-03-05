@@ -12,6 +12,10 @@ type GroupBlock = Omit<strict.GroupBlock, "next" | "step"> & {
   next: Block | null;
 };
 
+type HttpRequestBlock = Omit<strict.HttpRequestBlock, "next"> & {
+  next: Block | null;
+};
+
 type LibraryBlock = Omit<strict.LibraryBlock, "next"> & {
   next: Block | null;
 };
@@ -37,6 +41,7 @@ type Block =
   | WithTemplate<CheckBlock>
   | WithTemplate<ScenarioBlock>
   | WithTemplate<ExecutorBlock>
+  | WithTemplate<HttpRequestBlock>
   | WithTemplate<SleepBlock>;
 
 type Chainable = Extract<Block, { next: Block | null }>;
@@ -84,6 +89,7 @@ export {
   type CheckBlock,
   type ExecutorBlock,
   type GroupBlock,
+  type HttpRequestBlock,
   type LibraryBlock,
   type Root,
   type ScenarioBlock,

@@ -1,31 +1,31 @@
 <script lang="ts">
   import { test, updateBlock } from "$lib/stores/blocks";
   import type { ExecutorBlock } from "$lib/stores/blocks/model/loose";
-  import StringInput, { type StringInputChangeEvent } from "./inputs/StringInput.svelte";
+  import StringInput from "./inputs/StringInput.svelte";
   import Block from "./primitives/Block.svelte";
   import Field from "./primitives/Field.svelte";
 
   export let block: ExecutorBlock;
 
-  function handleVUsChange(ev: CustomEvent<StringInputChangeEvent>) {
+  function handleVUsChange(value: string) {
     test.update((test) => {
       return updateBlock(test, {
         ...block,
         executor: {
           ...block.executor,
-          vus: +ev.detail.value,
+          vus: +value,
         },
       });
     });
   }
 
-  function handleDurationChange(ev: CustomEvent<StringInputChangeEvent>) {
+  function handleDurationChange(value: string) {
     test.update((test) => {
       return updateBlock(test, {
         ...block,
         executor: {
           ...block.executor,
-          duration: ev.detail.value,
+          duration: value,
         },
       });
     });
@@ -35,10 +35,10 @@
 <Block {block} color={{ primary: "rgb(34 197 94)", secondary: "rgb(187 247 208)" }}>
   {#if block.executor.type === "constant-vus"}
     <Field
-      ><StringInput size={3} value={block.executor.vus} on:change={handleVUsChange} /> VUs for <StringInput
+      ><StringInput size={3} value={block.executor.vus} onChange={handleVUsChange} /> VUs for <StringInput
         size={3}
         value={block.executor.duration}
-        on:change={handleDurationChange}
+        onChange={handleDurationChange}
       /></Field
     >
   {/if}

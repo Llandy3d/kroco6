@@ -4,18 +4,18 @@
   import { isStepBlock } from "$lib/stores/blocks/utils";
   import AnyBlock from "./AnyBlock.svelte";
   import { STEP_COLOR } from "./colors";
-  import StringInput, { type StringInputChangeEvent } from "./inputs/StringInput.svelte";
+  import StringInput from "./inputs/StringInput.svelte";
   import Block from "./primitives/Block.svelte";
   import Collection from "./primitives/Collection.svelte";
   import Field from "./primitives/Field.svelte";
 
   export let block: ScenarioBlock;
 
-  function handleNameChange(ev: CustomEvent<StringInputChangeEvent>) {
+  function handleNameChange(value: string) {
     test.update((test) =>
       updateBlock(test, {
         ...block,
-        name: ev.detail.value,
+        name: value,
       }),
     );
   }
@@ -31,7 +31,7 @@
 
 <Block color={{ primary: "rgb(129 140 248)", secondary: "white" }} {block}>
   <Field
-    >Run <StringInput placeholder="Scenario name" value={block.name} on:change={handleNameChange} />
+    >Run <StringInput placeholder="Scenario name" value={block.name} onChange={handleNameChange} />
     with
   </Field>
   <Field>and do the following:</Field>

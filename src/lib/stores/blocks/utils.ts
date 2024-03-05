@@ -21,7 +21,8 @@ function isStepBlock(value: unknown): value is StepBlock {
     value.type === "check" ||
     value.type === "group" ||
     value.type === "library" ||
-    value.type === "sleep"
+    value.type === "sleep" ||
+    value.type === "http-request"
   );
 }
 
@@ -30,7 +31,7 @@ function isHttpRequestBlock(value: unknown): value is LibraryBlock {
     return false;
   }
 
-  return value.type === "library";
+  return value.type === "http-request" || value.type === "library";
 }
 
 export { isBlock, isHttpRequestBlock, isScenarioBlock, isStepBlock };

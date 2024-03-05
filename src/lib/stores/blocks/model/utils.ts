@@ -53,6 +53,7 @@ function replace(current: Block, target: Block, replacement: Block): Block {
     case "executor":
       return current;
 
+    case "http-request":
     case "check":
     case "library":
       if (current.next === null) {
@@ -126,6 +127,7 @@ function detach<T extends Block>(current: T, target: Block): T {
     case "executor":
       return current;
 
+    case "http-request":
     case "check":
     case "library":
       if (current.next === null) {

@@ -16,7 +16,7 @@ function* enumerate(start: model.StepBlock | null): Generator<model.StepBlock> {
   }
 }
 
-function toHttpRequestStep(model: model.LibraryBlock): HttpRequestStep {
+function toHttpRequestStep(model: model.LibraryBlock | model.HttpRequestBlock): HttpRequestStep {
   return {
     type: "library",
     name: model.name,
@@ -40,6 +40,9 @@ function toStep(model: model.StepBlock): Step {
         target: toHttpRequestStep(model.target),
         checks: [],
       };
+
+    case "http-request":
+      return toHttpRequestStep(model);
 
     case "library":
       return toHttpRequestStep(model);
