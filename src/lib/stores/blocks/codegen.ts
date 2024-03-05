@@ -53,6 +53,9 @@ function emitStep(step: Step): string {
 				})
 			`;
 
+    case "sleep":
+      return `sleep(${step.seconds});`;
+
     default:
       return exhaustive(step);
   }
@@ -118,7 +121,7 @@ function emitScript(test: Test) {
 
   const code = `
     import http from 'k6/http';
-    import { group, check } from 'k6';
+    import { group, check, sleep } from 'k6';
 
     export const options = {
       scenarios: { 

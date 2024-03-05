@@ -25,6 +25,10 @@ type ScenarioBlock = Omit<strict.ScenarioBlock, "step"> & {
   step: Block | null;
 };
 
+type SleepBlock = Omit<strict.SleepBlock, "next"> & {
+  next: Block | null;
+};
+
 type ExecutorBlock = strict.ExecutorBlock;
 
 type Block =
@@ -32,7 +36,8 @@ type Block =
   | WithTemplate<HttpRequestBlock>
   | WithTemplate<CheckBlock>
   | WithTemplate<ScenarioBlock>
-  | WithTemplate<ExecutorBlock>;
+  | WithTemplate<ExecutorBlock>
+  | WithTemplate<SleepBlock>;
 
 type Chainable = Extract<Block, { next: Block | null }>;
 
@@ -82,5 +87,6 @@ export {
   type HttpRequestBlock,
   type Root,
   type ScenarioBlock,
+  type SleepBlock,
   type Test,
 };

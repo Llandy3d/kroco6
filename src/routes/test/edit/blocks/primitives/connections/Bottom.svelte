@@ -68,7 +68,4 @@
     max-height: none;
     opacity: 0.2;
   }
-
-  .connected {
-  }
 </style>

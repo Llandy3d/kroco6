@@ -59,6 +59,12 @@
           ],
           next: null,
         }),
+        defineTemplate({
+          id: "sleep-template",
+          type: "sleep",
+          seconds: 1,
+          next: null,
+        }),
       ],
     },
   ];

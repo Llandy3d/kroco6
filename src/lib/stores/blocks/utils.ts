@@ -17,7 +17,12 @@ function isStepBlock(value: unknown): value is StepBlock {
     return false;
   }
 
-  return value.type === "check" || value.type === "group" || value.type === "http-request";
+  return (
+    value.type === "check" ||
+    value.type === "group" ||
+    value.type === "http-request" ||
+    value.type === "sleep"
+  );
 }
 
 function isHttpRequestBlock(value: unknown): value is HttpRequestBlock {

@@ -22,6 +22,11 @@ interface GroupStep {
   steps: Step[];
 }
 
+interface SleepStep {
+  type: "sleep";
+  seconds: number;
+}
+
 interface HttpRequestStep {
   type: "http-request";
   name: string;
@@ -29,7 +34,7 @@ interface HttpRequestStep {
   url: string;
 }
 
-type Step = GroupStep | HttpRequestStep | CheckStep;
+type Step = GroupStep | HttpRequestStep | CheckStep | SleepStep;
 
 interface ConstantVusExecutor {
   type: "constant-vus";
@@ -59,13 +64,13 @@ interface Test {
 }
 
 export type {
-  Test,
-  Scenario,
-  Step,
-  Executor,
-  HttpRequestStep,
-  GroupStep,
-  CheckStep,
-  StatusCheck,
   BodyContainsCheck,
+  CheckStep,
+  Executor,
+  GroupStep,
+  HttpRequestStep,
+  Scenario,
+  StatusCheck,
+  Step,
+  Test,
 };

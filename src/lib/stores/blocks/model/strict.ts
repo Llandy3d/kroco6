@@ -126,7 +126,22 @@ const checkBlock: BaseSchema<CheckBlock> = merge([
   }),
 ]);
 
-const stepBlock = union([groupBlock, httpRequest, checkBlock]);
+interface SleepBlock extends ChainableBlock {
+  type: "sleep";
+  seconds: number;
+  next: StepBlock | null;
+}
+
+const sleepBlock: BaseSchema<SleepBlock> = merge([
+  blockBase,
+  object({
+    type: literal("sleep"),
+    seconds: number(),
+    next: nullable(lazy(() => stepBlock)),
+  }),
+]);
+
+const stepBlock = union([groupBlock, httpRequest, checkBlock, sleepBlock]);
 
 type StepBlock = Output<typeof stepBlock>;
 
@@ -159,7 +174,14 @@ const scenarioBlock = merge([
 
 type ScenarioBlock = Output<typeof scenarioBlock>;
 
-const block = union([groupBlock, httpRequest, checkBlock, executorBlock, scenarioBlock]);
+const block = union([
+  groupBlock,
+  httpRequest,
+  checkBlock,
+  executorBlock,
+  scenarioBlock,
+  sleepBlock,
+]);
 
 type Block = Output<typeof block>;
 
@@ -197,6 +219,7 @@ export {
   type HttpRequestBlock,
   type Root,
   type ScenarioBlock,
+  type SleepBlock,
   type StepBlock,
   type Test,
 };

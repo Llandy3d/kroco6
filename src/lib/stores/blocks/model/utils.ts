@@ -71,6 +71,9 @@ function replace(current: Block, target: Block, replacement: Block): Block {
         next: replace(current.next, target, replacement),
       };
 
+    case "sleep":
+      return current;
+
     default:
       return exhaustive(current);
   }
@@ -140,6 +143,9 @@ function detach<T extends Block>(current: T, target: Block): T {
         ...current,
         next: detach(current.next, target),
       };
+
+    case "sleep":
+      return current;
 
     default:
       return exhaustive(current);
