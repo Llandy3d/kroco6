@@ -1,11 +1,9 @@
 <script lang="ts">
-  import { isRootBlock, type Block } from "$lib/stores/test/types";
+  import type { Root } from "$lib/stores/blocks/model/loose";
 
-  export let root: Block;
+  export let root: Root;
 </script>
 
-{#if isRootBlock(root)}
-  <div class="absolute" style="left: {root.parent.left}px; top: {root.parent.top}px;">
-    <slot />
-  </div>
-{/if}
+<div class="absolute" style="left: {root.left}px; top: {root.top}px;">
+  <slot />
+</div>

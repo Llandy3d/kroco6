@@ -1,7 +1,7 @@
 <script lang="ts">
-  import type { ApiEndpoint, ApiOperation } from "$lib/stores/test/types";
-  import MethodButton from "./MethodButton.svelte";
+  import type { ApiEndpoint, ApiOperation } from "$lib/stores/library/types";
   import { Plus } from "lucide-svelte";
+  import MethodButton from "./MethodButton.svelte";
 
   export let endpoint: ApiEndpoint;
   export let selected: ApiOperation | undefined;

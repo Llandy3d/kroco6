@@ -1,8 +1,8 @@
-import { exhaustive } from "./utils/typescript";
-import type { Scenario, Step, Test } from "./types";
 import * as prettier from "prettier";
 import * as babelParser from "prettier/parser-babel";
 import * as estreePlugin from "prettier/plugins/estree";
+import type { Scenario, Step, Test } from "../../types";
+import { exhaustive } from "../../utils/typescript";
 
 function sanitizeName(name: string) {
   const parts = name

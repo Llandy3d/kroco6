@@ -1,23 +1,21 @@
 <script lang="ts" generics="TBlock extends Block, TBottom extends Block">
-  import { derived } from "svelte/store";
+  import { isBlock } from "$lib/stores/blocks/utils";
 
-  import { isBlock, type Block, type BlockParent } from "$lib/stores/test/types";
+  import type { BottomConnection } from "./connections/types";
+
+  import type { Block } from "$lib/stores/blocks/model/loose";
   import { GripVertical } from "lucide-svelte";
-  import { draggable, type DragChangeEvent, type DroppedEvent, type AcceptsCallback } from "./dnd";
-  import { cn } from "$lib/utils";
-  import { blocks, byBlockParent, deleteBlock, reparentBlock, selected } from "$lib/stores/test";
   import Bottom from "./connections/Bottom.svelte";
   import Top from "./connections/Top.svelte";
+  import { draggable, type AcceptsCallback, type DragChangeEvent, type DroppedEvent } from "./dnd";
   import { toBlockColorStyle, type BlockColor } from "./types";
 
   export let block: TBlock;
 
   export let top: AcceptsCallback | boolean = false;
-  export let bottom: AcceptsCallback | null = null;
+  export let bottom: BottomConnection<TBottom> | null = null;
 
   export let color: BlockColor;
-
-  const next = derived(blocks, byBlockParent(block.id));
 
   let dragging = false;
 
@@ -31,8 +29,6 @@
       ev.preventDefault();
 
       ev.target.parentElement?.focus();
-
-      selected.set(block);
     }
   }
 
@@ -40,10 +36,6 @@
     if (ev.key === "Backspace") {
       ev.preventDefault();
       ev.stopPropagation();
-
-      deleteBlock(block);
-
-      $selected = null;
     }
   }
 
@@ -64,20 +56,15 @@
   }
 
   function acceptsBottom(value: unknown): value is TBottom {
-    if (bottom === null || block.parent.type === "toolbox" || !isBlock(value)) {
+    if (bottom === null) {
       return false;
     }
 
-    return isBlock(value) && bottom(value);
+    return isBlock(value) && bottom.accepts(value);
   }
 
-  function handleDrop(ev: DroppedEvent<TBottom, Block>) {
-    const parent: BlockParent = {
-      type: "block",
-      id: block.id,
-    };
-
-    reparentBlock(parent, ev.data.dropped);
+  function handleDropBottom(ev: DroppedEvent<TBottom, Block>) {
+    bottom?.onDrop(ev.data.dropped);
   }
 </script>
 
@@ -113,9 +100,9 @@
     </div>
   </div>
   {#if bottom !== null}
-    <Bottom data={block} accepts={acceptsBottom} onDrop={handleDrop} />
+    <Bottom data={block} accepts={acceptsBottom} onDrop={handleDropBottom} />
     <div>
-      <slot name="next" child={$next} />
+      <slot name="next" next={bottom.block} />
     </div>
   {/if}
 </div>

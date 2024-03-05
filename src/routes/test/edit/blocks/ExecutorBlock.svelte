@@ -1,9 +1,9 @@
 <script lang="ts">
-  import type { ExecutorBlock } from "$lib/stores/test/types";
+  import { updateBlock } from "$lib/stores/blocks";
+  import type { ExecutorBlock } from "$lib/stores/blocks/model/loose";
+  import StringInput, { type StringInputChangeEvent } from "./inputs/StringInput.svelte";
   import Block from "./primitives/Block.svelte";
   import Field from "./primitives/Field.svelte";
-  import StringInput, { type StringInputChangeEvent } from "./inputs/StringInput.svelte";
-  import { updateBlock } from "$lib/stores/test";
 
   export let block: ExecutorBlock;
 

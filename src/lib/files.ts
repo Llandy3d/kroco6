@@ -1,7 +1,7 @@
-import type { OpenAPIV3 } from "openapi-types";
-import type { OpenFile } from "./stores/editor";
-import { EMPTY_BLOCK_TEST, type BlockTest } from "./stores/test/types";
 import dedent from "dedent";
+import { EMPTY_BLOCK_TEST } from "./stores/blocks/constants";
+import type { Test } from "./stores/blocks/model/loose";
+import type { OpenFile } from "./stores/editor";
 
 const NEW_BLOCKS_TEST = JSON.stringify(EMPTY_BLOCK_TEST);
 
@@ -55,7 +55,7 @@ function loadContent(file: OpenFile): string {
   return data;
 }
 
-function storeContent(file: OpenFile, content: BlockTest | string | OpenAPIV3.Document) {
+function storeContent(file: OpenFile, content: Test | string) {
   sessionStorage.setItem(
     file.handle,
     typeof content === "string" ? content : JSON.stringify(content),

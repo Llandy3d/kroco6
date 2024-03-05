@@ -1,19 +1,41 @@
 <script lang="ts">
-  import { isStepBlock, type HttpRequestBlock, type StepBlock } from "$lib/stores/test/types";
-  import Field from "./primitives/Field.svelte";
-  import Block from "./primitives/Block.svelte";
-  import StringInput from "./inputs/StringInput.svelte";
-  import { STEP_COLOR } from "./colors";
+  import { detachBlock, updateBlock } from "$lib/stores/blocks";
+  import {
+    instantiate,
+    type Block as BlockType,
+    type HttpRequestBlock,
+  } from "$lib/stores/blocks/model/loose";
+  import { isStepBlock } from "$lib/stores/blocks/utils";
   import AnyBlock from "./AnyBlock.svelte";
-  import { derived } from "svelte/store";
-  import { byBlockParent, steps } from "$lib/stores/test";
+  import { STEP_COLOR } from "./colors";
+  import StringInput from "./inputs/StringInput.svelte";
+  import Block from "./primitives/Block.svelte";
+  import Field from "./primitives/Field.svelte";
 
   export let block: HttpRequestBlock;
 
-  const next = derived(steps, byBlockParent(block.id));
+  function handleNextDrop(next: BlockType) {
+    if (!isStepBlock(next)) {
+      return;
+    }
+
+    detachBlock(next);
+    updateBlock({
+      ...block,
+      next: {
+        ...instantiate(next),
+        next: block.next,
+      },
+    });
+  }
 </script>
 
-<Block {block} color={STEP_COLOR} top={true} bottom={isStepBlock}>
+<Block
+  {block}
+  color={STEP_COLOR}
+  top={true}
+  bottom={{ block: block.next, accepts: isStepBlock, onDrop: handleNextDrop }}
+>
   <svelte:fragment>
     <Field>
       {block.name}
@@ -27,8 +49,8 @@
     {/each}
   </svelte:fragment>
   <svelte:fragment slot="next">
-    {#if $next !== null}
-      <AnyBlock block={$next} />
+    {#if block.next !== null}
+      <AnyBlock block={block.next} />
     {/if}
   </svelte:fragment>
 </Block>

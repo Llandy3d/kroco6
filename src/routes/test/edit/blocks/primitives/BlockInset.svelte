@@ -1,18 +1,14 @@
-<script lang="ts">
-  import { dropzone, type DroppedEvent, type DroppingEvent, type AcceptsCallback } from "./dnd";
-  import { type Block, type BlockParent } from "$lib/stores/test/types";
-  import { derived } from "svelte/store";
-  import { blocks, byCollectionParent, reparentBlock } from "$lib/stores/test";
+<script lang="ts" generics="TBottom extends Block">
+  import type { Block } from "$lib/stores/blocks/model/loose";
+  import { isBlock } from "$lib/stores/blocks/utils";
+  import type { BottomConnection } from "./connections/types";
+  import { dropzone, type DroppedEvent, type DroppingEvent } from "./dnd";
 
-  export let owner: Block;
-  export let name: string;
-  export let accepts: AcceptsCallback<Block>;
+  export let connection: BottomConnection<TBottom>;
 
   let dropping = false;
 
-  const current = derived(blocks, byCollectionParent(owner.id, name));
-
-  const handleDropped = (ev: CustomEvent<DroppedEvent<Block, {}>>) => {
+  function handleDropped(ev: CustomEvent<DroppedEvent<Block, {}>>) {
     // if ($current !== undefined) {
     //   return;
     // }
@@ -22,11 +18,15 @@
     //   id: owner.id,
     // };
     // reparentBlock(parent, dropped);
-  };
+  }
 
-  const handleDropping = (ev: CustomEvent<DroppingEvent<unknown>>) => {
+  function handleDropping(ev: CustomEvent<DroppingEvent<unknown>>) {
     dropping = ev.detail.dropping;
-  };
+  }
+
+  function accepts(value: unknown): value is TBottom {
+    return isBlock(value) && connection.accepts(value);
+  }
 </script>
 
 <div
@@ -36,5 +36,5 @@
   on:dropped={handleDropped}
   on:dropping={handleDropping}
 >
-  <slot block={$current} />
+  <slot child={connection.block} />
 </div>

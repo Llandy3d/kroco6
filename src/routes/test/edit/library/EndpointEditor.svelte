@@ -1,14 +1,15 @@
 <script lang="ts">
-  import { Input, type InputEvents } from "$lib/components/ui/input";
-  import { Label } from "$lib/components/ui/label";
-  import { type ApiEndpoint, HTTP_METHODS, type ApiOperation } from "$lib/stores/test/types";
-  import { Tabs } from "bits-ui";
-  import MethodEditor from "./MethodEditor.svelte";
-  import { OpenAPIV3 } from "openapi-types";
-  import clsx from "clsx";
-  import { Plus } from "lucide-svelte";
   import { Button } from "$lib/components/ui/button";
   import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
+  import { Input, type InputEvents } from "$lib/components/ui/input";
+  import { Label } from "$lib/components/ui/label";
+  import { HTTP_METHODS } from "$lib/stores/library/constants";
+  import type { ApiEndpoint, ApiOperation } from "$lib/stores/library/types";
+  import { Tabs } from "bits-ui";
+  import clsx from "clsx";
+  import { Plus } from "lucide-svelte";
+  import { OpenAPIV3 } from "openapi-types";
+  import MethodEditor from "./MethodEditor.svelte";
 
   export let endpoint: ApiEndpoint;
   export let selected: OpenAPIV3.HttpMethods | undefined;
@@ -125,11 +126,7 @@
   </Tabs.List>
   {#each endpoint.operations as operation (operation.method)}
     <Tabs.Content value={operation.method}>
-      <MethodEditor
-        {operation}
-        onChange={handleOperationChange}
-        onRemove={handleOperationRemoved}
-      />
+      <MethodEditor {operation} onChange={handleOperationChange} />
     </Tabs.Content>
   {/each}
 </Tabs.Root>

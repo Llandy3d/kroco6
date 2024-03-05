@@ -1,27 +1,22 @@
 <script lang="ts">
-  import { isBlock, type Block, type Parent } from "$lib/stores/test/types";
-
-  import Root from "./Root.svelte";
-  import { dropzone, type DroppedEvent } from "./primitives/dnd";
-  import { reparentBlock, roots, selected } from "$lib/stores/test";
-  import Toolbox from "./Toolbox.svelte";
+  import { dropOnCanvas, test } from "$lib/stores/blocks";
+  import type { Block } from "$lib/stores/blocks/model/loose";
+  import { isBlock } from "$lib/stores/blocks/utils";
   import AnyBlock from "./AnyBlock.svelte";
+  import Root from "./Root.svelte";
+  import Toolbox from "./Toolbox.svelte";
+  import { dropzone, type DroppedEvent } from "./primitives/dnd";
 
   function handleDrop({ detail }: CustomEvent<DroppedEvent<Block, {}>>) {
-    const dropped = detail.data.dropped;
+    const { dropped } = detail.data;
 
-    const parent: Parent = {
-      type: "canvas",
+    dropOnCanvas(dropped, {
       top: detail.top,
       left: detail.left,
-    };
-
-    reparentBlock(parent, dropped);
+    });
   }
 
-  function handleClick() {
-    selected.set(null);
-  }
+  function handleClick() {}
 </script>
 
 <div
@@ -33,9 +28,9 @@
   <!-- svelte-ignore a11y-click-events-have-key-events -->
   <!-- svelte-ignore a11y-no-static-element-interactions -->
   <div class="flex-auto" on:click={handleClick}>
-    {#each $roots as root (root.id)}
+    {#each $test.roots as root (root.block.id)}
       <Root {root}>
-        <AnyBlock block={root} />
+        <AnyBlock block={root.block} />
       </Root>
     {/each}
   </div>

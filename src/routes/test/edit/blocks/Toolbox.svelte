@@ -1,4 +1,6 @@
 <script lang="ts" context="module">
+  import { defineTemplate, type Block } from "$lib/stores/blocks/model/loose";
+
   interface ToolboxCategory {
     id: string;
     name: string;
@@ -10,53 +12,58 @@
       id: "scenarios",
       name: "Scenarios",
       blocks: [
-        {
+        defineTemplate({
           id: "scenario-template",
           type: "scenario",
           name: "",
-          parent: { type: "toolbox" },
-        },
+          step: null,
+        }),
       ],
     },
     {
       id: "executors",
       name: "Executors",
       blocks: [
-        {
+        defineTemplate({
           id: "executor-template",
           type: "executor",
-          executor: { type: "constant-vus", vus: 1, duration: "1m" },
-          parent: { type: "toolbox" },
-        },
+          executor: {
+            type: "constant-vus",
+            vus: 1,
+            duration: "1m",
+          },
+        }),
       ],
     },
     {
       id: "steps",
       name: "Steps",
       blocks: [
-        {
+        defineTemplate({
           id: "group-template",
           type: "group",
           name: "",
-          parent: { type: "toolbox" },
-        },
-        {
+          step: null,
+          next: null,
+        }),
+        defineTemplate({
           id: "check-template",
           type: "check",
+          target: null,
           checks: [
             {
               id: nanoid(),
-              type: "has-status",
-              status: 200,
+              type: "status",
+              value: 200,
             },
           ],
-          parent: { type: "toolbox" },
-        },
+          next: null,
+        }),
       ],
     },
   ];
 
-  const requests = derived(blockTest, ($test) => {
+  const requests = derived(test, ($test) => {
     const baseUrl = $test.library.servers?.[0]?.url ?? "";
 
     return Object.entries($test.library.paths ?? {}).flatMap(([path, methods]) => {
@@ -72,7 +79,7 @@
           url: new URL(path, baseUrl).toString(),
           name: methods.get.summary || `GET ${path}`,
           parameters: {},
-          parent: { type: "toolbox" },
+          next: null,
         },
         methods.post && {
           type: "http-request",
@@ -81,7 +88,7 @@
           url: new URL(path, baseUrl).toString(),
           name: methods.post.summary || `POST ${path}`,
           parameters: {},
-          parent: { type: "toolbox" },
+          next: null,
         },
       ];
 
@@ -91,42 +98,13 @@
 </script>
 
 <script lang="ts">
-  import type { Block, HttpRequestBlock } from "$lib/stores/test/types";
-  import AnyBlock from "./AnyBlock.svelte";
-  import { dropmask } from "./primitives/dnd";
-  import { selected, library, blockTest } from "$lib/stores/test";
-  import { exhaustive, isTruthy, type Falsy } from "$lib/utils/typescript";
+  import { test } from "$lib/stores/blocks";
+  import type { HttpRequestBlock } from "$lib/stores/blocks/model/strict";
+  import { isTruthy, type Falsy } from "$lib/utils/typescript";
   import { nanoid } from "nanoid";
   import { derived } from "svelte/store";
-
-  function isCompatible(block: Block, selected: Block | null) {
-    if (selected === null) {
-      return true;
-    }
-
-    switch (selected.type) {
-      case "scenario":
-        return (
-          block.type === "executor" ||
-          block.type === "group" ||
-          block.type === "http-request" ||
-          block.type === "check"
-        );
-
-      case "http-request":
-      case "executor":
-        return false;
-
-      case "group":
-        return block.type === "group" || block.type === "http-request" || block.type === "check";
-
-      case "check":
-        return block.type === "http-request";
-
-      default:
-        return exhaustive(selected);
-    }
-  }
+  import AnyBlock from "./AnyBlock.svelte";
+  import { dropmask } from "./primitives/dnd";
 </script>
 
 <div class="toolbox absolute bottom-0 top-0 flex flex-col" use:dropmask>
@@ -135,22 +113,16 @@
       <h2 class="p-2 font-bold">{category.name}</h2>
       <ul class="">
         {#each category.blocks as template (template.type)}
-          <li
-            class="border-b border-gray-200 p-2"
-            class:opacity-50={!isCompatible(template, $selected)}
-          >
+          <li class="border-b border-gray-200 p-2">
             <AnyBlock block={template} />
           </li>
         {/each}
       </ul>
     {/each}
     <ul>
-      <h2 class="p-2 font-bold">{$library.info.title}</h2>
+      <h2 class="p-2 font-bold">{$test.library.info.title}</h2>
       {#each $requests as template (template.id)}
-        <li
-          class="border-b border-gray-200 p-2"
-          class:opacity-50={!isCompatible(template, $selected)}
-        >
+        <li class="border-b border-gray-200 p-2">
           <AnyBlock block={template} />
         </li>
       {/each}

@@ -1,57 +1,56 @@
 <script context="module">
   const labels = {
-    "has-status": "has status",
-    "body-contains": "body contains",
+    status: "has status",
+    contains: "body contains",
   };
 </script>
 
 <script lang="ts">
+  import * as Select from "$lib/components/ui/select";
+  import type { Check } from "$lib/stores/blocks/model/strict";
+  import { exhaustive } from "$lib/utils/typescript";
+  import type { Selected } from "bits-ui";
+  import { XIcon } from "lucide-svelte";
   import StringInput, { type StringInputChangeEvent } from "./inputs/StringInput.svelte";
   import Field from "./primitives/Field.svelte";
-  import * as Select from "$lib/components/ui/select";
-  import type { CheckExpression } from "$lib/stores/test/types";
-  import { createEventDispatcher } from "svelte";
-  import type { Selected } from "bits-ui";
-  import { exhaustive } from "$lib/utils/typescript";
-  import { XIcon } from "lucide-svelte";
 
-  export let check: CheckExpression;
-
-  const dispatch = createEventDispatcher<{ change: CheckExpression; remove: CheckExpression }>();
+  export let check: Check;
+  export let onChange: (check: Check) => void;
+  export let onRemove: (check: Check) => void;
 
   const handleStatusChange = (event: CustomEvent<StringInputChangeEvent>) => {
-    dispatch("change", {
-      type: "has-status",
+    onChange({
+      type: "status",
       id: check.id,
-      status: +event.detail.value,
+      value: +event.detail.value,
     });
   };
 
   const handleBodyContainsChange = (event: CustomEvent<StringInputChangeEvent>) => {
-    dispatch("change", {
-      type: "body-contains",
+    onChange({
+      type: "contains",
       id: check.id,
       value: event.detail.value,
     });
   };
 
-  const handleSelectedChange = (selected: Selected<CheckExpression["type"]> | undefined) => {
+  const handleSelectedChange = (selected: Selected<Check["type"]> | undefined) => {
     if (selected === undefined) {
       return;
     }
 
     switch (selected.value) {
-      case "has-status":
-        dispatch("change", {
-          type: "has-status",
+      case "status":
+        onChange({
+          type: "status",
           id: check.id,
-          status: 200,
+          value: 200,
         });
         break;
 
-      case "body-contains":
-        dispatch("change", {
-          type: "body-contains",
+      case "contains":
+        onChange({
+          type: "contains",
           id: check.id,
           value: "",
         });
@@ -64,7 +63,7 @@
   };
 
   const handleRemove = () => {
-    dispatch("remove", check);
+    onRemove(check);
   };
 </script>
 
@@ -74,23 +73,19 @@
     onSelectedChange={handleSelectedChange}
   >
     <Select.Trigger class="flex h-auto w-min items-center bg-white p-1">
-      <Select.Value placeholder="has-status" />
+      <Select.Value placeholder="status" />
     </Select.Trigger>
     <Select.Content sameWidth={false}>
-      <Select.Item value="has-status" label={labels["has-status"]}
-        >{labels["has-status"]}
-      </Select.Item>
-      <Select.Item value="body-contains" label={labels["body-contains"]}
-        >{labels["body-contains"]}
-      </Select.Item>
+      <Select.Item value="status" label={labels["status"]}>{labels["status"]}</Select.Item>
+      <Select.Item value="contains" label={labels["contains"]}>{labels["contains"]}</Select.Item>
     </Select.Content>
   </Select.Root>
 
-  {#if check.type === "has-status"}
+  {#if check.type === "status"}
     {#key check.type}
-      <StringInput size={3} value={check.status} on:change={handleStatusChange} />
+      <StringInput size={3} value={check.value} on:change={handleStatusChange} />
     {/key}
-  {:else if check.type === "body-contains"}
+  {:else if check.type === "contains"}
     {#key check.type}
       <StringInput size={10} value={check.value} on:change={handleBodyContainsChange} />
     {/key}
