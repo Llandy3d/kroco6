@@ -10,20 +10,26 @@
   import { saveToken } from "$lib/backend-client";
   import * as Tooltip from "$lib/components/ui/tooltip";
   import { Content } from "$lib/components/ui/accordion";
-  import { saveProjectConfig, loadProjectConfig, type Project, type ProjectConfig } from "$lib/backend-client";
+  import {
+    saveProjectConfig,
+    loadProjectConfig,
+    type Project,
+    type ProjectConfig,
+  } from "$lib/backend-client";
 
   let modalOpen = false;
   let projectConfig: ProjectConfig;
 
-  $: canRunTestsInCloud = projectConfig.cloud_token !== "" && projectConfig.cloud_project_id !== "";
+  $: canRunTestsInCloud =
+    projectConfig?.cloud_token !== "" && projectConfig?.cloud_project_id !== "";
 
   onMount(async () => {
     // TODO: we need to know the current active project
-    const project: Project = {"name": "default", "test_collections": []};
+    const project: Project = { name: "default", test_collections: [] };
     try {
       projectConfig = await loadProjectConfig(project);
     } catch (error) {
-      projectConfig = {"cloud_token": "", "cloud_project_id": ""};
+      projectConfig = { cloud_token: "", cloud_project_id: "" };
     }
   });
 
@@ -31,7 +37,7 @@
     // NOTE: used to set the env variable
     saveToken(projectConfig.cloud_token);
     // TODO: we need to know the current active project
-    const project: Project = {"name": "default", "test_collections": []};
+    const project: Project = { name: "default", test_collections: [] };
     saveProjectConfig(project, projectConfig);
     modalOpen = false;
   }
@@ -55,7 +61,11 @@
         <Button
           size="sm"
           variant="secondary"
-          on:click={() => runTestInCloud(projectId)}
+          on:click={() => {
+            if (projectConfig) {
+              runTestInCloud(projectConfig.cloud_project_id);
+            }
+          }}
           disabled={!canRunTestsInCloud}
         >
           <UploadCloud size={14} class="mr-2 h-4 w-4" />
