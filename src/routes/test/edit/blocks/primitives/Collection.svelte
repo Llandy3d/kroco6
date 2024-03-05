@@ -1,7 +1,7 @@
 <script lang="ts" generics="TBottom extends Block">
   import { isBlock } from "$lib/stores/blocks/utils";
 
-  import type { Block } from "$lib/stores/blocks/model/loose";
+  import { isTemplate, type Block } from "$lib/stores/blocks/model/loose";
 
   import Bottom from "./connections/Bottom.svelte";
   import type { BottomConnection } from "./connections/types";
@@ -17,7 +17,7 @@
   }
 
   function acceptsBlock(value: unknown): value is TBottom {
-    return isBlock(value) && connection.accepts(value);
+    return !isTemplate(owner) && isBlock(value) && connection.accepts(value);
   }
 </script>
 

@@ -1,9 +1,10 @@
 <script lang="ts" generics="TBottom extends Block">
-  import type { Block } from "$lib/stores/blocks/model/loose";
+  import { isTemplate, type Block } from "$lib/stores/blocks/model/loose";
   import { isBlock } from "$lib/stores/blocks/utils";
   import type { BottomConnection } from "./connections/types";
   import { dropzone, type DroppedEvent, type DroppingEvent } from "./dnd";
 
+  export let owner: Block;
   export let connection: BottomConnection<TBottom>;
 
   let dropping = false;
@@ -25,14 +26,14 @@
   }
 
   function accepts(value: unknown): value is TBottom {
-    return isBlock(value) && connection.accepts(value);
+    return !isTemplate(owner) && isBlock(value) && connection.accepts(value);
   }
 </script>
 
 <div
-  class="inline-block min-h-8 min-w-10 border-2 border-slate-300 bg-white"
+  class="inline-block min-h-6 min-w-10 border-2 border-slate-300 bg-white"
   class:bg-slate-400={dropping}
-  use:dropzone={{ accepts, data: {} }}
+  use:dropzone={{ accepts, data: owner }}
   on:dropped={handleDropped}
   on:dropping={handleDropping}
 >

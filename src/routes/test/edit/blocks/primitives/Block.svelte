@@ -3,7 +3,7 @@
 
   import type { BottomConnection } from "./connections/types";
 
-  import type { Block } from "$lib/stores/blocks/model/loose";
+  import { isTemplate, type Block } from "$lib/stores/blocks/model/loose";
   import { GripVertical } from "lucide-svelte";
   import Bottom from "./connections/Bottom.svelte";
   import Top from "./connections/Top.svelte";
@@ -60,7 +60,7 @@
       return false;
     }
 
-    return isBlock(value) && bottom.accepts(value);
+    return !isTemplate(block) && isBlock(value) && bottom.accepts(value);
   }
 
   function handleDropBottom(ev: DroppedEvent<TBottom, Block>) {

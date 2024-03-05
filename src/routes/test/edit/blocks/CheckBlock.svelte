@@ -82,6 +82,7 @@
   <svelte:fragment>
     <Field>
       Check that <BlockInset
+        owner={block}
         connection={{ block: block.target, accepts: isHttpRequestBlock, onDrop: handleTargetDrop }}
         let:child
       >
