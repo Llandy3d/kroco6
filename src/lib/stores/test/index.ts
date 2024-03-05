@@ -42,6 +42,26 @@ function byCollectionParent<T extends Block>(blockId: string, name: string) {
   };
 }
 
+function isChildOf(parent: Parent, { parent: target }: Block) {
+  if (parent.type === "toolbox") {
+    return false;
+  }
+
+  if (parent.type === "canvas" && target.type === "canvas") {
+    return true;
+  }
+
+  if (parent.type === "block" && target.type === "block") {
+    return parent.id === target.id;
+  }
+
+  if (parent.type === "collection" && target.type === "collection") {
+    return parent.ownerId === target.ownerId && parent.name === target.name;
+  }
+
+  return false;
+}
+
 function updateInBlocks(fn: (blocks: Block[]) => Block[]) {
   blockTest.update((test) => {
     return {
@@ -74,20 +94,29 @@ function reparentBlock(parent: Parent, target: Block) {
       parent,
     };
 
-    if (target.parent.type === "toolbox") {
-      return [...blocks, newBlock];
-    }
-
-    return blocks.map((block) => {
-      if (block.id === target.id) {
+    const newBlocks = blocks.map<Block>((block) => {
+      if (isChildOf(parent, block)) {
         return {
           ...block,
-          parent: parent,
+          parent: {
+            type: "block",
+            id: newBlock.id,
+          },
         };
+      }
+
+      if (block.id === newBlock.id) {
+        return newBlock;
       }
 
       return block;
     });
+
+    if (target.parent.type === "toolbox") {
+      return [...newBlocks, newBlock];
+    }
+
+    return newBlocks;
   });
 }
 

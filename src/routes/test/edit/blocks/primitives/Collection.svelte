@@ -31,7 +31,7 @@
   }
 
   function acceptsBlock(value: unknown): value is Block {
-    return isBlock(value) && accepts(value);
+    return owner.parent.type !== "toolbox" && isBlock(value) && accepts(value);
   }
 </script>
 
@@ -41,7 +41,7 @@
     <div class="flex rounded-l-md">
       <div class="padding w-2"></div>
       <div
-        class="separator relative flex w-6 flex-auto list-none flex-col"
+        class="separator relative mb-4 flex w-6 flex-auto list-none flex-col"
         style={toBlockColorStyle(color)}
       >
         <Bottom

@@ -2,16 +2,15 @@
   import { dropzone, type DroppedEvent, type DroppingEvent, type AcceptsCallback } from "./dnd";
   import { type Block, type BlockParent } from "$lib/stores/test/types";
   import { derived } from "svelte/store";
-  import { blocks, reparentBlock } from "$lib/stores/test";
+  import { blocks, byCollectionParent, reparentBlock } from "$lib/stores/test";
 
   export let owner: Block;
+  export let name: string;
   export let accepts: AcceptsCallback<Block>;
 
   let dropping = false;
 
-  const current = derived(blocks, (blocks) => {
-    return blocks.find((block) => block.parent.type === "block" && block.parent.id === owner.id);
-  });
+  const current = derived(blocks, byCollectionParent(owner.id, name));
 
   const handleDropped = (ev: CustomEvent<DroppedEvent<Block, {}>>) => {
     // if ($current !== undefined) {

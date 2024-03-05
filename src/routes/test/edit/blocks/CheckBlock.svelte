@@ -48,8 +48,8 @@
 <Block {block} color={STEP_COLOR} top={true} bottom={isStepBlock}>
   <svelte:fragment>
     <Field>
-      Check that <BlockInset owner={block} accepts={isHttpRequestBlock} let:block>
-        {#if block !== undefined}
+      Check that <BlockInset name="target" owner={block} accepts={isHttpRequestBlock} let:block>
+        {#if block !== null}
           <AnyBlock {block} />
         {/if}
       </BlockInset>

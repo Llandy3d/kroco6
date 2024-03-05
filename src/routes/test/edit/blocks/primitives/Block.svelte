@@ -20,7 +20,6 @@
   const next = derived(blocks, byBlockParent(block.id));
 
   let dragging = false;
-  let className = "";
 
   function handleDragChange(ev: CustomEvent<DragChangeEvent>) {
     dragging = ev.detail.dragging;
@@ -53,11 +52,7 @@
       return true;
     }
 
-    if (!isBlock(value)) {
-      return false;
-    }
-
-    if (value.id === block.id) {
+    if (!isBlock(value) || value.id === block.id) {
       return false;
     }
 
@@ -69,7 +64,7 @@
   }
 
   function acceptsBottom(value: unknown): value is TBottom {
-    if (bottom === null) {
+    if (bottom === null || block.parent.type === "toolbox" || !isBlock(value)) {
       return false;
     }
 
@@ -84,8 +79,6 @@
 
     reparentBlock(parent, ev.data.dropped);
   }
-
-  export { className as class, handleClass };
 </script>
 
 <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
@@ -93,10 +86,7 @@
 <div
   tabindex="0"
   id={block.id}
-  class={cn(
-    "block-root z-10 flex w-min flex-col rounded-r-md outline-2 outline-indigo-500 focus:outline",
-    className,
-  )}
+  class="block-root z-10 flex w-min flex-col rounded-r-md outline-2 outline-indigo-500 focus:outline"
   class:dragging
   use:draggable={{
     data: block,
@@ -116,7 +106,7 @@
       <GripVertical size={18} />
     </div>
     <div class="block-content relative flex flex-col">
-      {#if top !== null}
+      {#if top}
         <Top />
       {/if}
       <slot />
@@ -124,10 +114,10 @@
   </div>
   {#if bottom !== null}
     <Bottom data={block} accepts={acceptsBottom} onDrop={handleDrop} />
+    <div>
+      <slot name="next" child={$next} />
+    </div>
   {/if}
-  <div>
-    <slot name="next" child={$next} />
-  </div>
 </div>
 
 <style>
