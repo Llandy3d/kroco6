@@ -161,16 +161,15 @@ impl ProjectManager for LocalProjectManager {
 
     // Load project config
     fn load_project_config(&self, project: Project) -> io::Result<ProjectConfig> {
-        let project_config_path = self
-            .projects_dir()
-            .join(project.name)
-            .join(PROJECT_CONFIG_FILE);
-        if !project_config_path.exists() {
+        let project_path = self.projects_dir().join(project.name);
+        if !project_path.exists() {
             return Err(io::Error::new(
                 io::ErrorKind::NotFound,
                 "project config not found",
             ));
         }
+
+        let project_config_path = project_path.join(PROJECT_CONFIG_FILE);
 
         let file = fs::File::open(&project_config_path)?;
         let project_config = serde_json::from_reader(file)?;
@@ -183,16 +182,15 @@ impl ProjectManager for LocalProjectManager {
         project: Project,
         project_config: ProjectConfig,
     ) -> io::Result<()> {
-        let project_config_path = self
-            .projects_dir()
-            .join(project.name)
-            .join(PROJECT_CONFIG_FILE);
-        if !project_config_path.exists() {
+        let project_path = self.projects_dir().join(project.name);
+        if !project_path.exists() {
             return Err(io::Error::new(
                 io::ErrorKind::NotFound,
                 "project config not found",
             ));
         }
+
+        let project_config_path = project_path.join(PROJECT_CONFIG_FILE);
 
         let file = fs::File::create(&project_config_path)?;
         serde_json::to_writer_pretty(file, &project_config)?;
