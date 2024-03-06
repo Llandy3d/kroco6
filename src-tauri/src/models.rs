@@ -124,15 +124,6 @@ pub struct ProjectConfig {
     pub cloud_project_id: Option<String>,
 }
 
-impl ProjectConfig {
-    pub fn new() -> Self {
-        Self {
-            cloud_token: None,
-            cloud_project_id: None,
-        }
-    }
-}
-
 // Represents an Environment with its key/value variable pairs
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Environment {

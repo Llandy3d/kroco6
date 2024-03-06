@@ -1,18 +1,17 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod cloud;
 mod models;
 mod operations;
-mod cloud;
 
-use core::fmt;
+use regex::Regex;
 use std::fs;
-use std::io::{Read, Write, BufRead, BufReader};
+use std::io::{BufRead, BufReader, Read, Write};
 use std::path::Path;
 use std::process::{Command, Stdio};
 use std::sync::Mutex;
 use tauri::{Manager, Window};
-use regex::Regex;
 
 use crate::operations::ProjectManager;
 
@@ -32,7 +31,6 @@ fn main() {
         .environment_manager
         .initialize()
         .expect("Failed to initialize application state");
-
 
     tauri::Builder::default()
         .manage(application_state)
@@ -74,11 +72,10 @@ async fn get_cloud_tests(state: tauri::State<'_, ApplicationState>, project_name
     let cloud_token = project_config.cloud_token.unwrap();
     let cloud_project_id = project_config.cloud_project_id.unwrap();
 
-    let cloud_tests: Vec<models::CloudTest> = cloud::get_cloud_tests(&cloud_token, &cloud_project_id)
-        .await
-        .map_err(|e| {
-            e.to_string()
-        })?;
+    let cloud_tests: Vec<models::CloudTest> =
+        cloud::get_cloud_tests(&cloud_token, &cloud_project_id)
+            .await
+            .map_err(|e| e.to_string())?;
     Ok(cloud_tests)
 }
 
@@ -266,31 +263,16 @@ async fn save_test(
 }
 
 #[tauri::command]
-async fn run_script(state: tauri::State<'_, ApplicationState>) -> Result<String, String> {
-    // let script = r#"
+async fn run_script(handle: tauri::AppHandle, script: &str) -> Result<String, String> {
+    // Resolve the Tauri externalBin embedded k6 binary
+    // from the application's resources
+    let k6_binary_path = handle
+        .path_resolver()
+        .resolve_resource("k6")
+        .expect("failed to resolve resource");
 
-    // import http from 'k6/http';
-    // import { sleep } from 'k6';
-
-    // export const options = {
-    //   vus: 1,
-    //   duration: '2s',
-    // };
-
-    // export default function () {
-    //   http.get('http://test.k6.io');
-    //   sleep(1);
-    // }
-    // "#;
-
-    let script = {
-        let state_script = state.script.lock().unwrap();
-        state_script.clone()
-    };
-
-    // TODO: make it toggable
     std::env::set_var("K6_WEB_DASHBOARD", "true");
-    let mut child = Command::new("k6")
+    let mut child = Command::new(k6_binary_path)
         .arg("run")
         .arg("-")
         .stdin(Stdio::piped())
@@ -313,6 +295,63 @@ async fn run_script(state: tauri::State<'_, ApplicationState>) -> Result<String,
 
     let _ = child.wait_with_output().expect("Failed to execute command");
     Ok(k6_output)
+}
+
+#[tauri::command]
+async fn run_script_in_cloud(
+    handle: tauri::AppHandle,
+    script: String,
+    project_id: String,
+) -> Result<String, String> {
+    let k6_binary_path = handle
+        .path_resolver()
+        .resolve_resource("k6")
+        .expect("failed to resolve resource");
+
+    let mut child = Command::new(k6_binary_path)
+        .arg("cloud")
+        .arg("-")
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .env(
+            "K6_CLOUD_TOKEN",
+            std::env::var(String::from("K6_CLOUD_TOKEN")).unwrap_or(String::from("")),
+        )
+        .env("K6_CLOUD_PROJECT_ID", project_id)
+        .env("K6_CLOUD_NAME", "kroco6 script.js")
+        .spawn()
+        .expect("Failed to execute command");
+
+    if let Some(mut stdin) = child.stdin.take() {
+        stdin
+            .write_all(script.as_bytes())
+            .expect("Failed to write script.");
+    }
+
+    let re = Regex::new(r"output: (https?://[^\s]+)").unwrap();
+    if let Some(stdout) = child.stdout.take() {
+        let reader = BufReader::new(stdout);
+        for line in reader.lines() {
+            let line = line.expect("Failed to read line");
+            if let Some(cap) = re.captures(&line) {
+                return Ok(cap[1].to_string());
+            }
+        }
+    }
+
+    let _ = child.wait_with_output().expect("Failed to execute command");
+    Err("No URL found in output".to_string())
+}
+
+#[tauri::command]
+async fn get_cloud_token() -> Result<String, String> {
+    Ok(std::env::var(String::from("K6_CLOUD_TOKEN")).unwrap_or(String::from("")))
+}
+
+#[tauri::command]
+fn set_cloud_token(token: String) -> Result<(), String> {
+    std::env::set_var("K6_CLOUD_TOKEN", token);
+    Ok(())
 }
 
 // ApplicationState holds the state of the application.
@@ -359,52 +398,4 @@ impl ApplicationState {
     pub fn default() -> Self {
         Self::new()
     }
-}
-
-#[tauri::command]
-async fn get_cloud_token() -> Result<String, String> {
-    Ok(std::env::var(String::from("K6_CLOUD_TOKEN")).unwrap_or(String::from("")))
-}
-
-#[tauri::command]
-fn set_cloud_token(token: String) -> Result<(), String> {
-    std::env::set_var("K6_CLOUD_TOKEN", token);
-    Ok(())
-}
-
-#[tauri::command]
-async fn run_script_in_cloud(script: String, project_id: String) -> Result<String, String> {
-    let mut child = Command::new("k6")
-        .arg("cloud")
-        .arg("-")
-        .stdin(Stdio::piped())
-        .stdout(Stdio::piped())
-        .env(
-            "K6_CLOUD_TOKEN",
-            std::env::var(String::from("K6_CLOUD_TOKEN")).unwrap_or(String::from("")),
-        )
-        .env("K6_CLOUD_PROJECT_ID", project_id)
-        .env("K6_CLOUD_NAME", "kroco6 script.js")
-        .spawn()
-        .expect("Failed to execute command");
-
-    if let Some(mut stdin) = child.stdin.take() {
-        stdin
-            .write_all(script.as_bytes())
-            .expect("Failed to write script.");
-    }
-
-    let re = Regex::new(r"output: (https?://[^\s]+)").unwrap();
-    if let Some(stdout) = child.stdout.take() {
-        let reader = BufReader::new(stdout);
-        for line in reader.lines() {
-            let line = line.expect("Failed to read line");
-            if let Some(cap) = re.captures(&line) {
-                return Ok(cap[1].to_string());
-            }
-        }
-    }
-
-    let _ = child.wait_with_output().expect("Failed to execute command");
-    Err("No URL found in output".to_string())
 }
