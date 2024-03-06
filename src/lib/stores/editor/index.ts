@@ -1,3 +1,4 @@
+import type { Test } from "$lib/backend-client";
 import { NEW_BLOCKS_TEST, NEW_SCRIPT } from "$lib/files";
 import { nanoid } from "nanoid";
 import { get, writable } from "svelte/store";
@@ -59,10 +60,28 @@ function newFile({ type, initial }: { type: VirtualFile["type"]; initial?: strin
 
 function openFile(file: VirtualFile) {
   openFiles.update((files) => {
+    if (files.find((f) => f.handle === file.handle)) return files;
+
     return [...files, file];
   });
 
   currentFile.set(file);
+}
+
+function openTestAsFile(test: Test) {
+  const type = test.kind === "Javascript" ? "script" : "block";
+
+  openFile({
+    type,
+    // TODO: handle this better
+    handle: test.name,
+    name: test.name,
+    path: {
+      type: "existing",
+      path: "",
+      original: test.content,
+    },
+  });
 }
 
 function updateFile(handle: string, update: Partial<VirtualFile>) {
@@ -80,6 +99,7 @@ export {
   newFile,
   openFile,
   openFiles,
+  openTestAsFile,
   updateFile,
   type BlockFile,
   type ExistingPath,
