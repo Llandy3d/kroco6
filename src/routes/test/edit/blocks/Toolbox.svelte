@@ -162,7 +162,6 @@
     </Tabs.List>
     {#each categories as category (category.id)}
       <Tabs.Content value={category.id} class="min-w-80 border-r-[1px]">
-        <h2 class="p-2 font-bold uppercase">{category.name}</h2>
         <ul class="">
           {#each category.blocks as template (template.type)}
             <li class="p-2">
