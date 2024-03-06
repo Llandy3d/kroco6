@@ -29,28 +29,27 @@
   };
 </script>
 
-<nav class="flex h-10 items-center px-4 text-sm">
+<nav class="flex h-10 items-center gap-2 bg-secondary px-4 text-sm font-light">
   <RadioGroup.Root
-    class="flex"
+    class="flex gap-1"
     value={$currentFile?.handle}
     onValueChange={handleCurrentFileChange}
   >
     {#each $openFiles as file (file.handle)}
-      <RadioGroup.Item value={file.handle} class="pt-2 hover:bg-slate-200">
-        <div class="flex items-center gap-2 px-4">
-          <div>
-            {file.name}
-            {#if file.path.type === "new"}
-              <span>*</span>
-            {/if}
-          </div>
-          <button class="hover:scale-125" on:click={handleClose(file)}><XCircle size={14} /></button
-          >
-        </div>
-        <div
-          class={`${file.handle === $currentFile?.handle ? "bg-[#7d64ff]" : "bg-slate-300"} m-1 h-1 rounded-sm`}
-        ></div></RadioGroup.Item
+      <RadioGroup.Item
+        value={file.handle}
+        class="flex items-center gap-2 border-b-4 px-2 py-2 hover:bg-slate-200 data-[state='checked']:border-primary"
       >
+        <div>
+          {file.name}
+          {#if file.path.type === "new"}
+            *
+          {/if}
+        </div>
+        <button class="hover:scale-125" on:click={handleClose(file)}
+          ><XCircle size={16} class="text-slate-400" /></button
+        >
+      </RadioGroup.Item>
     {/each}
   </RadioGroup.Root>
   <DropdownMenu.Root>

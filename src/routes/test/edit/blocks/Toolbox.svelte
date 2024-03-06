@@ -4,41 +4,40 @@
   interface ToolboxCategory {
     id: string;
     name: string;
+    icon: "scenarios" | "basic" | "api";
     blocks: Block[];
   }
 
+  const DEFAULT_CATEGORY: ToolboxCategory = {
+    id: "scenarios",
+    name: "Scenarios",
+    icon: "scenarios",
+    blocks: [
+      defineTemplate({
+        id: "scenario-template",
+        type: "scenario",
+        executor: null,
+        name: "",
+        step: null,
+      }),
+      defineTemplate({
+        id: "executor-template",
+        type: "executor",
+        executor: {
+          type: "constant-vus",
+          vus: 1,
+          duration: "1m",
+        },
+      }),
+    ],
+  };
+
   const CATEGORIES: ToolboxCategory[] = [
-    {
-      id: "scenarios",
-      name: "Scenarios",
-      blocks: [
-        defineTemplate({
-          id: "scenario-template",
-          type: "scenario",
-          executor: null,
-          name: "",
-          step: null,
-        }),
-      ],
-    },
-    {
-      id: "executors",
-      name: "Executors",
-      blocks: [
-        defineTemplate({
-          id: "executor-template",
-          type: "executor",
-          executor: {
-            type: "constant-vus",
-            vus: 1,
-            duration: "1m",
-          },
-        }),
-      ],
-    },
+    DEFAULT_CATEGORY,
     {
       id: "steps",
       name: "Steps",
+      icon: "basic",
       blocks: [
         defineTemplate({
           id: "group-template",
@@ -78,11 +77,26 @@
       ],
     },
   ];
+</script>
 
-  const requests = derived(test, ($test) => {
+<script lang="ts">
+  import { test } from "$lib/stores/blocks";
+  import type { LibraryBlock } from "$lib/stores/blocks/model/strict";
+  import { isTruthy, type Falsy } from "$lib/utils/typescript";
+  import { Button } from "bits-ui";
+  import clsx from "clsx";
+  import { FileQuestion, Layers, Server } from "lucide-svelte";
+  import { nanoid } from "nanoid";
+  import { derived, type Readable } from "svelte/store";
+  import AnyBlock from "./AnyBlock.svelte";
+  import { dropmask } from "./primitives/dnd";
+
+  const current: ToolboxCategory = DEFAULT_CATEGORY;
+
+  const apis: Readable<ToolboxCategory[]> = derived(test, ($test) => {
     const baseUrl = $test.library.servers?.[0]?.url ?? "";
 
-    return Object.entries($test.library.paths ?? {}).flatMap(([path, methods]) => {
+    const blocks = Object.entries($test.library.paths ?? {}).flatMap(([path, methods]) => {
       if (methods === undefined) {
         return [];
       }
@@ -110,52 +124,50 @@
 
       return a.filter(isTruthy);
     });
+
+    const category: ToolboxCategory = {
+      id: "api",
+      name: $test.library.info.title,
+      icon: "api",
+      blocks,
+    };
+
+    return [category];
   });
+
+  $: categories = [...CATEGORIES, ...$apis];
 </script>
 
-<script lang="ts">
-  import { test } from "$lib/stores/blocks";
-  import type { LibraryBlock } from "$lib/stores/blocks/model/strict";
-  import { isTruthy, type Falsy } from "$lib/utils/typescript";
-  import { nanoid } from "nanoid";
-  import { derived } from "svelte/store";
-  import AnyBlock from "./AnyBlock.svelte";
-  import { dropmask } from "./primitives/dnd";
-</script>
-
-<div class="toolbox absolute bottom-0 top-0 flex flex-col" use:dropmask>
-  <div
-    class="m-4 mr-6 flex min-w-96 flex-auto list-none flex-col overflow-y-auto bg-slate-200 p-0 shadow-md"
-  >
-    {#each CATEGORIES as category (category.id)}
-      <h2 class="p-2 font-bold">{category.name}</h2>
-      <ul class="">
-        {#each category.blocks as template (template.type)}
-          <li class="border-b border-gray-200 p-2">
-            <AnyBlock block={template} />
-          </li>
-        {/each}
-      </ul>
+<div class="flex" use:dropmask>
+  <div class="flex flex-col border-r-[1px]">
+    {#each categories as category (category.id)}
+      <Button.Root
+        class={clsx(" p-5 text-slate-300", category.id === current.id && "text-primary")}
+      >
+        <div>
+          {#if category.icon === "scenarios"}
+            <FileQuestion size={28} />
+          {:else if category.icon === "basic"}
+            <Layers size={28} />
+          {:else if category.icon === "api"}
+            <Server size={28} />
+          {/if}
+        </div>
+        <div>
+          <span class="block rotate-90">
+            {category.name}
+          </span>
+        </div>
+      </Button.Root>
     {/each}
-    <ul>
-      <h2 class="p-2 font-bold">{$test.library.info.title}</h2>
-      {#each $requests as template (template.id)}
-        <li class="border-b border-gray-200 p-2">
-          <AnyBlock block={template} />
-        </li>
-      {/each}
-    </ul>
   </div>
+
+  <h2 class="p-2 font-bold uppercase">{current.name}</h2>
+  <ul class="">
+    {#each current.blocks as template (template.type)}
+      <li class="border-b border-gray-200 p-2">
+        <AnyBlock block={template} />
+      </li>
+    {/each}
+  </ul>
 </div>
-
-<style>
-  .toolbox {
-    transform: translateX(-90%);
-    transition: transform 0.3s;
-    z-index: 1000;
-  }
-
-  .toolbox:hover {
-    transform: translateX(0);
-  }
-</style>

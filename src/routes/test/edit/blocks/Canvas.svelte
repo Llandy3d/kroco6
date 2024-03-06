@@ -20,7 +20,7 @@
 </script>
 
 <div
-  class="relative flex h-full w-full overflow-hidden"
+  class="relative flex h-full w-full items-stretch overflow-hidden"
   use:dropzone={{ accepts: isBlock, data: "canvas" }}
   on:dropped={handleDrop}
 >

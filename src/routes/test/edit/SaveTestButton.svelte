@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { Trigger } from "$lib/components/ui/accordion";
   import { Button } from "$lib/components/ui/button";
   import { Input } from "$lib/components/ui/input";
   import Label from "$lib/components/ui/label/label.svelte";
@@ -10,8 +9,12 @@
   let testName = $currentFile?.name;
 
   function handleNameAndSave() {
-    if ($currentFile === null) return;
+    if ($currentFile === null) {
+      return;
+    }
+
     $currentFile.name = testName ?? "New test";
+
     saveTest();
   }
 
@@ -23,7 +26,7 @@
 {:else if $currentFile.path.type === "new"}
   <Popover.Root>
     <Popover.Trigger>
-      <Button size="sm" variant="secondary">
+      <Button variant="outline" class="border-2 border-primary font-bold text-primary">
         <Save size={14} class="mr-2 h-4 w-4" />
         Save
       </Button>
@@ -38,7 +41,11 @@
     </Popover.Content>
   </Popover.Root>
 {:else}
-  <Button size="sm" variant="secondary" on:click={saveTest}>
+  <Button
+    variant="outline"
+    class="border-2 border-primary font-bold text-primary"
+    on:click={saveTest}
+  >
     <Save size={14} class="mr-2 h-4 w-4" />
     Save
   </Button>
