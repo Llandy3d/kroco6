@@ -85,7 +85,7 @@
   import { isTruthy, type Falsy } from "$lib/utils/typescript";
   import { Button } from "bits-ui";
   import clsx from "clsx";
-  import { FileQuestion, Layers, Server } from "lucide-svelte";
+  import { FileSliders, Layers, Server } from "lucide-svelte";
   import { nanoid } from "nanoid";
   import { derived, type Readable } from "svelte/store";
   import AnyBlock from "./AnyBlock.svelte";
@@ -139,35 +139,36 @@
 </script>
 
 <div class="flex" use:dropmask>
-  <div class="flex flex-col border-r-[1px]">
+  <div class="flex flex-col items-center border-r-[1px]">
     {#each categories as category (category.id)}
       <Button.Root
-        class={clsx(" p-5 text-slate-300", category.id === current.id && "text-primary")}
+        class={clsx(
+          "flex flex-col items-center gap-2 p-5 text-slate-300 hover:bg-slate-100",
+          category.id === current.id && "text-primary",
+        )}
       >
-        <div>
-          {#if category.icon === "scenarios"}
-            <FileQuestion size={28} />
-          {:else if category.icon === "basic"}
-            <Layers size={28} />
-          {:else if category.icon === "api"}
-            <Server size={28} />
-          {/if}
-        </div>
-        <div>
-          <span class="block rotate-90">
-            {category.name}
-          </span>
-        </div>
+        {#if category.icon === "scenarios"}
+          <FileSliders size={24} />
+        {:else if category.icon === "basic"}
+          <Layers size={24} />
+        {:else if category.icon === "api"}
+          <Server size={24} />
+        {/if}
+        <span class="uppercase text-slate-500 [writing-mode:vertical-lr]">
+          {category.name}
+        </span>
       </Button.Root>
     {/each}
   </div>
 
-  <h2 class="p-2 font-bold uppercase">{current.name}</h2>
-  <ul class="">
-    {#each current.blocks as template (template.type)}
-      <li class="border-b border-gray-200 p-2">
-        <AnyBlock block={template} />
-      </li>
-    {/each}
-  </ul>
+  <div class="border-r-[1px]">
+    <h2 class="p-2 font-bold uppercase">{current.name}</h2>
+    <ul class="">
+      {#each current.blocks as template (template.type)}
+        <li class="p-2">
+          <AnyBlock block={template} />
+        </li>
+      {/each}
+    </ul>
+  </div>
 </div>
