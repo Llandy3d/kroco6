@@ -54,18 +54,18 @@ function replace(current: Block, target: Block, replacement: Block): Block {
       return current;
 
     case "check":
-      if (current.next === null || current.target === null) {
+      if (current.next === null && current.target === null) {
         return current;
       }
 
-      if (current.next.id === target.id) {
+      if (current.next?.id === target.id) {
         return {
           ...current,
           next: replacement,
         };
       }
 
-      if (current.target.id === target.id) {
+      if (current.target?.id === target.id) {
         return {
           ...current,
           target: replacement,
@@ -74,7 +74,8 @@ function replace(current: Block, target: Block, replacement: Block): Block {
 
       return {
         ...current,
-        next: replace(current.next, target, replacement),
+        target: current.target && replace(current.target, target, replacement),
+        next: current.next && replace(current.next, target, replacement),
       };
 
     case "sleep":
@@ -149,18 +150,18 @@ function detach<T extends Block>(current: T, target: Block): T {
       return current;
 
     case "check":
-      if (current.next === null || current.target === null) {
+      if (current.next === null && current.target === null) {
         return current;
       }
 
-      if (current.next.id === target.id) {
+      if (current.next?.id === target.id) {
         return {
           ...current,
           next: null,
         };
       }
 
-      if (current.target.id === target.id) {
+      if (current.target?.id === target.id) {
         return {
           ...current,
           target: null,
@@ -169,7 +170,8 @@ function detach<T extends Block>(current: T, target: Block): T {
 
       return {
         ...current,
-        next: detach(current.next, target),
+        target: current.target && detach(current.target, target),
+        next: current.next && detach(current.next, target),
       };
 
     case "sleep":
