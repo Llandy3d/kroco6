@@ -1,21 +1,20 @@
 <script lang="ts">
+  import { Loader2, PlayCircle, Settings, UploadCloud } from "lucide-svelte";
   import { onMount } from "svelte";
-  import { PlayCircle, UploadCloud, Settings, Loader2 } from "lucide-svelte";
 
+  import {
+    loadProjectConfig,
+    saveProjectConfig,
+    saveToken,
+    type ProjectConfig,
+  } from "$lib/backend-client";
   import { Button } from "$lib/components/ui/button";
   import * as Dialog from "$lib/components/ui/dialog";
   import { Input } from "$lib/components/ui/input";
   import { Label } from "$lib/components/ui/label";
-  import { saveToken } from "$lib/backend-client";
   import * as Tooltip from "$lib/components/ui/tooltip";
-  import {
-    saveProjectConfig,
-    loadProjectConfig,
-    type Project,
-    type ProjectConfig,
-  } from "$lib/backend-client";
-  import SaveTestButton from "./SaveTestButton.svelte";
   import { activeProject } from "$lib/stores/projects";
+  import SaveTestButton from "./SaveTestButton.svelte";
 
   let modalOpen = false;
   let cloudRunPending = false;
@@ -59,6 +58,7 @@
     <slot name="left" />
   </div>
   <div class="flex items-center gap-2">
+    <slot name="right" />
     <SaveTestButton saveTest={onSaveTest} />
 
     <Button size="sm" variant="secondary" on:click={runTest}>

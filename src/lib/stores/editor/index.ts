@@ -1,8 +1,10 @@
+import { NEW_BLOCKS_TEST, NEW_SCRIPT } from "$lib/files";
 import { nanoid } from "nanoid";
 import { get, writable } from "svelte/store";
 
 interface NewPath {
   type: "new";
+  initial: string;
 }
 
 interface ExistingPath {
@@ -37,15 +39,15 @@ function calculateNameClashes(name: string) {
   return get(openFiles).filter((file) => file.name.startsWith(name)).length;
 }
 
-function newFile(type: VirtualFile["type"], preferredName?: string) {
-  const name = preferredName ?? `New ${type === "block" ? "Test" : "Script"}`;
+function newFile({ type, initial }: { type: VirtualFile["type"]; initial?: string }) {
+  const name = type === "block" ? "New Blocks" : "New Script";
   const clashes = calculateNameClashes(name);
 
   const newFile: VirtualFile = {
+    type,
     handle: nanoid(),
     name: clashes > 0 ? `${name} (${clashes + 1})` : name,
-    path: { type: "new" },
-    type,
+    path: { type: "new", initial: initial ?? (type === "block" ? NEW_BLOCKS_TEST : NEW_SCRIPT) },
   };
 
   openFiles.update((files) => {
@@ -53,6 +55,14 @@ function newFile(type: VirtualFile["type"], preferredName?: string) {
   });
 
   currentFile.set(newFile);
+}
+
+function openFile(file: VirtualFile) {
+  openFiles.update((files) => {
+    return [...files, file];
+  });
+
+  currentFile.set(file);
 }
 
 function updateFile(handle: string, update: Partial<VirtualFile>) {
@@ -66,14 +76,15 @@ function updateFile(handle: string, update: Partial<VirtualFile>) {
 }
 
 export {
-  openFiles,
   currentFile,
   newFile,
+  openFile,
+  openFiles,
   updateFile,
-  type VirtualFile as OpenFile,
   type BlockFile,
-  type ScriptFile,
-  type Path,
-  type NewPath,
   type ExistingPath,
+  type NewPath,
+  type VirtualFile as OpenFile,
+  type Path,
+  type ScriptFile,
 };

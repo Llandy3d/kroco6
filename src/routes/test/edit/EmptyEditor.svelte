@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { FileCode, Puzzle } from "lucide-svelte";
   import { newFile } from "$lib/stores/editor";
+  import { FileCode, Puzzle } from "lucide-svelte";
 
   let message: string | null = null;
 
@@ -15,11 +15,15 @@
   }
 
   function handleNewBlocks() {
-    newFile("block");
+    newFile({
+      type: "block",
+    });
   }
 
   function handleNewScript() {
-    newFile("script");
+    newFile({
+      type: "script",
+    });
   }
 </script>
 
