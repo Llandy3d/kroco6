@@ -2,29 +2,28 @@
   import { loadContent, storeContent } from "$lib/files";
   import { currentFile, updateFile, type ScriptFile } from "$lib/stores/editor";
   import * as monaco from "monaco-editor";
-  import * as scripts from "$lib/example-scripts";
 </script>
 
 <script lang="ts">
-  import { onDestroy, onMount } from "svelte";
-  import TestToolbar from "./TestToolbar.svelte";
   import {
+    Test,
+    createTest,
+    getCloudTests,
     runScriptInCloud,
     runScriptLocally,
-    getCloudTests,
-    type CloudTest,
     saveTest,
-    createTest,
-    Test,
+    type CloudTest,
   } from "$lib/backend-client";
-  import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
-  import * as Dialog from "$lib/components/ui/dialog";
-  import * as Card from "$lib/components/ui/card";
-  import * as HoverCard from "$lib/components/ui/hover-card";
   import { Button } from "$lib/components/ui/button";
-  import { open } from "@tauri-apps/api/shell";
-  import { toast } from "svelte-sonner";
+  import * as Card from "$lib/components/ui/card";
+  import * as Dialog from "$lib/components/ui/dialog";
+  import * as HoverCard from "$lib/components/ui/hover-card";
   import { activeProject } from "$lib/stores/projects";
+  import { open } from "@tauri-apps/api/shell";
+  import { onDestroy, onMount } from "svelte";
+  import { toast } from "svelte-sonner";
+  import ScriptExamples from "./ScriptExamples.svelte";
+  import TestToolbar from "./TestToolbar.svelte";
 
   export let file: ScriptFile;
 
@@ -101,50 +100,9 @@
   });
 </script>
 
-<div class="flex flex-auto flex-col">
+<div class="flex flex-auto flex-col bg-white">
   <TestToolbar runTest={runTestLocally} {runTestInCloud} saveTest={handleSaveTest} />
-  <DropdownMenu.Root>
-    <DropdownMenu.Trigger>Script examples</DropdownMenu.Trigger>
-    <DropdownMenu.Content>
-      <DropdownMenu.Group>
-        <DropdownMenu.Label>Authentication/Authorization</DropdownMenu.Label>
-        <DropdownMenu.Separator />
-        <DropdownMenu.Item on:click={() => handleExScript(scripts.BASIC_AUTHENTICATION)}
-          >Basic Authentication</DropdownMenu.Item
-        >
-        <DropdownMenu.Item on:click={() => handleExScript(scripts.DIGEST_AUTHENTICATION)}
-          >Digest Authentication</DropdownMenu.Item
-        >
-      </DropdownMenu.Group>
-      <DropdownMenu.Group>
-        <DropdownMenu.Label>API CRUD operations</DropdownMenu.Label>
-        <DropdownMenu.Separator />
-        <DropdownMenu.Item on:click={() => handleExScript(scripts.CORE_K6_API)}
-          >Core k6 APIs example</DropdownMenu.Item
-        >
-      </DropdownMenu.Group>
-      <DropdownMenu.Group>
-        <DropdownMenu.Label>Cookies</DropdownMenu.Label>
-        <DropdownMenu.Separator />
-        <DropdownMenu.Item on:click={() => handleExScript(scripts.COOKIES_HEADER)}
-          >Accessing a cookie set in response headers</DropdownMenu.Item
-        >
-        <DropdownMenu.Item on:click={() => handleExScript(scripts.COOKIES_LOG_RESPONSE)}
-          >Logging all cookies in response</DropdownMenu.Item
-        >
-        <DropdownMenu.Item on:click={() => handleExScript(scripts.COOKIES_SET_JAR)}
-          >Setting a cookie in VU cookie jar</DropdownMenu.Item
-        >
-      </DropdownMenu.Group>
-      <DropdownMenu.Group>
-        <DropdownMenu.Label>Correlation</DropdownMenu.Label>
-        <DropdownMenu.Separator />
-        <DropdownMenu.Item on:click={() => handleExScript(scripts.EXTRACT_JSON)}
-          >Extracting values from JSON response</DropdownMenu.Item
-        >
-      </DropdownMenu.Group>
-    </DropdownMenu.Content>
-  </DropdownMenu.Root>
+  <ScriptExamples onSelectExample={handleExScript} />
   <Dialog.Root bind:open={cloudTestDialogOpen}>
     <Dialog.Trigger on:click={() => loadCloudTests()}>Open</Dialog.Trigger>
     <Dialog.Content>
