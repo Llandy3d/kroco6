@@ -1,11 +1,13 @@
 <script lang="ts">
-  import { insertStep, test, updateBlock } from "$lib/stores/blocks";
+  import { detachBlock, insertStep, test, updateBlock } from "$lib/stores/blocks";
   import { type Block as BlockType, type ScenarioBlock } from "$lib/stores/blocks/model/loose";
-  import { isStepBlock } from "$lib/stores/blocks/utils";
+  import { detach } from "$lib/stores/blocks/model/utils";
+  import { isExecutorBlock, isStepBlock } from "$lib/stores/blocks/utils";
   import AnyBlock from "./AnyBlock.svelte";
-  import { STEP_COLOR } from "./colors";
+  import { EXECUTOR_COLOR, STEP_COLOR } from "./colors";
   import StringInput from "./inputs/StringInput.svelte";
   import Block from "./primitives/Block.svelte";
+  import BlockInset from "./primitives/BlockInset.svelte";
   import Collection from "./primitives/Collection.svelte";
   import Field from "./primitives/Field.svelte";
 
@@ -27,12 +29,34 @@
 
     test.update((test) => insertStep(test, block, step));
   }
+
+  function handleExecutorDrop(executor: BlockType) {
+    if (!isExecutorBlock(executor)) {
+      return;
+    }
+
+    test.update((test) =>
+      updateBlock(detachBlock(test, executor), {
+        ...detach(block, executor),
+        executor,
+      }),
+    );
+  }
 </script>
 
 <Block color={{ primary: "rgb(129 140 248)", secondary: "white" }} {block}>
   <Field
     >Run <StringInput placeholder="Scenario name" value={block.name} onChange={handleNameChange} />
-    with
+    with <BlockInset
+      owner={block}
+      color={EXECUTOR_COLOR}
+      connection={{ block: block.executor, accepts: isExecutorBlock, onDrop: handleExecutorDrop }}
+      let:child
+    >
+      {#if child !== null}
+        <AnyBlock block={child} />
+      {/if}
+    </BlockInset>
   </Field>
   <Field>and do the following:</Field>
   <Collection

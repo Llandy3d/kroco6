@@ -115,6 +115,11 @@
   .block-root {
     margin-top: 0.1rem;
   }
+
+  :global(.block-inset) .block-root {
+    margin-top: 0;
+  }
+
   .block-content > :global(*:first-child) {
     border-top-right-radius: 0.25rem;
   }
