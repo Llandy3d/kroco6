@@ -1,26 +1,18 @@
 <script lang="ts">
-  import { PlusCircle, FlaskConical } from "lucide-svelte";
-  import { Check, ChevronsUpDown, Container } from "lucide-svelte";
-  import { onMount, tick } from "svelte";
+  import { Check, ChevronsUpDown, Container, PlusCircle } from "lucide-svelte";
+  import { tick } from "svelte";
 
-  import { goto } from "$app/navigation";
-  import {
-    type Environment as IEnvironment,
-    createProject,
-    listTests,
-    type EnvironmentsData,
-    Test,
-  } from "$lib/backend-client";
-  import * as AlertDialog from "$lib/components/ui/alert-dialog";
-  import * as Command from "$lib/components/ui/command";
-  import * as Popover from "$lib/components/ui/popover";
-  import { Input } from "$lib/components/ui/input";
-  import { Button } from "$lib/components/ui/button";
-  import { projects } from "$lib/stores/projects";
-  import { Separator } from "$lib/components/ui/separator";
-  import { cn } from "$lib/utils";
+  import { Test, createProject, listTests, type EnvironmentsData } from "$lib/backend-client";
   import EnvironmentList from "$lib/components/EnvironmentList.svelte";
   import TestList from "$lib/components/TestList.svelte";
+  import * as AlertDialog from "$lib/components/ui/alert-dialog";
+  import { Button } from "$lib/components/ui/button";
+  import * as Command from "$lib/components/ui/command";
+  import { Input } from "$lib/components/ui/input";
+  import * as Popover from "$lib/components/ui/popover";
+  import { Separator } from "$lib/components/ui/separator";
+  import { activeProject, projects } from "$lib/stores/projects";
+  import { cn } from "$lib/utils";
 
   // envs holds the active environment and the list of environments
   // that the user can switch between.
@@ -32,19 +24,16 @@
   $: environments = environmentsData?.environments;
 
   let open = false;
-  let activeProject = "default";
   let createProjectValue = "";
 
   let showCreateDialog = false;
 
-  $: selectedProject =
-    $projects.find((f) => f.name === activeProject)?.name ?? "Select a project...";
-
   let activeProjectTests: Test[] = [];
-  $: activeProject,
-    listTests(activeProject).then((tests) => {
-      activeProjectTests = tests;
-    });
+  $: $activeProject, loadProjectTests();
+
+  async function loadProjectTests() {
+    activeProjectTests = await listTests($activeProject);
+  }
 
   // We want to refocus the trigger button when the user selects
   // an item from the list so users can continue navigating the
@@ -75,7 +64,7 @@
         aria-expanded={open}
         class="self-strech m-2 flex justify-between"
       >
-        {selectedProject}
+        {$activeProject}
         <ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
       </Button>
     </Popover.Trigger>
@@ -88,13 +77,13 @@
             <Command.Item
               value={project.name}
               onSelect={(currentValue) => {
-                activeProject = currentValue;
+                $activeProject = currentValue;
 
                 closeAndFocusTrigger(ids.trigger);
               }}
             >
               <Check
-                class={cn("mr-2 h-4 w-4", activeProject !== project.name && "text-transparent")}
+                class={cn("mr-2 h-4 w-4", $activeProject !== project.name && "text-transparent")}
               />
               {project.name}
             </Command.Item>
@@ -117,10 +106,6 @@
   </Popover.Root>
 
   <Separator />
-
-  <Button variant="ghost" class="my-2" on:click={() => goto("/")}>
-    <FlaskConical class="mr-2 h-4 w-4" />Project's Tests
-  </Button>
 
   <TestList tests={activeProjectTests} />
 

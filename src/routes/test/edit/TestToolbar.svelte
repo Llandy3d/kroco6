@@ -6,7 +6,6 @@
     loadProjectConfig,
     saveProjectConfig,
     saveToken,
-    type Project,
     type ProjectConfig,
   } from "$lib/backend-client";
   import { Button } from "$lib/components/ui/button";
@@ -14,6 +13,8 @@
   import { Input } from "$lib/components/ui/input";
   import { Label } from "$lib/components/ui/label";
   import * as Tooltip from "$lib/components/ui/tooltip";
+  import { activeProject } from "$lib/stores/projects";
+  import SaveTestButton from "./SaveTestButton.svelte";
 
   let modalOpen = false;
   let cloudRunPending = false;
@@ -23,10 +24,8 @@
     !cloudRunPending && projectConfig?.cloud_token !== "" && projectConfig?.cloud_project_id !== "";
 
   onMount(async () => {
-    // TODO: we need to know the current active project
-    const project: Project = { name: "default", test_collections: [] };
     try {
-      projectConfig = await loadProjectConfig(project);
+      projectConfig = await loadProjectConfig($activeProject);
     } catch (error) {
       projectConfig = { cloud_token: "", cloud_project_id: "" };
     }
@@ -35,14 +34,17 @@
   function onSaveSettings() {
     // NOTE: used to set the env variable
     saveToken(projectConfig.cloud_token);
-    // TODO: we need to know the current active project
-    const project: Project = { name: "default", test_collections: [] };
-    saveProjectConfig(project, projectConfig);
+    saveProjectConfig($activeProject, projectConfig);
     modalOpen = false;
+  }
+
+  function onSaveTest() {
+    saveTest();
   }
 
   export let runTest: () => void;
   export let runTestInCloud: (projectId: string) => Promise<void>;
+  export let saveTest: () => void;
 
   async function onRunTestInCloud(projectId: string) {
     cloudRunPending = true;
@@ -57,6 +59,8 @@
   </div>
   <div class="flex items-center gap-2">
     <slot name="right" />
+    <SaveTestButton saveTest={onSaveTest} />
+
     <Button size="sm" variant="secondary" on:click={runTest}>
       <PlayCircle size={14} class="mr-2 h-4 w-4" />
       Run
