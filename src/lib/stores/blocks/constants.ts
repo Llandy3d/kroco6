@@ -4,8 +4,8 @@ import type { Test } from "./model/strict";
 const EMPTY_LIBRARY: OpenAPIV3.Document = {
   openapi: "3.0.0",
   info: {
-    title: "",
-    version: "",
+    title: "Untitled API",
+    version: "0.0.0",
   },
   paths: {},
 };

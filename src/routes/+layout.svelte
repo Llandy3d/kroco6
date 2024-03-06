@@ -7,7 +7,10 @@
   import { listProjects, loadEnvironments, type EnvironmentsData } from "$lib/backend-client";
   import { projects } from "$lib/stores/projects";
 
-  let environmentsData: EnvironmentsData = { environments: [] };
+  let environmentsData: EnvironmentsData = {
+    active: "",
+    environments: [],
+  };
 
   onMount(async () => {
     const projectsList = await listProjects();

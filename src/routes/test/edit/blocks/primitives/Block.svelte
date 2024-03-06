@@ -1,10 +1,11 @@
 <script lang="ts" generics="TBlock extends Block, TBottom extends Block">
+  import { detachBlock, test } from "$lib/stores/blocks";
+
   import { isBlock } from "$lib/stores/blocks/utils";
 
   import type { BottomConnection } from "./connections/types";
 
   import { isTemplate, type Block } from "$lib/stores/blocks/model/loose";
-  import { GripVertical } from "lucide-svelte";
   import Bottom from "./connections/Bottom.svelte";
   import Top from "./connections/Top.svelte";
   import { draggable, type AcceptsCallback, type DragChangeEvent, type DroppedEvent } from "./dnd";
@@ -36,6 +37,10 @@
     if (ev.key === "Backspace") {
       ev.preventDefault();
       ev.stopPropagation();
+
+      test.update((test) => {
+        return detachBlock(test, block);
+      });
     }
   }
 
@@ -73,7 +78,7 @@
 <div
   tabindex="0"
   id={block.id}
-  class="block-root z-10 flex w-min flex-col rounded-r-md outline-2 outline-indigo-500 focus:outline"
+  class="block-root z-10 flex w-min flex-col outline-2 outline-indigo-500 focus:outline"
   class:dragging
   use:draggable={{
     data: block,
@@ -83,20 +88,15 @@
   on:dragchange={handleDragChange}
   style={toBlockColorStyle(color)}
 >
-  <div class="w-min">
-    <div class="relative flex items-center">
-      <!-- svelte-ignore a11y-click-events-have-key-events -->
-      <div
-        class="drag-handle relative flex cursor-pointer select-none items-center self-stretch p-1 text-white shadow-md shadow-slate-400"
-        data-drag-handle
-        on:click={handleClick}
-      >
-        <GripVertical size={18} />
-      </div>
-      <div class="block-content relative flex flex-col">
-        {#if top}
-          <Top />
-        {/if}
+  <div
+    class:has-top={top !== false}
+    class="block-body w-min cursor-grab rounded-l-sm border-[1px] border-l-8 bg-white shadow-sm shadow-slate-300"
+  >
+    <div class="relative flex flex-col">
+      {#if top}
+        <Top />
+      {/if}
+      <div class="px-2 py-1">
         <slot />
       </div>
     </div>
@@ -112,24 +112,18 @@
 </div>
 
 <style>
-  .block-root {
-    margin-top: 0.1rem;
+  .has-top {
+    border-top: none;
   }
 
   :global(.block-inset) .block-root {
     margin-top: 0;
+    border-width: 1px;
+    border-style: solid;
   }
 
-  .block-content > :global(*:first-child) {
-    border-top-right-radius: 0.25rem;
-  }
-
-  .block-content > :global(*:last-child) {
-    border-bottom-right-radius: 0.25rem;
-  }
-
-  .drag-handle {
-    background-color: var(--block-bg-primary);
+  .block-body {
+    border-color: var(--block-bg-primary);
   }
 
   .dragging {

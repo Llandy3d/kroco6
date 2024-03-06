@@ -83,15 +83,14 @@
   import { test } from "$lib/stores/blocks";
   import type { LibraryBlock } from "$lib/stores/blocks/model/strict";
   import { isTruthy, type Falsy } from "$lib/utils/typescript";
-  import { Button } from "bits-ui";
-  import clsx from "clsx";
-  import { FileQuestion, Layers, Server } from "lucide-svelte";
+  import { Tabs } from "bits-ui";
+  import { CloudCog, FileSliders, Layers } from "lucide-svelte";
   import { nanoid } from "nanoid";
   import { derived, type Readable } from "svelte/store";
   import AnyBlock from "./AnyBlock.svelte";
   import { dropmask } from "./primitives/dnd";
 
-  const current: ToolboxCategory = DEFAULT_CATEGORY;
+  let current: ToolboxCategory = DEFAULT_CATEGORY;
 
   const apis: Readable<ToolboxCategory[]> = derived(test, ($test) => {
     const baseUrl = $test.library.servers?.[0]?.url ?? "";
@@ -139,35 +138,38 @@
 </script>
 
 <div class="flex" use:dropmask>
-  <div class="flex flex-col border-r-[1px]">
-    {#each categories as category (category.id)}
-      <Button.Root
-        class={clsx(" p-5 text-slate-300", category.id === current.id && "text-primary")}
-      >
-        <div>
-          {#if category.icon === "scenarios"}
-            <FileQuestion size={28} />
-          {:else if category.icon === "basic"}
-            <Layers size={28} />
-          {:else if category.icon === "api"}
-            <Server size={28} />
-          {/if}
-        </div>
-        <div>
-          <span class="block rotate-90">
+  <Tabs.Root value={current.id} class="flex">
+    <Tabs.List class="border-r-[1px]">
+      {#each categories as category (category.id)}
+        <Tabs.Trigger
+          class="text-pri flex flex-col items-center gap-2 p-4  hover:bg-slate-100 data-[state=active]:text-primary"
+          value={category.id}
+        >
+          <span class="text-slate-400">
+            {#if category.icon === "scenarios"}
+              <FileSliders size={24} />
+            {:else if category.icon === "basic"}
+              <Layers size={24} />
+            {:else if category.icon === "api"}
+              <CloudCog size={24} />
+            {/if}
+          </span>
+          <span class="uppercase [writing-mode:vertical-lr]">
             {category.name}
           </span>
-        </div>
-      </Button.Root>
+        </Tabs.Trigger>
+      {/each}
+    </Tabs.List>
+    {#each categories as category (category.id)}
+      <Tabs.Content value={category.id} class="min-w-80 border-r-[1px] p-2">
+        <ul class="">
+          {#each category.blocks as template (template.id)}
+            <li class="p-2">
+              <AnyBlock block={template} />
+            </li>
+          {/each}
+        </ul>
+      </Tabs.Content>
     {/each}
-  </div>
-
-  <h2 class="p-2 font-bold uppercase">{current.name}</h2>
-  <ul class="">
-    {#each current.blocks as template (template.type)}
-      <li class="border-b border-gray-200 p-2">
-        <AnyBlock block={template} />
-      </li>
-    {/each}
-  </ul>
+  </Tabs.Root>
 </div>

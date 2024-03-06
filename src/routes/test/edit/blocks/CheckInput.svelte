@@ -64,7 +64,7 @@
   };
 </script>
 
-<Field class="bg-orange-200">
+<Field>
   <SelectInput value={check.type} {items} onChange={handleSelectedChange} />
 
   {#if check.type === "status"}
