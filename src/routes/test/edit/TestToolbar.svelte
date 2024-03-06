@@ -53,24 +53,20 @@
   }
 </script>
 
-<div class="flex justify-between rounded-none bg-secondary p-1 shadow-md">
+<div class="flex justify-between rounded-none border-b-[1px] p-4">
   <div>
     <slot name="left" />
   </div>
   <div class="flex items-center gap-2">
     <slot name="right" />
-    <SaveTestButton saveTest={onSaveTest} />
 
-    <Button size="sm" variant="secondary" on:click={runTest}>
-      <PlayCircle size={14} class="mr-2 h-4 w-4" />
-      Run
-    </Button>
+    <SaveTestButton saveTest={onSaveTest} />
 
     <Tooltip.Root open={canRunTestsInCloud ? false : undefined}>
       <Tooltip.Trigger>
         <Button
-          size="sm"
-          variant="secondary"
+          variant="outline"
+          class="border-2 border-primary font-bold text-primary"
           on:click={() => {
             if (projectConfig) {
               onRunTestInCloud(projectConfig.cloud_project_id);
@@ -83,7 +79,7 @@
           {:else}
             <UploadCloud size={14} class="mr-2 h-4 w-4" />
           {/if}
-          Run in Cloud
+          Run in the Cloud
         </Button>
       </Tooltip.Trigger>
       <Tooltip.Content side="bottom">
@@ -94,6 +90,11 @@
         {/if}
       </Tooltip.Content>
     </Tooltip.Root>
+
+    <Button on:click={runTest}>
+      <PlayCircle size={14} class="mr-2 h-4 w-4" />
+      Run locally
+    </Button>
 
     <Button
       class="rounded-full"
