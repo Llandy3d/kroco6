@@ -15,3 +15,5 @@ import type { Project } from "$lib/backend-client";
  * @type {Writable<Project[]>}
  */
 export const projects: Writable<Project[]> = writable([]);
+
+export const activeProject: Writable<string> = writable("default");

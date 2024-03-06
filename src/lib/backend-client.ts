@@ -30,14 +30,14 @@ export async function saveEnvironments(environmentsData: EnvironmentsData): Prom
 
 export interface ProjectConfig {
   cloud_token: string;
-  cloud_project_id: string
+  cloud_project_id: string;
 }
 
 export interface Project {
   name: string;
   test_collections?: Array<Test>;
   description?: string;
-  project_config?: ProjectConfig,
+  project_config?: ProjectConfig;
 }
 
 export class Test {
@@ -157,15 +157,18 @@ export async function saveToken(token: string): Promise<void> {
 }
 
 // load project config
-export async function loadProjectConfig(project: Project): Promise<ProjectConfig> {
-  return await invoke("load_project_config", { project });
+export async function loadProjectConfig(projectName: string): Promise<ProjectConfig> {
+  return await invoke("load_project_config", { projectName });
 }
 
 // save project config
-export async function saveProjectConfig(project: Project, projectConfig: ProjectConfig): Promise<void> {
-  return await invoke("save_project_config", { project, projectConfig });
+export async function saveProjectConfig(
+  projectName: string,
+  projectConfig: ProjectConfig,
+): Promise<void> {
+  return await invoke("save_project_config", { projectName, projectConfig });
 }
 
-export async function getCloudTests(project: Project): Promise<Array<CloudTest>> {
-  return await invoke("get_cloud_tests", { project });
+export async function getCloudTests(projectName: string): Promise<Array<CloudTest>> {
+  return await invoke("get_cloud_tests", { projectName });
 }

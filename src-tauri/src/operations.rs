@@ -55,12 +55,12 @@ pub trait ProjectManager {
     fn save_test(&self, project_name: &str, test_name: &str, new_content: &str) -> io::Result<()>;
 
     // TODO: document
-    fn load_project_config(&self, project: Project) -> io::Result<ProjectConfig>;
+    fn load_project_config(&self, project_name: &str) -> io::Result<ProjectConfig>;
 
     // TODO: document
     fn save_project_config(
         &self,
-        project: Project,
+        project_name: &str,
         project_config: ProjectConfig,
     ) -> io::Result<()>;
 }
@@ -160,8 +160,8 @@ impl ProjectManager for LocalProjectManager {
     }
 
     // Load project config
-    fn load_project_config(&self, project: Project) -> io::Result<ProjectConfig> {
-        let project_path = self.projects_dir().join(project.name);
+    fn load_project_config(&self, project_name: &str) -> io::Result<ProjectConfig> {
+        let project_path = self.projects_dir().join(project_name);
         if !project_path.exists() {
             return Err(io::Error::new(
                 io::ErrorKind::NotFound,
@@ -179,10 +179,10 @@ impl ProjectManager for LocalProjectManager {
     // Save project config
     fn save_project_config(
         &self,
-        project: Project,
+        project_name: &str,
         project_config: ProjectConfig,
     ) -> io::Result<()> {
-        let project_path = self.projects_dir().join(project.name);
+        let project_path = self.projects_dir().join(project_name);
         if !project_path.exists() {
             return Err(io::Error::new(
                 io::ErrorKind::NotFound,

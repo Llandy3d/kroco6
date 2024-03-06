@@ -16,7 +16,7 @@
   import * as Popover from "$lib/components/ui/popover";
   import { Input } from "$lib/components/ui/input";
   import { Button } from "$lib/components/ui/button";
-  import { projects } from "$lib/stores/projects";
+  import { activeProject, projects } from "$lib/stores/projects";
   import { Separator } from "$lib/components/ui/separator";
   import { cn } from "$lib/utils";
   import EnvironmentList from "$lib/components/EnvironmentList.svelte";
@@ -32,19 +32,18 @@
   $: environments = environmentsData?.environments;
 
   let open = false;
-  let activeProject = "default";
   let createProjectValue = "";
 
   let showCreateDialog = false;
 
   $: selectedProject =
-    $projects.find((f) => f.name === activeProject)?.name ?? "Select a project...";
+    $projects.find((f) => f.name === $activeProject)?.name ?? "Select a project...";
 
   let activeProjectTests: Test[] = [];
-  $: activeProject,
-    listTests(activeProject).then((tests) => {
-      activeProjectTests = tests;
-    });
+
+  listTests($activeProject).then((tests) => {
+    activeProjectTests = tests;
+  });
 
   // We want to refocus the trigger button when the user selects
   // an item from the list so users can continue navigating the
@@ -88,13 +87,13 @@
             <Command.Item
               value={project.name}
               onSelect={(currentValue) => {
-                activeProject = currentValue;
+                $activeProject = currentValue;
 
                 closeAndFocusTrigger(ids.trigger);
               }}
             >
               <Check
-                class={cn("mr-2 h-4 w-4", activeProject !== project.name && "text-transparent")}
+                class={cn("mr-2 h-4 w-4", $activeProject !== project.name && "text-transparent")}
               />
               {project.name}
             </Command.Item>

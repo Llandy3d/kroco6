@@ -1,6 +1,5 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { invoke } from "@tauri-apps/api";
   import { PlayCircle, UploadCloud, Settings, Loader2 } from "lucide-svelte";
 
   import { Button } from "$lib/components/ui/button";
@@ -9,13 +8,14 @@
   import { Label } from "$lib/components/ui/label";
   import { saveToken } from "$lib/backend-client";
   import * as Tooltip from "$lib/components/ui/tooltip";
-  import { Content } from "$lib/components/ui/accordion";
   import {
     saveProjectConfig,
     loadProjectConfig,
     type Project,
     type ProjectConfig,
   } from "$lib/backend-client";
+  import SaveTestButton from "./SaveTestButton.svelte";
+  import { activeProject } from "$lib/stores/projects";
 
   let modalOpen = false;
   let cloudRunPending = false;
@@ -25,10 +25,8 @@
     !cloudRunPending && projectConfig?.cloud_token !== "" && projectConfig?.cloud_project_id !== "";
 
   onMount(async () => {
-    // TODO: we need to know the current active project
-    const project: Project = { name: "default", test_collections: [] };
     try {
-      projectConfig = await loadProjectConfig(project);
+      projectConfig = await loadProjectConfig($activeProject);
     } catch (error) {
       projectConfig = { cloud_token: "", cloud_project_id: "" };
     }
@@ -37,14 +35,17 @@
   function onSaveSettings() {
     // NOTE: used to set the env variable
     saveToken(projectConfig.cloud_token);
-    // TODO: we need to know the current active project
-    const project: Project = { name: "default", test_collections: [] };
-    saveProjectConfig(project, projectConfig);
+    saveProjectConfig($activeProject, projectConfig);
     modalOpen = false;
+  }
+
+  function onSaveTest() {
+    saveTest();
   }
 
   export let runTest: () => void;
   export let runTestInCloud: (projectId: string) => Promise<void>;
+  export let saveTest: () => void;
 
   async function onRunTestInCloud(projectId: string) {
     cloudRunPending = true;
@@ -58,6 +59,8 @@
     <slot name="left" />
   </div>
   <div class="flex items-center gap-2">
+    <SaveTestButton saveTest={onSaveTest} />
+
     <Button size="sm" variant="secondary" on:click={runTest}>
       <PlayCircle size={14} class="mr-2 h-4 w-4" />
       Run

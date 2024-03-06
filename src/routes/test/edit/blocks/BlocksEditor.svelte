@@ -1,12 +1,13 @@
 <script lang="ts">
-  import { runScriptInCloud, runScriptLocally } from "$lib/backend-client";
+  import { runScriptInCloud, runScriptLocally, saveTest } from "$lib/backend-client";
   import * as Tabs from "$lib/components/ui/tabs";
   import { loadContent, storeContent } from "$lib/files";
   import { loadTest, test } from "$lib/stores/blocks";
   import { EMPTY_BLOCK_TEST } from "$lib/stores/blocks/constants";
   import { convertToScript } from "$lib/stores/blocks/convert";
   import { parse } from "$lib/stores/blocks/model/strict";
-  import type { BlockFile } from "$lib/stores/editor";
+  import { currentFile, updateFile, type BlockFile } from "$lib/stores/editor";
+
   import { open } from "@tauri-apps/api/shell";
   import { onDestroy, onMount } from "svelte";
   import { toast } from "svelte-sonner";
@@ -42,6 +43,15 @@
     }
   }
 
+  async function handleSaveTest() {
+    if (!$currentFile) return;
+
+    await saveTest("default", $currentFile.name, JSON.stringify($test));
+    if ($currentFile.path.type === "new") {
+      updateFile($currentFile.handle, { path: { type: "existing", path: "", original: "" } });
+    }
+  }
+
   onMount(() => {
     // We store the block test in sessionStorage, so that changes are preserved
     // when the user switches between tabs.
@@ -73,7 +83,7 @@
 
 <div class="flex flex-auto">
   <Tabs.Root class="flex flex-auto flex-col" bind:value={tab}>
-    <TestToolbar runTest={runTestLocally} {runTestInCloud}>
+    <TestToolbar runTest={runTestLocally} {runTestInCloud} saveTest={handleSaveTest}>
       <svelte:fragment slot="left">
         <Tabs.List>
           <Tabs.Trigger value="library">Library</Tabs.Trigger>
