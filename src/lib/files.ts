@@ -40,13 +40,7 @@ function loadContent(file: OpenFile): string {
 
   if (data === null) {
     if (file.path.type === "new") {
-      switch (file.type) {
-        case "block":
-          return NEW_BLOCKS_TEST;
-
-        case "script":
-          return NEW_SCRIPT;
-      }
+      return file.path.initial;
     }
 
     return file.path.original;
@@ -62,4 +56,4 @@ function storeContent(file: OpenFile, content: Test | string) {
   );
 }
 
-export { loadContent, storeContent };
+export { NEW_BLOCKS_TEST, NEW_SCRIPT, loadContent, storeContent };
