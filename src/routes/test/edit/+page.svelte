@@ -1,6 +1,6 @@
 <script lang="ts">
-  import FileBar from "./FileBar.svelte";
   import Editor from "./Editor.svelte";
+  import FileBar from "./FileTabs.svelte";
 </script>
 
 <FileBar />

@@ -22,3 +22,4 @@ export const EMPTY_ENVIRONMENT: Environment = {
 export const projects: Writable<Project[]> = writable([]);
 
 export const currentEnvironment: Writable<Environment | null> = writable(null);
+export const activeProject: Writable<string> = writable("default");

@@ -62,10 +62,10 @@ fn main() {
 }
 
 #[tauri::command]
-async fn get_cloud_tests(state: tauri::State<'_, ApplicationState>, project: models::Project) -> Result<Vec<models::CloudTest>, String> {
+async fn get_cloud_tests(state: tauri::State<'_, ApplicationState>, project_name: &str) -> Result<Vec<models::CloudTest>, String> {
     let project_config = state
         .project_manager
-        .load_project_config(project)
+        .load_project_config(project_name)
         .map_err(|e| e.to_string())?;
 
     if project_config.cloud_token.is_none() || project_config.cloud_project_id.is_none() {
@@ -167,23 +167,23 @@ async fn get_project(
 #[tauri::command]
 async fn load_project_config(
     state: tauri::State<'_, ApplicationState>,
-    project: models::Project,
+    project_name: &str,
 ) -> Result<models::ProjectConfig, String> {
     state
         .project_manager
-        .load_project_config(project)
+        .load_project_config(project_name)
         .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
 async fn save_project_config(
     state: tauri::State<'_, ApplicationState>,
-    project: models::Project,
+    project_name: &str,
     project_config: models::ProjectConfig,
 ) -> Result<(), String> {
     state
         .project_manager
-        .save_project_config(project, project_config)
+        .save_project_config(project_name, project_config)
         .map_err(|e| e.to_string())
 }
 
@@ -237,6 +237,18 @@ async fn get_test(
     state
         .project_manager
         .get_test(project_name, test_name)
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn delete_test(
+    state: tauri::State<'_, ApplicationState>,
+    project_name: &str,
+    test_name: &str,
+) -> Result<(), String> {
+    state
+        .project_manager
+        .delete_test(project_name, test_name)
         .map_err(|e| e.to_string())
 }
 

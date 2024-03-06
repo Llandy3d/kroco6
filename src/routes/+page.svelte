@@ -1,14 +1,16 @@
 <script lang="ts">
-  import FileBar from "./test/edit/FileBar.svelte";
+  import { invoke } from "@tauri-apps/api/tauri";
+  import { onMount } from "svelte";
   import Editor from "./test/edit/Editor.svelte";
-  import { invoke } from '@tauri-apps/api/tauri';
-  import { onMount } from 'svelte';
+  import FileBar from "./test/edit/FileTabs.svelte";
 
   // close the splashscreen when the app is ready
   onMount(() => {
-    invoke('close_splashscreen');
+    invoke("close_splashscreen");
   });
 </script>
 
 <FileBar />
-<Editor />
+<div class="flex flex-auto bg-white">
+  <Editor />
+</div>

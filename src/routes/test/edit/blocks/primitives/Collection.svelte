@@ -22,35 +22,27 @@
 </script>
 
 <div class="collection-root">
-  <div class="header h-2 w-full"></div>
   <div class="select-none">
-    <div class="flex rounded-l-md">
-      <div class="padding w-2"></div>
+    <div class="flex rounded-l-md py-2">
       <div
-        class="relative mb-4 flex w-6 flex-auto list-none flex-col"
+        class="collection-container relative mb-4 flex w-6 flex-auto list-none flex-col border-t-4"
         style={toBlockColorStyle(color)}
       >
         <Bottom
           accepts={acceptsBlock}
           data={owner}
           connected={connection.block !== null}
+          collection={true}
           onDrop={handleDropped}
         />
         <slot child={connection.block} />
       </div>
     </div>
   </div>
-  <div class="footer h-2 w-full rounded-tr-md shadow-md shadow-slate-400"></div>
 </div>
 
 <style>
-  .header,
-  .footer,
-  .padding {
-    background-color: var(--block-bg-secondary);
-  }
-
-  .collection-root:last-child .footer {
-    border-bottom-right-radius: 0.25rem;
+  .collection-container {
+    border-color: var(--block-bg-primary);
   }
 </style>

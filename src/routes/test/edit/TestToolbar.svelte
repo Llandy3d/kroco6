@@ -1,21 +1,20 @@
 <script lang="ts">
+  import { Loader2, PlayCircle, Settings, UploadCloud } from "lucide-svelte";
   import { onMount } from "svelte";
-  import { invoke } from "@tauri-apps/api";
-  import { PlayCircle, UploadCloud, Settings, Loader2 } from "lucide-svelte";
 
+  import {
+    loadProjectConfig,
+    saveProjectConfig,
+    saveToken,
+    type ProjectConfig,
+  } from "$lib/backend-client";
   import { Button } from "$lib/components/ui/button";
   import * as Dialog from "$lib/components/ui/dialog";
   import { Input } from "$lib/components/ui/input";
   import { Label } from "$lib/components/ui/label";
-  import { saveToken } from "$lib/backend-client";
   import * as Tooltip from "$lib/components/ui/tooltip";
-  import { Content } from "$lib/components/ui/accordion";
-  import {
-    saveProjectConfig,
-    loadProjectConfig,
-    type Project,
-    type ProjectConfig,
-  } from "$lib/backend-client";
+  import { activeProject } from "$lib/stores/projects";
+  import SaveTestButton from "./SaveTestButton.svelte";
 
   let modalOpen = false;
   let cloudRunPending = false;
@@ -25,10 +24,8 @@
     !cloudRunPending && projectConfig?.cloud_token !== "" && projectConfig?.cloud_project_id !== "";
 
   onMount(async () => {
-    // TODO: we need to know the current active project
-    const project: Project = { name: "default", test_collections: [] };
     try {
-      projectConfig = await loadProjectConfig(project);
+      projectConfig = await loadProjectConfig($activeProject);
     } catch (error) {
       projectConfig = { cloud_token: "", cloud_project_id: "" };
     }
@@ -37,14 +34,17 @@
   function onSaveSettings() {
     // NOTE: used to set the env variable
     saveToken(projectConfig.cloud_token);
-    // TODO: we need to know the current active project
-    const project: Project = { name: "default", test_collections: [] };
-    saveProjectConfig(project, projectConfig);
+    saveProjectConfig($activeProject, projectConfig);
     modalOpen = false;
+  }
+
+  function onSaveTest() {
+    saveTest();
   }
 
   export let runTest: () => void;
   export let runTestInCloud: (projectId: string) => Promise<void>;
+  export let saveTest: () => void;
 
   async function onRunTestInCloud(projectId: string) {
     cloudRunPending = true;
@@ -53,21 +53,20 @@
   }
 </script>
 
-<div class="flex justify-between rounded-none bg-secondary p-1 shadow-md">
+<div class="flex justify-between rounded-none border-b-[1px] p-4">
   <div>
     <slot name="left" />
   </div>
   <div class="flex items-center gap-2">
-    <Button size="sm" variant="secondary" on:click={runTest}>
-      <PlayCircle size={14} class="mr-2 h-4 w-4" />
-      Run
-    </Button>
+    <slot name="right" />
+
+    <SaveTestButton saveTest={onSaveTest} />
 
     <Tooltip.Root open={canRunTestsInCloud ? false : undefined}>
       <Tooltip.Trigger>
         <Button
-          size="sm"
-          variant="secondary"
+          variant="outline"
+          class="border-2 border-primary font-bold text-primary"
           on:click={() => {
             if (projectConfig) {
               onRunTestInCloud(projectConfig.cloud_project_id);
@@ -80,7 +79,7 @@
           {:else}
             <UploadCloud size={14} class="mr-2 h-4 w-4" />
           {/if}
-          Run in Cloud
+          Run in the Cloud
         </Button>
       </Tooltip.Trigger>
       <Tooltip.Content side="bottom">
@@ -91,6 +90,11 @@
         {/if}
       </Tooltip.Content>
     </Tooltip.Root>
+
+    <Button on:click={runTest}>
+      <PlayCircle size={14} class="mr-2 h-4 w-4" />
+      Run locally
+    </Button>
 
     <Button
       class="rounded-full"

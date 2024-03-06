@@ -55,7 +55,7 @@ type Executor = ConstantVusExecutor | RampingVusExecutor;
 
 interface Scenario {
   name: string;
-  executors: Executor[];
+  executor: Executor;
   steps: Step[];
 }
 

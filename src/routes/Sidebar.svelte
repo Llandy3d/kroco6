@@ -1,18 +1,16 @@
 <script lang="ts">
-  import { Check, ChevronsUpDown, Container, FlaskConical, PlusCircle } from "lucide-svelte";
-  import { tick } from "svelte";
+  import { Container } from "lucide-svelte";
 
-  import { goto } from "$app/navigation";
-  import { createProject, type EnvironmentsData } from "$lib/backend-client";
+  import { Test, listTests, type EnvironmentsData } from "$lib/backend-client";
   import EnvironmentList from "$lib/components/EnvironmentList.svelte";
-  import * as AlertDialog from "$lib/components/ui/alert-dialog";
+  import Logo from "$lib/components/Logo.svelte";
+  import TestList from "$lib/components/TestList.svelte";
   import { Button } from "$lib/components/ui/button";
-  import * as Command from "$lib/components/ui/command";
-  import { Input } from "$lib/components/ui/input";
-  import * as Popover from "$lib/components/ui/popover";
   import { Separator } from "$lib/components/ui/separator";
-  import { projects } from "$lib/stores/projects";
-  import { cn } from "$lib/utils";
+  import { activeProject } from "$lib/stores/projects";
+  import { setMode } from "mode-watcher";
+  import { onMount } from "svelte";
+  import ProjectSelector from "./ProjectSelector.svelte";
 
   // envs holds the active environment and the list of environments
   // that the user can switch between.
@@ -24,87 +22,25 @@
 
   $: environments = environmentsData?.environments;
 
-  let open = false;
-  let value = "default";
-  let createProjectValue = "";
+  let activeProjectTests: Test[] = [];
+  $: $activeProject, loadProjectTests();
 
-  let showCreateDialog = false;
+  onMount(() => {
+    setMode("light");
+  });
 
-  $: selectedValue = $projects.find((f) => f.name === value)?.name ?? "Select a project...";
-
-  // We want to refocus the trigger button when the user selects
-  // an item from the list so users can continue navigating the
-  // rest of the form with the keyboard.
-  function closeAndFocusTrigger(triggerId: string) {
-    open = false;
-    tick().then(() => {
-      document.getElementById(triggerId)?.focus();
-    });
-  }
-
-  async function onCreateProject() {
-    const createdProject = await createProject(createProjectValue);
-    projects.update((p) => [...p, createdProject]);
-    createProjectValue = "";
+  async function loadProjectTests() {
+    activeProjectTests = await listTests($activeProject);
   }
 </script>
 
-<div class="flex h-screen flex-col bg-gray-500 py-4 text-center">
-  <h2>Projects</h2>
-
-  <Popover.Root bind:open let:ids>
-    <Popover.Trigger asChild let:builder>
-      <Button
-        builders={[builder]}
-        variant="outline"
-        role="combobox"
-        aria-expanded={open}
-        class="self-strech m-2 flex justify-between"
-      >
-        {selectedValue}
-        <ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
-      </Button>
-    </Popover.Trigger>
-    <Popover.Content class="rounded-none p-0" sameWidth>
-      <Command.Root>
-        <Command.Input placeholder="Search project..." />
-        <Command.Empty>No project found.</Command.Empty>
-        <Command.Group>
-          {#each $projects as project}
-            <Command.Item
-              value={project.name}
-              onSelect={(currentValue) => {
-                value = currentValue;
-
-                closeAndFocusTrigger(ids.trigger);
-              }}
-            >
-              <Check class={cn("mr-2 h-4 w-4", value !== project.name && "text-transparent")} />
-              {project.name}
-            </Command.Item>
-          {/each}
-        </Command.Group>
-        <Separator />
-        <Command.Group>
-          <Command.Item
-            onSelect={() => {
-              showCreateDialog = true;
-              open = false;
-            }}
-          >
-            <PlusCircle class="mr-2" size={16} />
-            Create a new project
-          </Command.Item>
-        </Command.Group>
-      </Command.Root>
-    </Popover.Content>
-  </Popover.Root>
-
+<div class="flex h-screen flex-col gap-4 p-4 text-center">
+  <Logo class="self-center" />
   <Separator />
+  <ProjectSelector />
 
-  <Button variant="ghost" class="my-2" on:click={() => goto("/")}>
-    <FlaskConical class="mr-2 h-4 w-4" /> Go to tests
-  </Button>
+  <h2 class="text-left uppercase">Tests ({activeProjectTests.length})</h2>
+  <TestList tests={activeProjectTests} />
 
   <Separator />
 
@@ -114,24 +50,3 @@
 
   <EnvironmentList bind:environments />
 </div>
-
-<AlertDialog.Root bind:open={showCreateDialog}>
-  <AlertDialog.Content>
-    <AlertDialog.Header>
-      <AlertDialog.Title>Create new project</AlertDialog.Title>
-      <AlertDialog.Description>
-        <Input
-          class="w-full"
-          type="text"
-          placeholder="Project name"
-          bind:value={createProjectValue}
-        />
-      </AlertDialog.Description>
-    </AlertDialog.Header>
-
-    <AlertDialog.Footer>
-      <AlertDialog.Cancel>Close</AlertDialog.Cancel>
-      <Button type="submit" on:click={onCreateProject}>Create</Button>
-    </AlertDialog.Footer>
-  </AlertDialog.Content>
-</AlertDialog.Root>

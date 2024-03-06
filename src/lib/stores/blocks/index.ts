@@ -84,6 +84,10 @@ function updateBlock(test: Test, block: Block) {
 }
 
 function insertStep(test: Test, block: ScenarioBlock | GroupBlock, step: StepBlock) {
+  if (step.id === block.step?.id) {
+    return test;
+  }
+
   const newStep = instantiate(step);
 
   return updateBlock(detachBlock(test, step), {
@@ -93,6 +97,10 @@ function insertStep(test: Test, block: ScenarioBlock | GroupBlock, step: StepBlo
 }
 
 function insertNext(test: Test, block: Chainable, next: StepBlock) {
+  if (next.id === block.next?.id) {
+    return test;
+  }
+
   const newNext = instantiate(next);
 
   return updateBlock(detachBlock(test, next), {

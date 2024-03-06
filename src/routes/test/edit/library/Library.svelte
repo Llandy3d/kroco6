@@ -78,9 +78,9 @@
 
 <div class="flex h-full flex-col">
   <div class="flex flex-auto">
-    <div class="flex h-full w-96 flex-col gap-4 bg-accent p-2">
-      <h2 class="flex items-center justify-between font-bold">
-        <span>{$library.info.title}</span>
+    <div class="flex h-full w-96 flex-col gap-4 border-r-[1px] p-2">
+      <h2 class="flex items-center justify-between">
+        <span class="font-bold uppercase">{$library.info.title}</span>
         <Button class="gap-2" variant="ghost" size="sm" on:click={handleSyncClick}
           ><RefreshCcw size={14} /> Sync</Button
         >

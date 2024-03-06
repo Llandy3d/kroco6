@@ -7,7 +7,10 @@
   import { listProjects, loadEnvironments, type EnvironmentsData } from "$lib/backend-client";
   import { currentEnvironment, projects } from "$lib/stores/projects";
 
-  let environmentsData: EnvironmentsData = { active: "", environments: [] };
+  let environmentsData: EnvironmentsData = {
+    active: "",
+    environments: [],
+  };
 
   onMount(async () => {
     const projectsList = await listProjects();
@@ -26,11 +29,11 @@
 <Toaster />
 
 <div class="flex">
-  <div class="w-72">
+  <div class="w-60">
     <Sidebar bind:environmentsData />
   </div>
 
-  <div class="flex flex-auto flex-col">
+  <div class="flex flex-auto flex-col bg-[#F9F8FC] p-4">
     <slot />
   </div>
 </div>

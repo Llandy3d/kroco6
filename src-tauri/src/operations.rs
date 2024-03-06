@@ -43,6 +43,9 @@ pub trait ProjectManager {
     // Returns the test with the given name, if it exists.
     fn get_test(&self, project_name: &str, test_name: &str) -> io::Result<Test>;
 
+    // TODO: document
+    fn delete_test(&self, project_name: &str, test_name: &str) -> io::Result<()>;
+
     // Create a new test in a project.
     //
     // Returns the newly created test.
@@ -55,12 +58,12 @@ pub trait ProjectManager {
     fn save_test(&self, project_name: &str, test_name: &str, new_content: &str) -> io::Result<()>;
 
     // TODO: document
-    fn load_project_config(&self, project: Project) -> io::Result<ProjectConfig>;
+    fn load_project_config(&self, project_name: &str) -> io::Result<ProjectConfig>;
 
     // TODO: document
     fn save_project_config(
         &self,
-        project: Project,
+        project_name: &str,
         project_config: ProjectConfig,
     ) -> io::Result<()>;
 }
@@ -160,8 +163,8 @@ impl ProjectManager for LocalProjectManager {
     }
 
     // Load project config
-    fn load_project_config(&self, project: Project) -> io::Result<ProjectConfig> {
-        let project_path = self.projects_dir().join(project.name);
+    fn load_project_config(&self, project_name: &str) -> io::Result<ProjectConfig> {
+        let project_path = self.projects_dir().join(project_name);
         if !project_path.exists() {
             return Err(io::Error::new(
                 io::ErrorKind::NotFound,
@@ -179,10 +182,10 @@ impl ProjectManager for LocalProjectManager {
     // Save project config
     fn save_project_config(
         &self,
-        project: Project,
+        project_name: &str,
         project_config: ProjectConfig,
     ) -> io::Result<()> {
-        let project_path = self.projects_dir().join(project.name);
+        let project_path = self.projects_dir().join(project_name);
         if !project_path.exists() {
             return Err(io::Error::new(
                 io::ErrorKind::NotFound,
@@ -234,6 +237,11 @@ impl ProjectManager for LocalProjectManager {
                         "invalid file extension",
                     ))?;
 
+                // skip json as it's not a test but configuration
+                if kind == "json" {
+                    continue;
+                }
+
                 // Read the content of the file
                 let content = fs::read_to_string(&path)?;
 
@@ -283,6 +291,32 @@ impl ProjectManager for LocalProjectManager {
                 );
 
                 Ok(test)
+            }
+            None => Err(io::Error::new(io::ErrorKind::NotFound, "test not found")),
+        }
+    }
+
+    fn delete_test(&self, project_name: &str, test_name: &str) -> io::Result<()> {
+        let project_path = self.projects_dir().join(project_name);
+        if !project_path.exists() {
+            return Err(io::Error::new(io::ErrorKind::NotFound, "project not found"));
+        }
+
+        match get_file_with_basename(project_path.as_path(), test_name) {
+            Some(test_path) => {
+                let kind = test_path
+                    .extension()
+                    .ok_or(io::Error::new(
+                        io::ErrorKind::InvalidData,
+                        "invalid file extension",
+                    ))?
+                    .to_str()
+                    .ok_or(io::Error::new(
+                        io::ErrorKind::InvalidData,
+                        "invalid file extension",
+                    ))?;
+
+                fs::remove_file(test_path)
             }
             None => Err(io::Error::new(io::ErrorKind::NotFound, "test not found")),
         }

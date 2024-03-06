@@ -1,21 +1,29 @@
 <script lang="ts" context="module">
   import { loadContent, storeContent } from "$lib/files";
-  import type { ScriptFile } from "$lib/stores/editor";
+  import { currentFile, updateFile, type ScriptFile } from "$lib/stores/editor";
   import * as monaco from "monaco-editor";
-  import * as scripts from "$lib/example-scripts";
 </script>
 
 <script lang="ts">
-  import { onDestroy, onMount } from "svelte";
-  import TestToolbar from "./TestToolbar.svelte";
-  import { runScriptInCloud, runScriptLocally, getCloudTests, type Project, type CloudTest } from "$lib/backend-client";
-  import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
-  import * as Dialog from "$lib/components/ui/dialog";
-  import * as Card from "$lib/components/ui/card";
-  import * as HoverCard from "$lib/components/ui/hover-card";
+  import {
+    Test,
+    createTest,
+    getCloudTests,
+    runScriptInCloud,
+    runScriptLocally,
+    saveTest,
+    type CloudTest,
+  } from "$lib/backend-client";
   import { Button } from "$lib/components/ui/button";
+  import * as Card from "$lib/components/ui/card";
+  import * as Dialog from "$lib/components/ui/dialog";
+  import * as HoverCard from "$lib/components/ui/hover-card";
+  import { activeProject } from "$lib/stores/projects";
   import { open } from "@tauri-apps/api/shell";
+  import { onDestroy, onMount } from "svelte";
   import { toast } from "svelte-sonner";
+  import ScriptExamples from "./ScriptExamples.svelte";
+  import TestToolbar from "./TestToolbar.svelte";
 
   export let file: ScriptFile;
 
@@ -27,9 +35,7 @@
   let cloudTestDialogOpen = false;
 
   async function loadCloudTests() {
-    // TODO: we need to know the current active project
-    const project: Project = { name: "default", test_collections: [] };
-    cloud_tests = await getCloudTests(project);
+    cloud_tests = await getCloudTests($activeProject);
   }
 
   function setCloudScriptInEditor(script: string | null) {
@@ -63,6 +69,17 @@
     editor.setValue(script);
   }
 
+  async function handleSaveTest() {
+    if (!$currentFile) return;
+
+    if ($currentFile.path.type === "new") {
+      await createTest($activeProject, new Test($currentFile.name, "Javascript", script));
+      updateFile($currentFile.handle, { path: { type: "existing", path: "", original: "" } });
+    } else {
+      await saveTest($activeProject, $currentFile.name, script);
+    }
+  }
+
   onMount(() => {
     script = loadContent(file);
 
@@ -83,57 +100,16 @@
   });
 </script>
 
-<div class="flex flex-auto flex-col">
-  <TestToolbar runTest={runTestLocally} {runTestInCloud} />
-  <DropdownMenu.Root>
-    <DropdownMenu.Trigger>Script examples</DropdownMenu.Trigger>
-    <DropdownMenu.Content>
-      <DropdownMenu.Group>
-        <DropdownMenu.Label>Authentication/Authorization</DropdownMenu.Label>
-        <DropdownMenu.Separator />
-        <DropdownMenu.Item on:click={() => handleExScript(scripts.BASIC_AUTHENTICATION)}
-          >Basic Authentication</DropdownMenu.Item
-        >
-        <DropdownMenu.Item on:click={() => handleExScript(scripts.DIGEST_AUTHENTICATION)}
-          >Digest Authentication</DropdownMenu.Item
-        >
-      </DropdownMenu.Group>
-      <DropdownMenu.Group>
-        <DropdownMenu.Label>API CRUD operations</DropdownMenu.Label>
-        <DropdownMenu.Separator />
-        <DropdownMenu.Item on:click={() => handleExScript(scripts.CORE_K6_API)}
-          >Core k6 APIs example</DropdownMenu.Item
-        >
-      </DropdownMenu.Group>
-      <DropdownMenu.Group>
-        <DropdownMenu.Label>Cookies</DropdownMenu.Label>
-        <DropdownMenu.Separator />
-        <DropdownMenu.Item on:click={() => handleExScript(scripts.COOKIES_HEADER)}
-          >Accessing a cookie set in response headers</DropdownMenu.Item
-        >
-        <DropdownMenu.Item on:click={() => handleExScript(scripts.COOKIES_LOG_RESPONSE)}
-          >Logging all cookies in response</DropdownMenu.Item
-        >
-        <DropdownMenu.Item on:click={() => handleExScript(scripts.COOKIES_SET_JAR)}
-          >Setting a cookie in VU cookie jar</DropdownMenu.Item
-        >
-      </DropdownMenu.Group>
-      <DropdownMenu.Group>
-        <DropdownMenu.Label>Correlation</DropdownMenu.Label>
-        <DropdownMenu.Separator />
-        <DropdownMenu.Item on:click={() => handleExScript(scripts.EXTRACT_JSON)}
-          >Extracting values from JSON response</DropdownMenu.Item
-        >
-      </DropdownMenu.Group>
-    </DropdownMenu.Content>
-  </DropdownMenu.Root>
+<div class="flex flex-auto flex-col bg-white">
+  <TestToolbar runTest={runTestLocally} {runTestInCloud} saveTest={handleSaveTest} />
+  <ScriptExamples onSelectExample={handleExScript} />
   <Dialog.Root bind:open={cloudTestDialogOpen}>
     <Dialog.Trigger on:click={() => loadCloudTests()}>Open</Dialog.Trigger>
     <Dialog.Content>
       <Dialog.Header>
         <Dialog.Title>Choose a test</Dialog.Title>
         <Dialog.Description>
-            <div class="grid grid-cols-4">
+          <div class="grid grid-cols-4">
             {#each cloud_tests as test}
               <Card.Root>
                 <Card.Content>
@@ -143,16 +119,21 @@
                       {test.script}
                     </HoverCard.Content>
                   </HoverCard.Root>
-                <Button class="bottom-0"on:click={() => {setCloudScriptInEditor(test.script)}}>Use</Button>
+                  <Button
+                    class="bottom-0"
+                    on:click={() => {
+                      setCloudScriptInEditor(test.script);
+                    }}>Use</Button
+                  >
                 </Card.Content>
               </Card.Root>
             {/each}
-            </div>
-          This action cannot be undone. This will permanently delete your account
-          and remove your data from our servers.
+          </div>
+          This action cannot be undone. This will permanently delete your account and remove your data
+          from our servers.
         </Dialog.Description>
       </Dialog.Header>
     </Dialog.Content>
   </Dialog.Root>
-    <div class="full-w flex-auto" bind:this={container}></div>
-  </div>
+  <div class="full-w flex-auto" bind:this={container}></div>
+</div>
