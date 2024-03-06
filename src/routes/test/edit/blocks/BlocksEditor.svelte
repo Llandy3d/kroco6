@@ -1,18 +1,19 @@
 <script lang="ts">
+  import { runScriptInCloud, runScriptLocally } from "$lib/backend-client";
   import * as Tabs from "$lib/components/ui/tabs";
+  import { loadContent, storeContent } from "$lib/files";
+  import { loadTest, test } from "$lib/stores/blocks";
+  import { EMPTY_BLOCK_TEST } from "$lib/stores/blocks/constants";
+  import { convertToScript } from "$lib/stores/blocks/convert";
+  import { parse } from "$lib/stores/blocks/model/strict";
   import type { BlockFile } from "$lib/stores/editor";
+  import { open } from "@tauri-apps/api/shell";
   import { onDestroy, onMount } from "svelte";
+  import { toast } from "svelte-sonner";
+  import TestToolbar from "../TestToolbar.svelte";
+  import Library from "../library/Library.svelte";
   import Canvas from "./Canvas.svelte";
   import ScriptPreview from "./ScriptPreview.svelte";
-  import { blockTest, loadBlockTest } from "$lib/stores/test";
-  import { loadContent, storeContent } from "$lib/files";
-  import Library from "../library/Library.svelte";
-  import { EMPTY_BLOCK_TEST, type BlockTest } from "$lib/stores/test/types";
-  import { runScriptInCloud, runScriptLocally } from "$lib/backend-client";
-  import { convertToScript } from "$lib/convert";
-  import TestToolbar from "../TestToolbar.svelte";
-  import { toast } from "svelte-sonner";
-  import { open } from "@tauri-apps/api/shell";
 
   let tab = "library";
 
@@ -20,7 +21,7 @@
 
   async function runTestLocally() {
     try {
-      const script = await convertToScript($blockTest);
+      const script = await convertToScript($test);
       const response = await runScriptLocally(script);
 
       console.log(response);
@@ -31,7 +32,7 @@
 
   async function runTestInCloud(projectId: string) {
     try {
-      const script = await convertToScript($blockTest);
+      const script = await convertToScript($test);
       const results = await runScriptInCloud({ script, projectId });
 
       open(results);
@@ -47,18 +48,26 @@
     let content = loadContent(file);
 
     try {
-      const blockTest = JSON.parse(content) as BlockTest;
+      const test = parse(JSON.parse(content));
 
-      loadBlockTest(blockTest);
+      if (!test.success) {
+        console.log("Failed to parse block test", test.issues);
+
+        loadTest(EMPTY_BLOCK_TEST);
+
+        return;
+      }
+
+      loadTest(test.output);
     } catch (e) {
-      loadBlockTest(EMPTY_BLOCK_TEST);
+      loadTest(EMPTY_BLOCK_TEST);
 
       console.error(e);
     }
   });
 
   onDestroy(() => {
-    storeContent(file, $blockTest);
+    storeContent(file, $test);
   });
 </script>
 

@@ -1,17 +1,17 @@
 <script lang="ts">
-  import { derived } from "svelte/store";
-  import { convertToScript } from "$lib/convert";
+  import { test } from "$lib/stores/blocks";
+  import { convertToScript } from "$lib/stores/blocks/convert";
+  import { mode } from "mode-watcher";
   import Highlight, { LineNumbers } from "svelte-highlight";
   import typescript from "svelte-highlight/languages/typescript";
   import light from "svelte-highlight/styles/github";
   import dark from "svelte-highlight/styles/github-dark";
-  import { mode } from "mode-watcher";
-  import { blockTest, blocks } from "$lib/stores/test";
+  import { derived } from "svelte/store";
 
   let error: unknown = null;
 
   let script = derived(
-    blockTest,
+    test,
     (test, set) => {
       try {
         convertToScript(test).then((script) => {

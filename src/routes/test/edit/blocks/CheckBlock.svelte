@@ -1,56 +1,106 @@
 <script lang="ts">
-  import type { CheckBlock, CheckExpression } from "$lib/stores/test/types";
+  import { detachBlock, insertNext, test, updateBlock } from "$lib/stores/blocks";
+  import {
+    instantiate,
+    type Block as BlockType,
+    type CheckBlock,
+  } from "$lib/stores/blocks/model/loose";
+  import type { Check } from "$lib/stores/blocks/model/strict";
+  import { isHttpRequestBlock, isStepBlock } from "$lib/stores/blocks/utils";
+  import { PlusSquare } from "lucide-svelte";
+  import { nanoid } from "nanoid";
   import AnyBlock from "./AnyBlock.svelte";
+  import CheckInput from "./CheckInput.svelte";
+  import { STEP_COLOR } from "./colors";
   import Block from "./primitives/Block.svelte";
   import BlockInset from "./primitives/BlockInset.svelte";
   import Field from "./primitives/Field.svelte";
-  import { updateBlock } from "$lib/stores/test";
-  import CheckInput from "./CheckInput.svelte";
-  import { PlusSquare } from "lucide-svelte";
-  import { nanoid } from "nanoid";
 
   export let block: CheckBlock;
 
-  const handleCheckChange = (event: CustomEvent<CheckExpression>) => {
-    updateBlock({
-      ...block,
-      checks: block.checks.map((check) => (check.id === event.detail.id ? event.detail : check)),
-    });
-  };
+  function handleCheckChange(target: Check) {
+    test.update((test) =>
+      updateBlock(test, {
+        ...block,
+        checks: block.checks.map((check) => (check.id === target.id ? target : check)),
+      }),
+    );
+  }
 
-  const handleAddCheck = () => {
-    const newCheck: CheckExpression = {
+  function handleAddCheck() {
+    const newCheck: Check = {
+      type: "status",
       id: nanoid(),
-      type: "has-status",
-      status: 200,
+      value: 200,
     };
 
-    updateBlock({
-      ...block,
-      checks: [...block.checks, newCheck],
-    });
-  };
+    test.update((test) =>
+      updateBlock(test, {
+        ...block,
+        checks: [...block.checks, newCheck],
+      }),
+    );
+  }
 
-  const handleRemoveCheck = (event: CustomEvent<CheckExpression>) => {
-    updateBlock({
-      ...block,
-      checks: block.checks.filter((check) => check.id !== event.detail.id),
+  function handleRemoveCheck(target: Check) {
+    test.update((test) =>
+      updateBlock(test, {
+        ...block,
+        checks: block.checks.filter((check) => check.id !== target.id),
+      }),
+    );
+  }
+
+  function handleTargetDrop(target: BlockType) {
+    if (!isHttpRequestBlock(target)) {
+      return;
+    }
+
+    test.update((test) => {
+      return updateBlock(detachBlock(test, target), {
+        ...block,
+        target: instantiate(target),
+      });
     });
-  };
+  }
+
+  function handleNextDrop(next: BlockType) {
+    if (!isStepBlock(next)) {
+      return;
+    }
+
+    test.update((test) => insertNext(test, block, next));
+  }
 </script>
 
-<Block handleClass="bg-orange-500" type="check" {block}>
-  <Field class="bg-orange-200">
-    Check that <BlockInset accepts={["http-request"]} owner={block} let:block>
-      {#if block !== undefined}
-        <AnyBlock {block} />
-      {/if}
-    </BlockInset>
-  </Field>
-  {#each block.checks as check (check.id)}
-    <CheckInput {check} on:change={handleCheckChange} on:remove={handleRemoveCheck} />
-  {/each}
-  <Field class="bg-orange-200">
-    <button on:click={handleAddCheck}><PlusSquare size={14} /></button>
-  </Field>
+<Block
+  {block}
+  color={STEP_COLOR}
+  top={true}
+  bottom={{ block: block.next, accepts: isStepBlock, onDrop: handleNextDrop }}
+>
+  <svelte:fragment>
+    <Field>
+      Check that <BlockInset
+        owner={block}
+        connection={{ block: block.target, accepts: isHttpRequestBlock, onDrop: handleTargetDrop }}
+        let:child
+      >
+        {#if child !== null}
+          <AnyBlock block={child} />
+        {/if}
+      </BlockInset>
+    </Field>
+    {#each block.checks as check (check.id)}
+      <CheckInput {check} onChange={handleCheckChange} onRemove={handleRemoveCheck} />
+    {/each}
+    <Field>
+      <button on:click={handleAddCheck}><PlusSquare size={14} /></button>
+    </Field>
+  </svelte:fragment>
+  <svelte:fragment slot="next" let:next>
+    {#if next !== null}
+      <AnyBlock block={next} />
+    {/if}
+  </svelte:fragment>
 </Block>

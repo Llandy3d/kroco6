@@ -1,12 +1,13 @@
 <script lang="ts">
   import Button from "$lib/components/ui/button/button.svelte";
-  import ImportDialog, { type ImportEvent } from "./SyncDialog.svelte";
-  import { library, syncLibrary, updateEndpoint } from "$lib/stores/test";
+  import { library, syncLibrary, updateEndpoint } from "$lib/stores/library";
+  import { HTTP_METHODS } from "$lib/stores/library/constants";
+  import type { ApiEndpoint, ApiOperation } from "$lib/stores/library/types";
   import { Plus, RefreshCcw } from "lucide-svelte";
-  import ApiPath from "./ApiPath.svelte";
   import { derived, type Readable } from "svelte/store";
+  import ApiPath from "./ApiPath.svelte";
   import EndpointEditor from "./EndpointEditor.svelte";
-  import { type ApiOperation, type ApiEndpoint, HTTP_METHODS } from "$lib/stores/test/types";
+  import ImportDialog, { type ImportEvent } from "./SyncDialog.svelte";
 
   let importModalOpen = false;
 

@@ -1,46 +1,35 @@
-<script lang="ts">
+<script lang="ts" generics="TTarget extends Block">
+  import { isTemplate, type Block } from "$lib/stores/blocks/model/loose";
+  import { isBlock } from "$lib/stores/blocks/utils";
+  import type { BottomConnection } from "./connections/types";
   import { dropzone, type DroppedEvent, type DroppingEvent } from "./dnd";
-  import { type Block as BlockType, type ImmediateParent } from "$lib/stores/test/types";
-  import { derived } from "svelte/store";
-  import { blocks, reparentBlock } from "$lib/stores/test";
 
-  export let accepts: string[] | undefined = undefined;
-  export let owner: BlockType;
+  export let owner: Block;
+  export let connection: BottomConnection<TTarget>;
 
   let dropping = false;
 
-  const current = derived(blocks, (blocks) => {
-    return blocks.find(
-      (block) => block.parent.type === "immediate" && block.parent.id === owner.id,
-    );
-  });
+  function handleDropped(ev: CustomEvent<DroppedEvent<TTarget, {}>>) {
+    connection.onDrop(ev.detail.data.dropped);
 
-  const handleDropped = (ev: CustomEvent<DroppedEvent<BlockType, {}>>) => {
-    if ($current !== undefined) {
-      return;
-    }
+    dropping = false;
+  }
 
-    const { dropped } = ev.detail.data;
-
-    const parent: ImmediateParent = {
-      type: "immediate",
-      id: owner.id,
-    };
-
-    reparentBlock(parent, dropped);
-  };
-
-  const handleDropping = (ev: CustomEvent<DroppingEvent>) => {
+  function handleDropping(ev: CustomEvent<DroppingEvent<unknown>>) {
     dropping = ev.detail.dropping;
-  };
+  }
+
+  function accepts(value: unknown): value is TTarget {
+    return !isTemplate(owner) && isBlock(value) && connection.accepts(value);
+  }
 </script>
 
 <div
-  class="inline-block min-h-8 min-w-10 border-2 border-slate-300 bg-white"
+  class="inline-block min-h-6 min-w-16 border-2 border-slate-300 bg-white"
   class:bg-slate-400={dropping}
-  use:dropzone={{ accepts, data: {} }}
+  use:dropzone={{ accepts, data: owner }}
   on:dropped={handleDropped}
   on:dropping={handleDropping}
 >
-  <slot block={$current} />
+  <slot child={connection.block} />
 </div>

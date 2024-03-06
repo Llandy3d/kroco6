@@ -1,51 +1,65 @@
 <script lang="ts">
-  import { appendBlock, blocks, insertBlock, updateBlock } from "$lib/stores/test";
-  import { type GroupBlock, STEPS } from "$lib/stores/test/types";
-  import { derived } from "svelte/store";
-  import Block from "./primitives/Block.svelte";
-  import Field from "./primitives/Field.svelte";
-  import StringInput, { type StringInputChangeEvent } from "./inputs/StringInput.svelte";
-  import Collection, {
-    type AppendBlockEvent,
-    type InsertBlockEvent,
-  } from "./primitives/Collection.svelte";
+  import { insertNext, insertStep, test, updateBlock } from "$lib/stores/blocks";
+  import { type Block as BlockType, type GroupBlock } from "$lib/stores/blocks/model/loose";
+  import { isStepBlock } from "$lib/stores/blocks/utils";
   import AnyBlock from "./AnyBlock.svelte";
+  import { STEP_COLOR } from "./colors";
+  import StringInput from "./inputs/StringInput.svelte";
+  import Block from "./primitives/Block.svelte";
+  import Collection from "./primitives/Collection.svelte";
+  import Field from "./primitives/Field.svelte";
 
   export let block: GroupBlock;
 
-  const children = derived(blocks, ($blocks) => {
-    return $blocks.filter((b) => b.parent.type === "collection" && b.parent.id === block.id);
-  });
+  function handleNameChange(value: string) {
+    test.update((test) =>
+      updateBlock(test, {
+        ...block,
+        name: value,
+      }),
+    );
+  }
 
-  const append = ({ detail }: CustomEvent<AppendBlockEvent>) => {
-    appendBlock(block, detail.target);
-  };
+  function handleDropStep(step: BlockType) {
+    if (!isStepBlock(step)) {
+      return;
+    }
 
-  const insert = ({ detail }: CustomEvent<InsertBlockEvent>) => {
-    insertBlock(block, detail.before, detail.target);
-  };
+    test.update((test) => insertStep(test, block, step));
+  }
 
-  const handleNameChange = (ev: CustomEvent<StringInputChangeEvent>) => {
-    updateBlock({
-      ...block,
-      name: ev.detail.value,
-    });
-  };
+  function handleDropNext(next: BlockType) {
+    if (!isStepBlock(next)) {
+      return;
+    }
+
+    test.update((test) => insertNext(test, block, next));
+  }
 </script>
 
-<Block type="group" handleClass="bg-amber-500" {block}>
-  <Field class="bg-amber-100"
-    >Grouped as <StringInput value={block.name} on:change={handleNameChange} />
-  </Field>
-  <Field class="bg-amber-100">do the following:</Field>
-  <Collection
-    class="bg-amber-100"
-    accepts={STEPS}
-    items={$children}
-    on:append={append}
-    on:insert={insert}
-    let:item
-  >
-    <AnyBlock block={item} />
-  </Collection>
+<Block
+  {block}
+  top={true}
+  color={STEP_COLOR}
+  bottom={{ block: block.next, accepts: isStepBlock, onDrop: handleDropNext }}
+>
+  <svelte:fragment>
+    <Field>Grouped as <StringInput value={block.name} onChange={handleNameChange} /></Field>
+    <Field>do the following:</Field>
+    <Collection
+      owner={block}
+      connection={{ block: block.step, accepts: isStepBlock, onDrop: handleDropStep }}
+      color={STEP_COLOR}
+      let:child
+    >
+      {#if child !== null}
+        <AnyBlock block={child} />
+      {/if}
+    </Collection>
+  </svelte:fragment>
+  <svelte:fragment slot="next" let:next>
+    {#if next !== null}
+      <AnyBlock block={next} />
+    {/if}
+  </svelte:fragment>
 </Block>

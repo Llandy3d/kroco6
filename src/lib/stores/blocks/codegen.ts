@@ -1,8 +1,8 @@
-import { exhaustive } from "./utils/typescript";
-import type { Scenario, Step, Test } from "./types";
 import * as prettier from "prettier";
 import * as babelParser from "prettier/parser-babel";
 import * as estreePlugin from "prettier/plugins/estree";
+import type { Scenario, Step, Test } from "../../types";
+import { exhaustive } from "../../utils/typescript";
 
 function sanitizeName(name: string) {
   const parts = name
@@ -52,6 +52,9 @@ function emitStep(step: Step): string {
             .join(",")},
 				})
 			`;
+
+    case "sleep":
+      return `sleep(${step.seconds});`;
 
     default:
       return exhaustive(step);
@@ -118,7 +121,7 @@ function emitScript(test: Test) {
 
   const code = `
     import http from 'k6/http';
-    import { group, check } from 'k6';
+    import { group, check, sleep } from 'k6';
 
     export const options = {
       scenarios: { 

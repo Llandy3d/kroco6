@@ -1,41 +1,36 @@
 <script lang="ts">
-  import type { Block as BlockType } from "$lib/stores/test/types";
-
-  import Root from "./Root.svelte";
-  import { dropzone, type DroppedEvent } from "./primitives/dnd";
-  import { reparentBlock, roots, selected } from "$lib/stores/test";
+  import { dropOnCanvas, test } from "$lib/stores/blocks";
+  import type { Block } from "$lib/stores/blocks/model/loose";
+  import { isBlock } from "$lib/stores/blocks/utils";
   import AnyBlock from "./AnyBlock.svelte";
+  import Root from "./Root.svelte";
   import Toolbox from "./Toolbox.svelte";
+  import { dropzone, type DroppedEvent } from "./primitives/dnd";
 
-  const handleDrop = ({ detail }: CustomEvent<DroppedEvent<BlockType, {}>>) => {
-    const dropped = detail.data.dropped;
+  function handleDrop({ detail }: CustomEvent<DroppedEvent<Block, {}>>) {
+    const { dropped } = detail.data;
 
-    const parent = {
-      type: "canvas",
+    dropOnCanvas(dropped, {
       top: detail.top,
       left: detail.left,
-    } as const;
+    });
+  }
 
-    reparentBlock(parent, dropped);
-  };
-
-  const handleClick = () => {
-    selected.set(null);
-  };
+  function handleClick() {}
 </script>
 
 <div
   class="relative flex h-full w-full overflow-hidden"
-  use:dropzone={{ data: {} }}
+  use:dropzone={{ accepts: isBlock, data: "canvas" }}
   on:dropped={handleDrop}
 >
   <Toolbox />
   <!-- svelte-ignore a11y-click-events-have-key-events -->
   <!-- svelte-ignore a11y-no-static-element-interactions -->
   <div class="flex-auto" on:click={handleClick}>
-    {#each $roots as root (root.id)}
+    {#each $test.roots as root (root.block.id)}
       <Root {root}>
-        <AnyBlock block={root} />
+        <AnyBlock block={root.block} />
       </Root>
     {/each}
   </div>

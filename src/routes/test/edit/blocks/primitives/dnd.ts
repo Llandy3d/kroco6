@@ -2,19 +2,21 @@
 import type { ActionReturn } from "svelte/action";
 import { writable } from "svelte/store";
 
+type AcceptsCallback<T = unknown> = (value: unknown) => value is T;
+
 const dragging = writable<DragSource<any> | null>(null);
 
 interface DragSource<T = unknown> {
+  accepts: (value: unknown) => boolean;
   node: HTMLElement;
   top: number;
   left: number;
-  type: string;
   data: T;
 }
 
 interface DraggableOptions<T> {
-  type: string;
   data: T;
+  accepts: (value: unknown) => boolean;
   transform?: (data: T) => T;
 }
 
@@ -26,7 +28,7 @@ function draggable<T>(
   node: HTMLElement,
   options: DraggableOptions<T>,
 ): ActionReturn<DraggableOptions<T>, DraggableAttributes> {
-  let { type, data, transform } = options;
+  let { accepts, data, transform } = options;
 
   const handle = node.querySelector<HTMLElement>("[data-drag-handle]") ?? node;
 
@@ -53,8 +55,8 @@ function draggable<T>(
       node,
       top: event.clientY - bounds.top,
       left: event.clientX - bounds.left,
-      type,
       data: transform?.(data) ?? data,
+      accepts,
     };
 
     event.dataTransfer.setData("application/json", JSON.stringify(payload));
@@ -95,8 +97,8 @@ function draggable<T>(
 
   return {
     update(options) {
-      type = options.type;
       data = options.data;
+      accepts = options.accepts;
       transform = options.transform;
     },
     destroy() {
@@ -109,21 +111,22 @@ function draggable<T>(
   };
 }
 
-interface DropZoneOptions<T> {
-  accepts?: readonly string[];
-  data: T;
+interface DropZoneOptions<Data, Accepts> {
+  data: Data;
+  accepts: (value: unknown) => value is Accepts;
 }
 
 interface DragChangeEvent {
   dragging: boolean;
 }
 
-interface AcceptingEvent {
+interface AcceptingEvent<Accepts> {
+  source: DragSource<Accepts> | null;
   accepting: boolean;
 }
 
-interface DroppingEvent {
-  source: DragSource<any> | null;
+interface DroppingEvent<Accepts> {
+  source: DragSource<Accepts> | null;
   dropping: boolean;
 }
 
@@ -136,26 +139,26 @@ interface DroppedEvent<Dropped = unknown, Target = unknown> {
   left: number;
 }
 
-interface DropZoneAttributes<TargetData> {
-  "on:dropped": (event: CustomEvent<DroppedEvent<any, TargetData>>) => void;
-  "on:accepting"?: (event: CustomEvent<AcceptingEvent>) => void;
-  "on:dropping"?: (event: CustomEvent<DroppingEvent>) => void;
+interface DropZoneAttributes<TargetData, Accepts> {
+  "on:dropped": (event: CustomEvent<DroppedEvent<Accepts, TargetData>>) => void;
+  "on:accepting"?: (event: CustomEvent<AcceptingEvent<Accepts>>) => void;
+  "on:dropping"?: (event: CustomEvent<DroppingEvent<Accepts>>) => void;
 }
 
-function dropzone<TargetData>(
+function dropzone<TargetData, Accepts>(
   node: HTMLElement,
-  options: DropZoneOptions<TargetData>,
-): ActionReturn<DropZoneOptions<TargetData>, DropZoneAttributes<TargetData>> {
+  options: DropZoneOptions<TargetData, Accepts>,
+): ActionReturn<DropZoneOptions<TargetData, Accepts>, DropZoneAttributes<TargetData, Accepts>> {
   let source: DragSource<any> | null = null;
 
   let { accepts, data: target } = options;
 
-  const isAcceptable = (source: DragSource<unknown> | null): source is DragSource => {
+  const isAcceptable = (source: DragSource<unknown> | null): source is DragSource<Accepts> => {
     if (source === null) {
       return false;
     }
 
-    return accepts === undefined || accepts.includes(source.type);
+    return source.accepts(target) && accepts(source.data);
   };
 
   const handleDragEnter = () => {
@@ -164,7 +167,7 @@ function dropzone<TargetData>(
     }
 
     node.dispatchEvent(
-      new CustomEvent<DroppingEvent>("dropping", {
+      new CustomEvent<DroppingEvent<Accepts>>("dropping", {
         detail: {
           dropping: true,
           source,
@@ -179,7 +182,7 @@ function dropzone<TargetData>(
     }
 
     node.dispatchEvent(
-      new CustomEvent<DroppingEvent>("dropping", {
+      new CustomEvent<DroppingEvent<Accepts>>("dropping", {
         detail: {
           dropping: false,
           source,
@@ -218,7 +221,7 @@ function dropzone<TargetData>(
     const bounds = node.getBoundingClientRect();
 
     node.dispatchEvent(
-      new CustomEvent<DroppedEvent>("dropped", {
+      new CustomEvent<DroppedEvent<Accepts, TargetData>>("dropped", {
         detail: {
           data: {
             dropped: source.data,
@@ -237,8 +240,9 @@ function dropzone<TargetData>(
     source = state;
 
     node.dispatchEvent(
-      new CustomEvent<AcceptingEvent>("accepting", {
+      new CustomEvent<AcceptingEvent<Accepts>>("accepting", {
         detail: {
+          source: state,
           accepting: state !== null,
         },
       }),
@@ -293,6 +297,7 @@ export {
   dropzone,
   dropmask,
   dragging,
+  type AcceptsCallback,
   type DragSource,
   type AcceptingEvent,
   type DroppingEvent,

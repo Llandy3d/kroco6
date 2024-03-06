@@ -1,88 +1,56 @@
-<script lang="ts" context="module">
-  export interface InsertBlockEvent {
-    target: BlockType;
-    before: BlockType;
-  }
+<script lang="ts" generics="TBottom extends Block">
+  import { isBlock } from "$lib/stores/blocks/utils";
 
-  export interface AppendBlockEvent {
-    target: BlockType;
-  }
-</script>
+  import { isTemplate, type Block } from "$lib/stores/blocks/model/loose";
 
-<script lang="ts">
-  import type { Block as BlockType } from "$lib/stores/test/types";
-  import { cn } from "$lib/utils";
+  import Bottom from "./connections/Bottom.svelte";
+  import type { BottomConnection } from "./connections/types";
   import { type DroppedEvent } from "./dnd";
-  import DropZone from "./DropZone.svelte";
-  import { createEventDispatcher } from "svelte";
+  import { toBlockColorStyle, type BlockColor } from "./types";
 
-  export let accepts: string[] | undefined;
-  export let items: BlockType[];
+  export let owner: Block;
+  export let color: BlockColor;
+  export let connection: BottomConnection<TBottom>;
 
-  let className = "";
+  function handleDropped(ev: DroppedEvent<TBottom, Block | null>) {
+    connection.onDrop(ev.data.dropped);
+  }
 
-  export { className as class };
-
-  const dispatch = createEventDispatcher<{
-    insert: InsertBlockEvent;
-    append: AppendBlockEvent;
-  }>();
-
-  const handleDropped = (ev: CustomEvent<DroppedEvent<BlockType, BlockType | null>>) => {
-    const { dropped, target } = ev.detail.data;
-
-    // If we are dropping an item before itself, then we don't need to do anything.
-    if (dropped.id === target?.id) {
-      return;
-    }
-
-    if (target === null) {
-      dispatch("append", {
-        target: dropped,
-      });
-
-      return;
-    }
-
-    dispatch("insert", {
-      target: dropped,
-      before: target,
-    });
-  };
+  function acceptsBlock(value: unknown): value is TBottom {
+    return !isTemplate(owner) && isBlock(value) && connection.accepts(value);
+  }
 </script>
 
 <div class="collection-root">
-  <div class={cn("h-2 w-full rounded-br-md  bg-white shadow-md shadow-slate-400", className)}></div>
+  <div class="header h-2 w-full"></div>
   <div class="select-none">
     <div class="flex rounded-l-md">
-      <div class={cn("w-2 bg-white", className)}></div>
-      <ul class="separator flex w-6 flex-auto list-none flex-col">
-        {#each items as item (item.id)}
-          <li class="relative z-0 border-slate-200">
-            <DropZone {accepts} data={item} on:dropped={handleDropped} />
-            <slot {item} />
-          </li>
-        {/each}
-        <li class="relative z-0 min-h-2">
-          <DropZone {accepts} data={null} on:dropped={handleDropped} />
-        </li>
-      </ul>
+      <div class="padding w-2"></div>
+      <div
+        class="relative mb-4 flex w-6 flex-auto list-none flex-col"
+        style={toBlockColorStyle(color)}
+      >
+        <Bottom
+          accepts={acceptsBlock}
+          data={owner}
+          connected={connection.block !== null}
+          onDrop={handleDropped}
+        />
+        <slot child={connection.block} />
+      </div>
     </div>
   </div>
-  <div
-    class={cn(
-      "collection-footer h-2 w-full rounded-tr-md bg-white shadow-md shadow-slate-400",
-      className,
-    )}
-  ></div>
+  <div class="footer h-2 w-full rounded-tr-md shadow-md shadow-slate-400"></div>
 </div>
 
 <style>
-  .collection-root:last-child .collection-footer {
-    border-bottom-right-radius: 0.25rem;
+  .header,
+  .footer,
+  .padding {
+    background-color: var(--block-bg-secondary);
   }
 
-  .separator {
-    gap: 1px;
+  .collection-root:last-child .footer {
+    border-bottom-right-radius: 0.25rem;
   }
 </style>

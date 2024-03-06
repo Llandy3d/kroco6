@@ -1,13 +1,12 @@
 <script lang="ts">
-  import { Label } from "$lib/components/ui/label";
-  import type { ApiOperation } from "$lib/stores/test/types";
   import { Input } from "$lib/components/ui/input";
+  import { Label } from "$lib/components/ui/label";
+  import type { ApiOperation } from "$lib/stores/library/types";
   import type { InputEvents } from "cmdk-sv";
 
   export let operation: ApiOperation;
 
   export let onChange: (target: ApiOperation) => void;
-  export let onRemove: (target: ApiOperation) => void;
 
   function handleSummaryChange(event: InputEvents["change"]) {
     if (event.target instanceof HTMLInputElement) {

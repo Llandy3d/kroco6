@@ -8,9 +8,15 @@
 
 <div
   class={cn(
-    "relative flex items-center gap-2 whitespace-nowrap border-slate-400 p-1 text-sm text-black last:shadow-md",
+    "field relative flex items-center gap-2 whitespace-nowrap border-slate-400 p-1 text-xs text-black last:shadow-md",
     className,
   )}
 >
   <slot />
 </div>
+
+<style>
+  .field {
+    background-color: var(--block-bg-secondary);
+  }
+</style>
