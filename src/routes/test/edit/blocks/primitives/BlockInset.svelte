@@ -32,7 +32,7 @@
 
 <div class="inline-block flex-auto" style={toBlockColorStyle(color)}>
   <div
-    class="block-inset min-h-8 min-w-16 border-2 border-slate-300 bg-white"
+    class="block-inset min-h-8 min-w-16 border-2 bg-white"
     class:bg-slate-400={dropping}
     class:connected={connection.block !== null}
     class:dropping
@@ -48,6 +48,10 @@
   :global(.block-inset) {
     opacity: 0.5;
     border-color: var(--block-bg-primary);
+  }
+
+  .connected {
+    border: none;
   }
 
   .connected,

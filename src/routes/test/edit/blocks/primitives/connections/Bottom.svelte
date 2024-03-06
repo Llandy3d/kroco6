@@ -4,6 +4,7 @@
   export let connected = false;
 
   export let data: Target;
+  export let collection: boolean = false;
 
   export let accepts: (value: unknown) => value is Dropped;
   export let onDrop: (ev: DroppedEvent<Dropped, Target>) => void;
@@ -30,9 +31,9 @@
   }
 </script>
 
-<div class="bottom relative shadow-md shadow-slate-400">
+<div class="bottom relative z-20" class:collection>
   <svg width="16px" height="8px" viewBox="0 0 100 50" xmlns="http://www.w3.org/2000/svg">
-    <polygon points="0,0 100,0 50,25" />
+    <polygon points="0,0 100,0 50,40" />
   </svg>
 </div>
 <div class="relative">
@@ -50,9 +51,7 @@
 
 <style>
   .bottom {
-    height: 4px;
     background-color: var(--block-bg-primary);
-    border-bottom-right-radius: 4px;
   }
 
   :global(.block-inset) .bottom {
@@ -61,9 +60,14 @@
 
   svg {
     position: absolute;
-    top: 3px;
-    left: 58px;
+    left: 32px;
+    top: 1px;
     fill: var(--block-bg-primary);
+  }
+
+  .collection svg {
+    top: 0;
+    left: 40px;
   }
 
   .dropping {
