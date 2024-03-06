@@ -1,5 +1,11 @@
 <script lang="ts">
-  import { runScriptInCloud, runScriptLocally, saveTest } from "$lib/backend-client";
+  import {
+    Test,
+    createTest,
+    runScriptInCloud,
+    runScriptLocally,
+    saveTest,
+  } from "$lib/backend-client";
   import * as Tabs from "$lib/components/ui/tabs";
   import { loadContent, storeContent } from "$lib/files";
   import { loadTest, test } from "$lib/stores/blocks";
@@ -8,6 +14,7 @@
   import { parse } from "$lib/stores/blocks/model/strict";
   import { currentFile, updateFile, type BlockFile } from "$lib/stores/editor";
 
+  import { activeProject } from "$lib/stores/projects";
   import { open } from "@tauri-apps/api/shell";
   import { onDestroy, onMount } from "svelte";
   import { toast } from "svelte-sonner";
@@ -49,6 +56,16 @@
     await saveTest("default", $currentFile.name, JSON.stringify($test));
     if ($currentFile.path.type === "new") {
       updateFile($currentFile.handle, { path: { type: "existing", path: "", original: "" } });
+    }
+
+    if ($currentFile.path.type === "new") {
+      await createTest(
+        $activeProject,
+        new Test($currentFile.name, "Blocks", JSON.stringify($test)),
+      );
+      updateFile($currentFile.handle, { path: { type: "existing", path: "", original: "" } });
+    } else {
+      await saveTest($activeProject, $currentFile.name, JSON.stringify($test));
     }
   }
 
