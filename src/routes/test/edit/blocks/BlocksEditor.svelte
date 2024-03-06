@@ -1,7 +1,6 @@
 <script lang="ts">
   import { runScriptInCloud, runScriptLocally } from "$lib/backend-client";
   import { Button } from "$lib/components/ui/button";
-  import * as Tabs from "$lib/components/ui/tabs";
   import { loadContent, storeContent } from "$lib/files";
   import { loadTest, test } from "$lib/stores/blocks";
   import { EMPTY_BLOCK_TEST } from "$lib/stores/blocks/constants";
@@ -9,13 +8,15 @@
   import { parse } from "$lib/stores/blocks/model/strict";
   import { newFile, type BlockFile } from "$lib/stores/editor";
   import { open } from "@tauri-apps/api/shell";
-  import { FileCode2 } from "lucide-svelte";
+  import { Tabs } from "bits-ui";
+  import { Book, Code, FileCode2, Layers } from "lucide-svelte";
   import { onDestroy, onMount } from "svelte";
   import { toast } from "svelte-sonner";
   import TestToolbar from "../TestToolbar.svelte";
   import Library from "../library/Library.svelte";
   import Canvas from "./Canvas.svelte";
   import ScriptPreview from "./ScriptPreview.svelte";
+  import TabButton from "./TabButton.svelte";
 
   let tab = "build";
 
@@ -90,14 +91,14 @@
   <Tabs.Root class="flex flex-auto flex-col" bind:value={tab}>
     <TestToolbar runTest={runTestLocally} {runTestInCloud}>
       <svelte:fragment slot="left">
-        <Tabs.List>
-          <Tabs.Trigger value="build">Build</Tabs.Trigger>
-          <Tabs.Trigger value="library">Library</Tabs.Trigger>
-          <Tabs.Trigger value="script">Script</Tabs.Trigger>
+        <Tabs.List class="bg-default flex rounded-none shadow-none">
+          <TabButton value="build"><Layers size={14} /> Build</TabButton>
+          <TabButton value="library"><Book size={14} /> Library</TabButton>
+          <TabButton value="script"><Code size={14} /> Script</TabButton>
         </Tabs.List>
       </svelte:fragment>
       <svelte:fragment slot="right">
-        <Button size="sm" variant="secondary" on:click={handleConvertToScript}>
+        <Button class="hidden" size="sm" variant="secondary" on:click={handleConvertToScript}>
           <FileCode2 size={14} class="mr-2 h-4 w-4" />
           Convert to script
         </Button>

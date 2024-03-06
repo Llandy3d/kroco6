@@ -29,7 +29,7 @@
   };
 </script>
 
-<nav class="flex h-10 items-center px-4 text-sm">
+<nav class="flex h-10 items-center gap-2 bg-secondary px-4 text-sm font-light">
   <RadioGroup.Root
     class="flex gap-1"
     value={$currentFile?.handle}
