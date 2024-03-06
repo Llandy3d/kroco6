@@ -1,16 +1,14 @@
 <script lang="ts">
-  import { Container } from "lucide-svelte";
-
   import { Test, listTests, type EnvironmentsData } from "$lib/backend-client";
   import EnvironmentList from "$lib/components/EnvironmentList.svelte";
-  import Logo from "$lib/components/Logo.svelte";
   import TestList from "$lib/components/TestList.svelte";
-  import { Button } from "$lib/components/ui/button";
+  import Logo from "$lib/components/ui/illustrations/Logo.svelte";
   import { Separator } from "$lib/components/ui/separator";
   import { activeProject } from "$lib/stores/projects";
   import { setMode } from "mode-watcher";
   import { onMount } from "svelte";
   import ProjectSelector from "./ProjectSelector.svelte";
+  import SidebarSection from "./SidebarSection.svelte";
 
   // envs holds the active environment and the list of environments
   // that the user can switch between.
@@ -38,14 +36,10 @@
   <Separator />
   <ProjectSelector />
 
-  <h2 class="text-left uppercase">Tests ({activeProjectTests.length})</h2>
-  <TestList tests={activeProjectTests} />
-
-  <Separator />
-
-  <Button variant="ghost" class="my-2">
-    <Container class="mr-2 h-4 w-4" /> Environments
-  </Button>
-
-  <EnvironmentList bind:environments />
+  <SidebarSection title={`Tests (${activeProjectTests.length})`}>
+    <TestList tests={activeProjectTests} />
+  </SidebarSection>
+  <SidebarSection title="Environments">
+    <EnvironmentList bind:environments />
+  </SidebarSection>
 </div>

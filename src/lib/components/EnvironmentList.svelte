@@ -1,8 +1,8 @@
 <script lang="ts">
-  import Environment from "./Environment.svelte";
+  import type { Environment as IEnvironment } from "$lib/backend-client";
   import { cubicInOut } from "svelte/easing";
   import { crossfade } from "svelte/transition";
-  import type { Environment as IEnvironment } from "$lib/backend-client";
+  import Environment from "./Environment.svelte";
 
   export let environments: IEnvironment[];
 
