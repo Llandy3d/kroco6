@@ -24,11 +24,11 @@
 <Toaster />
 
 <div class="flex">
-  <div class="w-72">
+  <div class="w-60">
     <Sidebar bind:environmentsData />
   </div>
 
-  <div class="flex flex-auto flex-col bg-secondary p-2">
+  <div class="flex flex-auto flex-col bg-[#F9F8FC] p-4">
     <slot />
   </div>
 </div>
