@@ -18,7 +18,7 @@
 </script>
 
 <Select.Root {items} {selected} onSelectedChange={handleSelectedChange}>
-  <Select.Trigger class="h-6 bg-white text-xs">
+  <Select.Trigger class="h-6 gap-2 bg-white pr-1 text-xs">
     <Select.Value></Select.Value>
   </Select.Trigger>
   <Select.Content sameWidth={false}>

@@ -53,8 +53,31 @@ function replace(current: Block, target: Block, replacement: Block): Block {
     case "executor":
       return current;
 
-    case "http-request":
     case "check":
+      if (current.next === null || current.target === null) {
+        return current;
+      }
+
+      if (current.next.id === target.id) {
+        return {
+          ...current,
+          next: replacement,
+        };
+      }
+
+      if (current.target.id === target.id) {
+        return {
+          ...current,
+          target: replacement,
+        };
+      }
+
+      return {
+        ...current,
+        next: replace(current.next, target, replacement),
+      };
+
+    case "http-request":
     case "library":
       if (current.next === null) {
         return current;
@@ -127,8 +150,31 @@ function detach<T extends Block>(current: T, target: Block): T {
     case "executor":
       return current;
 
-    case "http-request":
     case "check":
+      if (current.next === null || current.target === null) {
+        return current;
+      }
+
+      if (current.next.id === target.id) {
+        return {
+          ...current,
+          next: null,
+        };
+      }
+
+      if (current.target.id === target.id) {
+        return {
+          ...current,
+          target: null,
+        };
+      }
+
+      return {
+        ...current,
+        next: detach(current.next, target),
+      };
+
+    case "http-request":
     case "library":
       if (current.next === null) {
         return current;

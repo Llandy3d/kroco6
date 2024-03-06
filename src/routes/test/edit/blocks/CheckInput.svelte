@@ -1,7 +1,7 @@
 <script lang="ts" context="module">
   const items: Selected<Check["type"]>[] = [
-    { value: "status", label: "Status" },
-    { value: "contains", label: "Contains" },
+    { value: "status", label: "had status" },
+    { value: "contains", label: "body contained" },
   ];
 </script>
 

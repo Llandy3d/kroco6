@@ -52,7 +52,7 @@
   }
 
   function handleTargetDrop(target: BlockType) {
-    if (isHttpRequestBlock(target)) {
+    if (!isHttpRequestBlock(target)) {
       return;
     }
 
