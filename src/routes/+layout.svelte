@@ -5,7 +5,7 @@
   import Sidebar from "./Sidebar.svelte";
 
   import { listProjects, loadEnvironments, type EnvironmentsData } from "$lib/backend-client";
-  import { projects } from "$lib/stores/projects";
+  import { currentEnvironment, projects } from "$lib/stores/projects";
 
   let environmentsData: EnvironmentsData = {
     active: "",
@@ -17,8 +17,13 @@
     projects.update(() => projectsList);
 
     environmentsData = await loadEnvironments();
-    console.log(`loaded envs:`, JSON.stringify(environmentsData, null, 2));
+
+    console.log(`loaded envs:`, environmentsData);
   });
+
+  $: currentEnvironment.set(
+    environmentsData.environments.find((e) => e.name === environmentsData.active) ?? null,
+  );
 </script>
 
 <Toaster />

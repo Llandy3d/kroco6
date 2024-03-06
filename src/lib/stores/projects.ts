@@ -1,6 +1,11 @@
-import { type Writable, writable } from "svelte/store";
+import { writable, type Writable } from "svelte/store";
 
-import type { Project } from "$lib/backend-client";
+import type { Environment, Project } from "$lib/backend-client";
+
+export const EMPTY_ENVIRONMENT: Environment = {
+  name: "",
+  variables: {},
+};
 
 /**
  * A store that contains the list of projects.
@@ -16,4 +21,5 @@ import type { Project } from "$lib/backend-client";
  */
 export const projects: Writable<Project[]> = writable([]);
 
+export const currentEnvironment: Writable<Environment | null> = writable(null);
 export const activeProject: Writable<string> = writable("default");

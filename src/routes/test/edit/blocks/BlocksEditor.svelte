@@ -13,6 +13,7 @@
   import { convertToScript } from "$lib/stores/blocks/convert";
   import { parse } from "$lib/stores/blocks/model/strict";
   import { currentFile, newFile, updateFile, type BlockFile } from "$lib/stores/editor";
+  import { EMPTY_ENVIRONMENT, currentEnvironment } from "$lib/stores/projects";
 
   import { activeProject } from "$lib/stores/projects";
   import { open } from "@tauri-apps/api/shell";
@@ -32,7 +33,7 @@
 
   async function runTestLocally() {
     try {
-      const script = await convertToScript($test);
+      const script = await convertToScript($currentEnvironment ?? EMPTY_ENVIRONMENT, $test);
       const response = await runScriptLocally(script);
 
       console.log(response);
@@ -42,8 +43,16 @@
   }
 
   async function runTestInCloud(projectId: string) {
+    if ($currentEnvironment === null) {
+      toast.error(
+        "No environment selected. Please select an environment to run the test in cloud.",
+      );
+
+      return;
+    }
+
     try {
-      const script = await convertToScript($test);
+      const script = await convertToScript($currentEnvironment ?? EMPTY_ENVIRONMENT, $test);
       const results = await runScriptInCloud({ script, projectId });
 
       open(results);
@@ -55,7 +64,7 @@
 
   async function handleConvertToScript() {
     try {
-      const script = await convertToScript($test);
+      const script = await convertToScript($currentEnvironment ?? EMPTY_ENVIRONMENT, $test);
 
       newFile({
         type: "script",

@@ -17,6 +17,7 @@
   // be loaded, and most likely bounded from by the parent loading this
   // specific component.
   export let environmentsData: EnvironmentsData = { active: "default", environments: [] };
+
   $: environments = environmentsData?.environments;
 
   let activeProjectTests: Test[] = [];
