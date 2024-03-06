@@ -189,6 +189,7 @@ const scenarioBlock = merge([
   object({
     type: literal("scenario"),
     name: string(),
+    executor: executorBlock,
     step: nullable(stepBlock),
   }),
 ]);

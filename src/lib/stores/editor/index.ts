@@ -65,11 +65,22 @@ function openFile(file: VirtualFile) {
   currentFile.set(file);
 }
 
+function updateFile(handle: string, update: Partial<VirtualFile>) {
+  openFiles.update((files) => {
+    return files.map((file) => (file.handle === handle ? { ...file, ...update } : file));
+  });
+
+  currentFile.update((file) => {
+    return file?.handle === handle ? { ...file, ...update } : file;
+  });
+}
+
 export {
   currentFile,
   newFile,
   openFile,
   openFiles,
+  updateFile,
   type BlockFile,
   type ExistingPath,
   type NewPath,

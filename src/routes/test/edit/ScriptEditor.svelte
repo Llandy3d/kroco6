@@ -1,6 +1,6 @@
 <script lang="ts" context="module">
   import { loadContent, storeContent } from "$lib/files";
-  import type { ScriptFile } from "$lib/stores/editor";
+  import { currentFile, updateFile, type ScriptFile } from "$lib/stores/editor";
   import * as monaco from "monaco-editor";
   import * as scripts from "$lib/example-scripts";
 </script>
@@ -8,7 +8,15 @@
 <script lang="ts">
   import { onDestroy, onMount } from "svelte";
   import TestToolbar from "./TestToolbar.svelte";
-  import { runScriptInCloud, runScriptLocally, getCloudTests, type Project, type CloudTest } from "$lib/backend-client";
+  import {
+    runScriptInCloud,
+    runScriptLocally,
+    getCloudTests,
+    type CloudTest,
+    saveTest,
+    createTest,
+    Test,
+  } from "$lib/backend-client";
   import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
   import * as Dialog from "$lib/components/ui/dialog";
   import * as Card from "$lib/components/ui/card";
@@ -16,6 +24,7 @@
   import { Button } from "$lib/components/ui/button";
   import { open } from "@tauri-apps/api/shell";
   import { toast } from "svelte-sonner";
+  import { activeProject } from "$lib/stores/projects";
 
   export let file: ScriptFile;
 
@@ -27,9 +36,7 @@
   let cloudTestDialogOpen = false;
 
   async function loadCloudTests() {
-    // TODO: we need to know the current active project
-    const project: Project = { name: "default", test_collections: [] };
-    cloud_tests = await getCloudTests(project);
+    cloud_tests = await getCloudTests($activeProject);
   }
 
   function setCloudScriptInEditor(script: string | null) {
@@ -63,6 +70,17 @@
     editor.setValue(script);
   }
 
+  async function handleSaveTest() {
+    if (!$currentFile) return;
+
+    if ($currentFile.path.type === "new") {
+      await createTest($activeProject, new Test($currentFile.name, "Javascript", script));
+      updateFile($currentFile.handle, { path: { type: "existing", path: "", original: "" } });
+    } else {
+      await saveTest($activeProject, $currentFile.name, script);
+    }
+  }
+
   onMount(() => {
     script = loadContent(file);
 
@@ -84,7 +102,7 @@
 </script>
 
 <div class="flex flex-auto flex-col">
-  <TestToolbar runTest={runTestLocally} {runTestInCloud} />
+  <TestToolbar runTest={runTestLocally} {runTestInCloud} saveTest={handleSaveTest} />
   <DropdownMenu.Root>
     <DropdownMenu.Trigger>Script examples</DropdownMenu.Trigger>
     <DropdownMenu.Content>
@@ -133,7 +151,7 @@
       <Dialog.Header>
         <Dialog.Title>Choose a test</Dialog.Title>
         <Dialog.Description>
-            <div class="grid grid-cols-4">
+          <div class="grid grid-cols-4">
             {#each cloud_tests as test}
               <Card.Root>
                 <Card.Content>
@@ -143,16 +161,21 @@
                       {test.script}
                     </HoverCard.Content>
                   </HoverCard.Root>
-                <Button class="bottom-0"on:click={() => {setCloudScriptInEditor(test.script)}}>Use</Button>
+                  <Button
+                    class="bottom-0"
+                    on:click={() => {
+                      setCloudScriptInEditor(test.script);
+                    }}>Use</Button
+                  >
                 </Card.Content>
               </Card.Root>
             {/each}
-            </div>
-          This action cannot be undone. This will permanently delete your account
-          and remove your data from our servers.
+          </div>
+          This action cannot be undone. This will permanently delete your account and remove your data
+          from our servers.
         </Dialog.Description>
       </Dialog.Header>
     </Dialog.Content>
   </Dialog.Root>
-    <div class="full-w flex-auto" bind:this={container}></div>
-  </div>
+  <div class="full-w flex-auto" bind:this={container}></div>
+</div>

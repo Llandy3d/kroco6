@@ -4,6 +4,6 @@
   export let root: Root;
 </script>
 
-<div class="absolute" style="left: {root.left}px; top: {root.top}px;">
+<div class="absolute" style="left: {Math.round(root.left)}px; top: {Math.round(root.top)}px;">
   <slot />
 </div>

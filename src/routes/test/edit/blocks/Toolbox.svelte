@@ -15,6 +15,7 @@
         defineTemplate({
           id: "scenario-template",
           type: "scenario",
+          executor: null,
           name: "",
           step: null,
         }),

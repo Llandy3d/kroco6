@@ -61,7 +61,7 @@ function toStep(model: model.StepBlock): Step {
 function toScenario(model: model.ScenarioBlock): Scenario {
   return {
     name: model.name,
-    executors: [],
+    executor: model.executor.executor,
     steps: [...enumerate(model.step)].map(toStep),
   };
 }

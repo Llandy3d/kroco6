@@ -1,7 +1,7 @@
 import * as prettier from "prettier";
 import * as babelParser from "prettier/parser-babel";
 import * as estreePlugin from "prettier/plugins/estree";
-import type { Scenario, Step, Test } from "../../types";
+import type { Executor, Scenario, Step, Test } from "../../types";
 import { exhaustive } from "../../utils/typescript";
 
 function sanitizeName(name: string) {
@@ -61,47 +61,44 @@ function emitStep(step: Step): string {
   }
 }
 
-function emitExecutors(scenario: Scenario) {
-  const fn = sanitizeName(scenario.name);
+function emitExecutor(exec: string, executor: Executor) {
+  switch (executor.type) {
+    case "constant-vus":
+      return `
+        { 
+          "executor": "constant-vus", 
+          "vus": ${executor.vus}, 
+          "duration": "${executor.duration}",
+          "exec": "${exec}",
+        }
+      `;
 
-  const executors = scenario.executors.map((executor) => {
-    switch (executor.type) {
-      case "constant-vus":
-        return `
-          { 
-            "executor": "constant-vus", 
-            "vus": ${executor.vus}, 
-            "duration": "${executor.duration}",
-            "exec": "${fn}",
-          }
-        `;
+    case "ramping-vus":
+      return `
+        { 
+          "executor": "ramping-vus",
+          "stages": [${executor.stages
+            .map(
+              (stage) => `{ 
+            "target": ${stage.target}, 
+            "duration": "${stage.duration}" 
+          }`,
+            )
+            .join(", ")}], 
+          "duration": "${executor.duration}" },
+          "exec": "${exec}",
+      `;
 
-      case "ramping-vus":
-        return `
-          { 
-            "executor": "ramping-vus",
-            "stages": [${executor.stages
-              .map(
-                (stage) => `{ 
-              "target": ${stage.target}, 
-              "duration": "${stage.duration}" 
-            }`,
-              )
-              .join(", ")}], 
-            "duration": "${executor.duration}" },
-            "exec": "${fn}",
-        `;
-
-      default:
-        exhaustive(executor);
-    }
-  });
-
-  if (executors.length === 0) {
-    return "";
+    default:
+      exhaustive(executor);
   }
+}
 
-  return `"${fn}": ${executors.join(",\n")},`;
+function emitScenarioOptions(scenario: Scenario) {
+  const fn = sanitizeName(scenario.name);
+  const executor = emitExecutor(fn, scenario.executor);
+
+  return `"${fn}": ${executor},`;
 }
 
 function emitScenario(scenario: Scenario) {
@@ -115,7 +112,7 @@ function emitScenario(scenario: Scenario) {
 }
 
 function emitScript(test: Test) {
-  const scenarioOptions = test.scenarios.flatMap(emitExecutors);
+  const scenarioOptions = test.scenarios.flatMap(emitScenarioOptions);
 
   const scenarios = test.scenarios.map(emitScenario);
 
