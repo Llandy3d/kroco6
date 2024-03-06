@@ -8,6 +8,8 @@
   import { Button } from "$lib/components/ui/button";
   import { Separator } from "$lib/components/ui/separator";
   import { activeProject } from "$lib/stores/projects";
+  import { setMode } from "mode-watcher";
+  import { onMount } from "svelte";
   import ProjectSelector from "./ProjectSelector.svelte";
 
   // envs holds the active environment and the list of environments
@@ -21,6 +23,10 @@
 
   let activeProjectTests: Test[] = [];
   $: $activeProject, loadProjectTests();
+
+  onMount(() => {
+    setMode("light");
+  });
 
   async function loadProjectTests() {
     activeProjectTests = await listTests($activeProject);

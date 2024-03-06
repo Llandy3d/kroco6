@@ -21,7 +21,7 @@
 <Toaster />
 
 <div class="flex">
-  <div class="w-72">
+  <div class="w-60">
     <Sidebar bind:environmentsData />
   </div>
 
