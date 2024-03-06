@@ -1,14 +1,16 @@
 <script lang="ts">
-  import "../app.pcss";
   import { Toaster } from "$lib/components/ui/sonner";
-  import { ModeWatcher } from "mode-watcher";
-  import Sidebar from "./Sidebar.svelte";
   import { onMount } from "svelte";
+  import "../app.pcss";
+  import Sidebar from "./Sidebar.svelte";
 
+  import { listProjects, loadEnvironments, type EnvironmentsData } from "$lib/backend-client";
   import { projects } from "$lib/stores/projects";
-  import { listProjects, type EnvironmentsData, loadEnvironments } from "$lib/backend-client";
 
-  let environmentsData: EnvironmentsData = { environments: [] };
+  let environmentsData: EnvironmentsData = {
+    active: "",
+    environments: [],
+  };
 
   onMount(async () => {
     const projectsList = await listProjects();
@@ -26,7 +28,7 @@
     <Sidebar bind:environmentsData />
   </div>
 
-  <div class="flex flex-auto flex-col">
+  <div class="flex flex-auto flex-col bg-secondary p-2">
     <slot />
   </div>
 </div>

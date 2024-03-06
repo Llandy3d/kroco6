@@ -11,4 +11,6 @@
 </script>
 
 <FileBar />
-<Editor />
+<div class="flex flex-auto bg-white">
+  <Editor />
+</div>
