@@ -64,7 +64,7 @@
 
   async function handleConvertToScript() {
     try {
-      const script = await convertToScript($test);
+      const script = await convertToScript($currentEnvironment ?? EMPTY_ENVIRONMENT, $test);
 
       newFile({
         type: "script",

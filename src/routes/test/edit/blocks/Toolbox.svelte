@@ -161,7 +161,7 @@
       {/each}
     </Tabs.List>
     {#each categories as category (category.id)}
-      <Tabs.Content value={category.id} class="min-w-80 border-r-[1px]">
+      <Tabs.Content value={category.id} class="min-w-80 border-r-[1px] p-2">
         <ul class="">
           {#each category.blocks as template (template.id)}
             <li class="p-2">

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Button } from "$lib/components/ui/button";
   import * as Dialog from "$lib/components/ui/dialog";
-  import { Trash2 } from "lucide-svelte";
+  import { Container, Trash2 } from "lucide-svelte";
 
   import { type Environment } from "$lib/backend-client";
   import type { InputEvents } from "cmdk-sv";
@@ -59,7 +59,12 @@
 </script>
 
 <Dialog.Root>
-  <Dialog.Trigger>{environment.name}</Dialog.Trigger>
+  <Dialog.Trigger>
+    <div class="flex items-center gap-2">
+      <Container size="14" />
+      {environment.name}
+    </div>
+  </Dialog.Trigger>
 
   <Dialog.Content>
     <Dialog.Header>
