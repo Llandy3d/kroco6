@@ -28,6 +28,20 @@ mod models;
 mod operations;
 
 fn main() {
+    // Figure out configuration file absolute path
+    let config_file = application::Config::file().expect("failed computing config file path");
+
+    // Create the configuration file if it doesn't exist
+    if !config_file.exists() {
+        let config = application::Config::new(vec![], None);
+        config.save(config_file.clone()).unwrap();
+    }
+
+    // Load the application configuration
+    let application_config =
+        application::Config::load(config_file).expect("Failed to load application configuration");
+
+    // Instantiate the default application state
     let application_state = application::State::default();
 
     // Initialize the application state's ProjectManager instance
