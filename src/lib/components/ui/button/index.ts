@@ -1,15 +1,16 @@
-import Root from "./button.svelte";
-import { tv, type VariantProps } from "tailwind-variants";
 import type { Button as ButtonPrimitive } from "bits-ui";
+import { tv, type VariantProps } from "tailwind-variants";
+import Root from "./button.svelte";
 
 const buttonVariants = tv({
-  base: "inline-flex items-center justify-center text-sm font-medium whitespace-nowrap ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+  base: "inline-flex items-center justify-center text-sm font-medium whitespace-nowrap rounded-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
   variants: {
     variant: {
-      default: "bg-primary text-primary-foreground hover:bg-primary/90",
+      default: "bg-[#7d64ff] text-primary-foreground hover:bg-[#7d64ff]/90",
       destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
       outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
-      secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+      secondary:
+        "bg-transparent border-solid border-2 border-[#7d64ff] text-[#7d64ff] hover:bg-secondary/80",
       ghost: "hover:bg-accent hover:text-accent-foreground",
       link: "text-primary underline-offset-4 hover:underline",
     },
@@ -37,12 +38,12 @@ type Props = ButtonPrimitive.Props & {
 type Events = ButtonPrimitive.Events;
 
 export {
-  Root,
-  type Props,
-  type Events,
   //
   Root as Button,
-  type Props as ButtonProps,
-  type Events as ButtonEvents,
   buttonVariants,
+  Root,
+  type Events as ButtonEvents,
+  type Props as ButtonProps,
+  type Events,
+  type Props,
 };

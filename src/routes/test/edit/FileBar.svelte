@@ -2,7 +2,7 @@
   import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
   import { currentFile, newFile, openFiles, type OpenFile } from "$lib/stores/editor";
   import { RadioGroup } from "bits-ui";
-  import { PlusIcon, X } from "lucide-svelte";
+  import { PlusIcon, XCircle } from "lucide-svelte";
 
   const handleCurrentFileChange = (handle: string) => {
     $currentFile = $openFiles.find((file) => file.handle === handle) ?? null;
@@ -36,18 +36,19 @@
     onValueChange={handleCurrentFileChange}
   >
     {#each $openFiles as file (file.handle)}
-      <RadioGroup.Item
-        value={file.handle}
-        class="flex items-center gap-1 px-2 py-2 hover:bg-slate-200 data-[state='checked']:font-bold data-[state='checked']:shadow-md"
-      >
-        <div>
-          {file.name}
-          {#if file.path.type === "new"}
-            *
-          {/if}
+      <RadioGroup.Item value={file.handle} class="pt-2 hover:bg-slate-200">
+        <div class="flex items-center gap-2 px-4">
+          <div>
+            {file.name}
+            {file.path.type === "new" && "*"}
+          </div>
+          <button class="hover:scale-125" on:click={handleClose(file)}><XCircle size={14} /></button
+          >
         </div>
-        <button class="hover:scale-125" on:click={handleClose(file)}><X size={14} /></button>
-      </RadioGroup.Item>
+        <div
+          class={`${file.handle === $currentFile?.handle ? "bg-[#7d64ff]" : "bg-slate-300"} m-1 h-1 rounded-sm`}
+        ></div></RadioGroup.Item
+      >
     {/each}
   </RadioGroup.Root>
   <DropdownMenu.Root>

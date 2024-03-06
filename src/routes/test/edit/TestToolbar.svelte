@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Loader2, PlayCircle, Settings, UploadCloud } from "lucide-svelte";
+  import { Loader2, Play, Settings, UploadCloud } from "lucide-svelte";
   import { onMount } from "svelte";
 
   import {
@@ -53,18 +53,13 @@
   }
 </script>
 
-<div class="flex justify-between rounded-none bg-secondary p-1 shadow-md">
+<div class="flex justify-between bg-white px-4 py-2">
   <div>
     <slot name="left" />
   </div>
   <div class="flex items-center gap-2">
     <slot name="right" />
     <SaveTestButton saveTest={onSaveTest} />
-
-    <Button size="sm" variant="secondary" on:click={runTest}>
-      <PlayCircle size={14} class="mr-2 h-4 w-4" />
-      Run
-    </Button>
 
     <Tooltip.Root open={canRunTestsInCloud ? false : undefined}>
       <Tooltip.Trigger>
@@ -83,7 +78,7 @@
           {:else}
             <UploadCloud size={14} class="mr-2 h-4 w-4" />
           {/if}
-          Run in Cloud
+          Run in the Cloud
         </Button>
       </Tooltip.Trigger>
       <Tooltip.Content side="bottom">
@@ -94,6 +89,11 @@
         {/if}
       </Tooltip.Content>
     </Tooltip.Root>
+
+    <Button size="sm" on:click={runTest}>
+      <Play size={14} class="mr-2 h-4 w-4" />
+      Run locally
+    </Button>
 
     <Button
       class="rounded-full"
