@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Loader2, Settings, UploadCloud } from "lucide-svelte";
+  import { Loader2, PlayCircle, Settings, UploadCloud } from "lucide-svelte";
   import { onMount } from "svelte";
 
   import {
