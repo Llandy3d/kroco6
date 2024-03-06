@@ -119,6 +119,16 @@ export async function getTest(projectName: string, testName: string): Promise<Te
 }
 
 /**
+ * Delete a test by name
+ *
+ * @param projectName The name of the parent project
+ * @param testName The name of the test
+ */
+export async function deleteTest(projectName: string, testName: string): Promise<void> {
+  return await invoke("delete_test", { projectName, testName });
+}
+
+/**
  * Save the test and updates its content with the new content as provided
  * by the UI.
  *

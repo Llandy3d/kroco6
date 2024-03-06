@@ -241,6 +241,18 @@ async fn get_test(
 }
 
 #[tauri::command]
+async fn delete_test(
+    state: tauri::State<'_, ApplicationState>,
+    project_name: &str,
+    test_name: &str,
+) -> Result<(), String> {
+    state
+        .project_manager
+        .delete_test(project_name, test_name)
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
 async fn save_test(
     state: tauri::State<'_, ApplicationState>,
     project_name: &str,
