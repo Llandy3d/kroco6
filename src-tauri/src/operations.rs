@@ -234,6 +234,11 @@ impl ProjectManager for LocalProjectManager {
                         "invalid file extension",
                     ))?;
 
+                // skip json as it's not a test but configuration
+                if kind == "json" {
+                    continue;
+                }
+
                 // Read the content of the file
                 let content = fs::read_to_string(&path)?;
 
