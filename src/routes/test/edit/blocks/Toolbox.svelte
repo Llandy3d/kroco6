@@ -142,7 +142,7 @@
     <Tabs.List class="border-r-[1px]">
       {#each categories as category (category.id)}
         <Tabs.Trigger
-          class="text-pri flex flex-col items-center gap-2 p-5  hover:bg-slate-100 data-[state=active]:text-primary"
+          class="text-pri flex flex-col items-center gap-2 p-4  hover:bg-slate-100 data-[state=active]:text-primary"
           value={category.id}
         >
           <span class="text-slate-400">
@@ -163,7 +163,7 @@
     {#each categories as category (category.id)}
       <Tabs.Content value={category.id} class="min-w-80 border-r-[1px]">
         <ul class="">
-          {#each category.blocks as template (template.type)}
+          {#each category.blocks as template (template.id)}
             <li class="p-2">
               <AnyBlock block={template} />
             </li>

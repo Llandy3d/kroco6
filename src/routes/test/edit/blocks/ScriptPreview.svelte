@@ -43,7 +43,7 @@
     </Highlight>
   </div>
 {:else}
-  <div>
+  <div class="flex h-full items-center justify-center">
     An error occurred while converting to script. Make sure you've filled in all the required data.
   </div>
 {/if}

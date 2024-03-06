@@ -8,7 +8,7 @@
 
 <div
   class={cn(
-    "relative flex items-center gap-2 whitespace-nowrap border-slate-400 bg-white p-1 text-xs text-black",
+    "relative flex items-center gap-2 whitespace-nowrap border-slate-400  p-1 text-xs text-black",
     className,
   )}
 >

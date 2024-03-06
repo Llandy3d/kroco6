@@ -97,9 +97,9 @@
 </script>
 
 <div class="form-grid mb-4 items-center justify-end">
-  <Label for="path" class="text-right">Path</Label>
+  <Label for="path" class="text-right font-normal">Path</Label>
   <Input id="path" value={endpoint.path} on:change={handlePathChange} />
-  <Label for="summary" class="text-right">Summary</Label>
+  <Label for="summary" class="text-right font-normal">Summary</Label>
   <Input id="summary" value={endpoint.details.summary} on:change={handleSummaryChange} />
 </div>
 
