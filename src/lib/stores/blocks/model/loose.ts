@@ -25,7 +25,8 @@ type CheckBlock = Omit<strict.CheckBlock, "next" | "target"> & {
   next: Block | null;
 };
 
-type ScenarioBlock = Omit<strict.ScenarioBlock, "step"> & {
+type ScenarioBlock = Omit<strict.ScenarioBlock, "step" | "executor"> & {
+  executor: Block | null;
   step: Block | null;
 };
 

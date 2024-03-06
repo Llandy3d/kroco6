@@ -9,20 +9,28 @@ function replace(current: Block, target: Block, replacement: Block): Block {
 
   switch (current.type) {
     case "scenario":
-      if (current.step === null) {
+      if (current.step === null && current.executor === null) {
         return current;
       }
 
-      if (current.step.id === target.id) {
+      if (current.step?.id === target.id) {
         return {
           ...current,
           step: replacement,
         };
       }
 
+      if (current.executor?.id === target.id) {
+        return {
+          ...current,
+          executor: replacement,
+        };
+      }
+
       return {
         ...current,
-        step: replace(current.step, target, replacement),
+        executor: current.executor && replace(current.executor, target, replacement),
+        step: current.step && replace(current.step, target, replacement),
       };
 
     case "group":
@@ -105,20 +113,28 @@ function replace(current: Block, target: Block, replacement: Block): Block {
 function detach<T extends Block>(current: T, target: Block): T {
   switch (current.type) {
     case "scenario":
-      if (current.step === null) {
+      if (current.step === null && current.executor === null) {
         return current;
       }
 
-      if (current.step.id === target.id) {
+      if (current.step?.id === target.id) {
         return {
           ...current,
           step: null,
         };
       }
 
+      if (current.executor?.id === target.id) {
+        return {
+          ...current,
+          executor: null,
+        };
+      }
+
       return {
         ...current,
-        step: detach(current.step, target),
+        executor: current.executor && detach(current.executor, target),
+        step: current.step && detach(current.step, target),
       };
 
     case "group":

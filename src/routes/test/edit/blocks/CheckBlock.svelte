@@ -6,6 +6,7 @@
     type CheckBlock,
   } from "$lib/stores/blocks/model/loose";
   import type { Check } from "$lib/stores/blocks/model/strict";
+  import { detach } from "$lib/stores/blocks/model/utils";
   import { isHttpRequestBlock, isStepBlock } from "$lib/stores/blocks/utils";
   import { PlusSquare } from "lucide-svelte";
   import { nanoid } from "nanoid";
@@ -58,7 +59,7 @@
 
     test.update((test) => {
       return updateBlock(detachBlock(test, target), {
-        ...block,
+        ...detach(block, target),
         target: instantiate(target),
       });
     });
@@ -83,6 +84,7 @@
     <Field>
       Check that <BlockInset
         owner={block}
+        color={STEP_COLOR}
         connection={{ block: block.target, accepts: isHttpRequestBlock, onDrop: handleTargetDrop }}
         let:child
       >

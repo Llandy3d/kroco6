@@ -55,6 +55,10 @@
     border-bottom-right-radius: 4px;
   }
 
+  :global(.block-inset) .bottom {
+    display: none;
+  }
+
   svg {
     position: absolute;
     top: 3px;

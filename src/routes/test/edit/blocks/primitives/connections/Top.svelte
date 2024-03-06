@@ -14,6 +14,10 @@
     display: flex;
   }
 
+  :global(.block-inset) .top {
+    display: none;
+  }
+
   .top > .left-fill {
     background: var(--block-bg-primary);
     width: 32px;
