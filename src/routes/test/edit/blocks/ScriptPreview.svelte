@@ -1,6 +1,7 @@
 <script lang="ts">
   import { test } from "$lib/stores/blocks";
   import { convertToScript } from "$lib/stores/blocks/convert";
+  import { EMPTY_ENVIRONMENT, currentEnvironment } from "$lib/stores/projects";
   import { mode } from "mode-watcher";
   import Highlight, { LineNumbers } from "svelte-highlight";
   import typescript from "svelte-highlight/languages/typescript";
@@ -13,8 +14,10 @@
   let script = derived(
     test,
     (test, set) => {
+      const env = $currentEnvironment ?? EMPTY_ENVIRONMENT;
+
       try {
-        convertToScript(test).then((script) => {
+        convertToScript(env, test).then((script) => {
           console.log("generated script", { script });
 
           error = null;

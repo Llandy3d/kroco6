@@ -1,3 +1,4 @@
+import type { Environment } from "$lib/backend-client";
 import type { HttpRequestStep, Scenario, Step, Test } from "$lib/types";
 import { exhaustive } from "$lib/utils/typescript";
 import { emitScript } from "./codegen";
@@ -74,7 +75,7 @@ function convertToTest(model: model.Test): Test {
   };
 }
 
-function convertToScript(test: loose.Test) {
+function convertToScript(env: Environment, test: loose.Test) {
   const scenarioRoots = {
     ...test,
     roots: test.roots.filter((root) => isScenarioBlock(root.block)),
@@ -86,7 +87,7 @@ function convertToScript(test: loose.Test) {
     throw new Error("Failed to parse the test.");
   }
 
-  return emitScript(convertToTest(strict.output));
+  return emitScript(env, convertToTest(strict.output));
 }
 
 export { convertToScript };

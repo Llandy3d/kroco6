@@ -4,39 +4,57 @@
   import { Trash2 } from "lucide-svelte";
 
   import { type Environment } from "$lib/backend-client";
+  import type { InputEvents } from "cmdk-sv";
+  import Input from "./ui/input/input.svelte";
 
   // The environment object is assumed to be loaded and bounded from the parent
   // component that is using this component.
   export let environment: Environment;
 
-  let tempName: string | null = null;
-  function handleEditStart(name: string) {
-    tempName = name;
-  }
+  function handleNameEdit(event: InputEvents["change"], originalName: string) {
+    if (event.target instanceof HTMLInputElement) {
+      const name = event.target.value.trim();
 
-  function handleNameEdit(event: any, originalName: string) {
-    const newName = event.target.textContent.trim();
-    if (newName && newName !== originalName) {
-      if (environment.variables.hasOwnProperty(newName)) {
-        console.error("Duplicate key name.");
-        return;
-      }
+      const { [originalName]: originalValue, ...rest } = environment.variables;
 
-      environment.variables[newName] = environment.variables[originalName];
-      delete environment.variables[originalName];
+      environment = {
+        ...environment,
+        variables: {
+          ...rest,
+          [name]: originalValue ?? "",
+        },
+      };
     }
   }
 
-  function handleValueEdit(event: any, name: string) {
-    environment.variables[name] = event.target.textContent;
+  function handleValueEdit(event: InputEvents["change"], name: string) {
+    if (event.target instanceof HTMLInputElement) {
+      const value = event.target.value.trim();
+
+      environment = {
+        ...environment,
+        variables: {
+          ...environment.variables,
+          [name]: value,
+        },
+      };
+    }
   }
 
-  function handleDelete(event: any, name: string) {
-    delete environment.variables[name];
+  function handleDelete(name: string) {
+    const { [name]: _, ...newVariables } = environment.variables;
+
+    environment = {
+      ...environment,
+      variables: newVariables,
+    };
   }
 
   function handleAddVariable() {
-    environment.variables[""] = "";
+    environment.variables = {
+      ...environment.variables,
+      [""]: "",
+    };
   }
 </script>
 
@@ -72,20 +90,22 @@
           <tbody class="divide-y divide-gray-200 bg-white">
             {#each Object.entries(environment.variables) as [name, value]}
               <tr>
+                <td>
+                  <Input
+                    class="border-none"
+                    value={name}
+                    on:change={(event) => handleNameEdit(event, name)}
+                  />
+                </td>
+                <td>
+                  <Input
+                    class="border-none"
+                    {value}
+                    on:change={(event) => handleValueEdit(event, name)}
+                  />
+                </td>
                 <td
-                  contenteditable="true"
-                  on:blur={(event) => handleNameEdit(event, name)}
-                  on:focus={() => handleEditStart(name)}>{name}</td
-                >
-                <td contenteditable="true" on:blur={(event) => handleValueEdit(event, name)}
-                  >{value}</td
-                >
-                <td
-                  ><Button
-                    variant="outline"
-                    size="icon"
-                    on:click={(event) => handleDelete(event, name)}
-                  >
+                  ><Button variant="outline" size="icon" on:click={(event) => handleDelete(name)}>
                     <Trash2 size="16" />
                   </Button></td
                 >

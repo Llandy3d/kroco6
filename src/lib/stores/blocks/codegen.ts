@@ -1,8 +1,11 @@
+import type { Environment } from "$lib/backend-client";
 import * as prettier from "prettier";
 import * as babelParser from "prettier/parser-babel";
 import * as estreePlugin from "prettier/plugins/estree";
 import type { Scenario, Step, Test } from "../../types";
 import { exhaustive } from "../../utils/typescript";
+
+type Substitution = [name: string, value: string];
 
 function sanitizeName(name: string) {
   const parts = name
@@ -22,21 +25,25 @@ function sanitizeName(name: string) {
   return sanitizied;
 }
 
-function emitStep(step: Step): string {
+function substitute(target: string, substitutions: Substitution[]) {
+  return substitutions.reduce((acc, [name, value]) => acc.replaceAll(`{{${name}}}`, value), target);
+}
+
+function emitStep(step: Step, substitutions: Substitution[]): string {
   switch (step.type) {
     case "http-request":
-      return `http.${step.method.toLowerCase()}(${JSON.stringify(step.url)});`;
+      return `http.${step.method.toLowerCase()}(${substitute(JSON.stringify(step.url), substitutions)});`;
 
     case "group":
       return `
-        group("${step.name}", () => {
-          ${step.steps.map(emitStep).join("\n\n")}
-        });
+        group("${substitute(step.name, substitutions)}", () => {
+          ${step.steps.map((step) => emitStep(step, substitutions)).join("\n\n")}
+        }); 
       `;
 
     case "check":
-      return `
-        response = ${emitStep(step.target)}
+      return ` 
+        response = ${emitStep(step.target, substitutions)}
 
 			  check(response, {
 					${step.checks
@@ -46,7 +53,7 @@ function emitStep(step: Step): string {
                   return `status: (r) => r.status === ${check.status}`;
 
                 case "body-contains":
-                  return `body: (r) => r.body.includes(${JSON.stringify(check.value)})`;
+                  return `body: (r) => r.body.includes(${JSON.stringify(substitute(check.value, substitutions))})`;
               }
             })
             .join(",")},
@@ -104,20 +111,23 @@ function emitExecutors(scenario: Scenario) {
   return `"${fn}": ${executors.join(",\n")},`;
 }
 
-function emitScenario(scenario: Scenario) {
-  return ` 
-    export function ${sanitizeName(scenario.name)}() {
+function emitScenario(scenario: Scenario, substitutions: Substitution[]) {
+  const scenarioName = sanitizeName(substitute(scenario.name, substitutions));
+
+  return `  
+    export function ${scenarioName}() {
 			let response = null;
 
-      ${scenario.steps.map(emitStep).join("\n\n")}
+      ${scenario.steps.map((step) => emitStep(step, substitutions)).join("\n\n")}
     }
   `;
 }
 
-function emitScript(test: Test) {
+function emitScript(env: Environment, test: Test) {
+  const substitutions = Object.entries(env.variables);
   const scenarioOptions = test.scenarios.flatMap(emitExecutors);
 
-  const scenarios = test.scenarios.map(emitScenario);
+  const scenarios = test.scenarios.map((scenario) => emitScenario(scenario, substitutions));
 
   const code = `
     import http from 'k6/http';

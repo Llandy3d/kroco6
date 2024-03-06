@@ -1,23 +1,18 @@
 <script lang="ts">
-  import { PlusCircle, FlaskConical } from "lucide-svelte";
-  import { Check, ChevronsUpDown, Container } from "lucide-svelte";
-  import { onMount, tick } from "svelte";
+  import { Check, ChevronsUpDown, Container, FlaskConical, PlusCircle } from "lucide-svelte";
+  import { tick } from "svelte";
 
   import { goto } from "$app/navigation";
-  import {
-    type Environment as IEnvironment,
-    createProject,
-    type EnvironmentsData,
-  } from "$lib/backend-client";
-  import * as AlertDialog from "$lib/components/ui/alert-dialog";
-  import * as Command from "$lib/components/ui/command";
-  import * as Popover from "$lib/components/ui/popover";
-  import { Input } from "$lib/components/ui/input";
-  import { Button } from "$lib/components/ui/button";
-  import { projects } from "$lib/stores/projects";
-  import { Separator } from "$lib/components/ui/separator";
-  import { cn } from "$lib/utils";
+  import { createProject, type EnvironmentsData } from "$lib/backend-client";
   import EnvironmentList from "$lib/components/EnvironmentList.svelte";
+  import * as AlertDialog from "$lib/components/ui/alert-dialog";
+  import { Button } from "$lib/components/ui/button";
+  import * as Command from "$lib/components/ui/command";
+  import { Input } from "$lib/components/ui/input";
+  import * as Popover from "$lib/components/ui/popover";
+  import { Separator } from "$lib/components/ui/separator";
+  import { projects } from "$lib/stores/projects";
+  import { cn } from "$lib/utils";
 
   // envs holds the active environment and the list of environments
   // that the user can switch between.
@@ -26,6 +21,7 @@
   // be loaded, and most likely bounded from by the parent loading this
   // specific component.
   export let environmentsData: EnvironmentsData = { active: "default", environments: [] };
+
   $: environments = environmentsData?.environments;
 
   let open = false;

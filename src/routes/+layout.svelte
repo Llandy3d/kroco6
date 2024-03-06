@@ -1,22 +1,26 @@
 <script lang="ts">
-  import "../app.pcss";
   import { Toaster } from "$lib/components/ui/sonner";
-  import { ModeWatcher } from "mode-watcher";
-  import Sidebar from "./Sidebar.svelte";
   import { onMount } from "svelte";
+  import "../app.pcss";
+  import Sidebar from "./Sidebar.svelte";
 
-  import { projects } from "$lib/stores/projects";
-  import { listProjects, type EnvironmentsData, loadEnvironments } from "$lib/backend-client";
+  import { listProjects, loadEnvironments, type EnvironmentsData } from "$lib/backend-client";
+  import { currentEnvironment, projects } from "$lib/stores/projects";
 
-  let environmentsData: EnvironmentsData = { environments: [] };
+  let environmentsData: EnvironmentsData = { active: "", environments: [] };
 
   onMount(async () => {
     const projectsList = await listProjects();
     projects.update(() => projectsList);
 
     environmentsData = await loadEnvironments();
-    console.log(`loaded envs:`, JSON.stringify(environmentsData, null, 2));
+
+    console.log(`loaded envs:`, environmentsData);
   });
+
+  $: currentEnvironment.set(
+    environmentsData.environments.find((e) => e.name === environmentsData.active) ?? null,
+  );
 </script>
 
 <Toaster />
