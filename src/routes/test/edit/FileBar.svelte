@@ -1,16 +1,8 @@
 <script lang="ts">
-  import {
-    type OpenFile,
-    openFiles,
-    currentFile,
-    type ScriptFile,
-    type BlockFile,
-    newFile,
-  } from "$lib/stores/editor";
+  import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
+  import { currentFile, newFile, openFiles, type OpenFile } from "$lib/stores/editor";
   import { RadioGroup } from "bits-ui";
   import { PlusIcon, X } from "lucide-svelte";
-  import { nanoid } from "nanoid";
-  import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
 
   const handleCurrentFileChange = (handle: string) => {
     $currentFile = $openFiles.find((file) => file.handle === handle) ?? null;
@@ -25,11 +17,15 @@
   };
 
   const handleNewBlocksFile = () => {
-    newFile("block");
+    newFile({
+      type: "block",
+    });
   };
 
   const handleNewScriptFile = () => {
-    newFile("script");
+    newFile({
+      type: "script",
+    });
   };
 </script>
 

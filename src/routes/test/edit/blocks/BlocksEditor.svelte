@@ -1,13 +1,15 @@
 <script lang="ts">
   import { runScriptInCloud, runScriptLocally } from "$lib/backend-client";
+  import { Button } from "$lib/components/ui/button";
   import * as Tabs from "$lib/components/ui/tabs";
   import { loadContent, storeContent } from "$lib/files";
   import { loadTest, test } from "$lib/stores/blocks";
   import { EMPTY_BLOCK_TEST } from "$lib/stores/blocks/constants";
   import { convertToScript } from "$lib/stores/blocks/convert";
   import { parse } from "$lib/stores/blocks/model/strict";
-  import type { BlockFile } from "$lib/stores/editor";
+  import { newFile, type BlockFile } from "$lib/stores/editor";
   import { open } from "@tauri-apps/api/shell";
+  import { FileCode2 } from "lucide-svelte";
   import { onDestroy, onMount } from "svelte";
   import { toast } from "svelte-sonner";
   import TestToolbar from "../TestToolbar.svelte";
@@ -15,7 +17,7 @@
   import Canvas from "./Canvas.svelte";
   import ScriptPreview from "./ScriptPreview.svelte";
 
-  let tab = "library";
+  let tab = "build";
 
   export let file: BlockFile;
 
@@ -39,6 +41,19 @@
     } catch (error) {
       toast.error("Error running test in cloud. Check your configuration.");
       console.error(error);
+    }
+  }
+
+  async function handleConvertToScript() {
+    try {
+      const script = await convertToScript($test);
+
+      newFile({
+        type: "script",
+        initial: script,
+      });
+    } catch {
+      toast.error("The script could not be generated because the blocks contain errors.");
     }
   }
 
@@ -76,17 +91,23 @@
     <TestToolbar runTest={runTestLocally} {runTestInCloud}>
       <svelte:fragment slot="left">
         <Tabs.List>
-          <Tabs.Trigger value="library">Library</Tabs.Trigger>
           <Tabs.Trigger value="build">Build</Tabs.Trigger>
+          <Tabs.Trigger value="library">Library</Tabs.Trigger>
           <Tabs.Trigger value="script">Script</Tabs.Trigger>
         </Tabs.List>
       </svelte:fragment>
+      <svelte:fragment slot="right">
+        <Button size="sm" variant="secondary" on:click={handleConvertToScript}>
+          <FileCode2 size={14} class="mr-2 h-4 w-4" />
+          Convert to script
+        </Button>
+      </svelte:fragment>
     </TestToolbar>
-    <Tabs.Content value="library" class="mt-0 flex-auto">
-      <Library />
-    </Tabs.Content>
     <Tabs.Content value="build" class="flex-auto">
       <Canvas />
+    </Tabs.Content>
+    <Tabs.Content value="library" class="mt-0 flex-auto">
+      <Library />
     </Tabs.Content>
     <Tabs.Content value="script" class="flex-auto">
       <ScriptPreview />
