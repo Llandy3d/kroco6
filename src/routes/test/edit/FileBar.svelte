@@ -40,7 +40,9 @@
         <div class="flex items-center gap-2 px-4">
           <div>
             {file.name}
-            {file.path.type === "new" && "*"}
+            {#if file.path.type === "new"}
+              <span>*</span>
+            {/if}
           </div>
           <button class="hover:scale-125" on:click={handleClose(file)}><XCircle size={14} /></button
           >
