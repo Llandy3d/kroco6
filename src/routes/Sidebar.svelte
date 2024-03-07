@@ -31,7 +31,7 @@
   <SidebarSection title="Environments">
     <EnvironmentList bind:environments />
   </SidebarSection>
-  <SidebarSection title="Discover">
+  <SidebarSection title="Discover" class="mt-auto pb-2">
     <div class="mt-1 flex flex-col items-start text-sm">
       <a
         href="https://grafana.com/docs/k6/latest/"
