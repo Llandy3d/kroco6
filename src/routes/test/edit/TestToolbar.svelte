@@ -38,10 +38,6 @@
     modalOpen = false;
   }
 
-  function onSaveTest() {
-    saveTest();
-  }
-
   export let runTest: () => void;
   export let runTestInCloud: (projectId: string) => Promise<void>;
   export let saveTest: () => void;
@@ -60,7 +56,7 @@
   <div class="flex items-center gap-2">
     <slot name="right" />
 
-    <SaveTestButton saveTest={onSaveTest} />
+    <SaveTestButton {saveTest} />
 
     <Tooltip.Root open={canRunTestsInCloud ? false : undefined}>
       <Tooltip.Trigger>

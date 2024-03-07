@@ -6,6 +6,8 @@
 
   import { listProjects, loadEnvironments, type EnvironmentsData } from "$lib/backend-client";
   import { currentEnvironment, projects } from "$lib/stores/projects";
+  import { invoke } from "@tauri-apps/api";
+  import { setMode } from "mode-watcher";
 
   let environmentsData: EnvironmentsData = {
     active: "",
@@ -19,6 +21,12 @@
     environmentsData = await loadEnvironments();
 
     console.log(`loaded envs:`, environmentsData);
+
+    onMount(() => {
+      setMode("light");
+    });
+
+    invoke("close_splashscreen");
   });
 
   $: currentEnvironment.set(

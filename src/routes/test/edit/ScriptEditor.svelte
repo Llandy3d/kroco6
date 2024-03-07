@@ -19,6 +19,7 @@
   import * as Dialog from "$lib/components/ui/dialog";
   import * as HoverCard from "$lib/components/ui/hover-card";
   import { activeProject } from "$lib/stores/projects";
+  import { refetchTests } from "$lib/stores/tests";
   import { open } from "@tauri-apps/api/shell";
   import { onDestroy, onMount } from "svelte";
   import { toast } from "svelte-sonner";
@@ -75,6 +76,7 @@
     if ($currentFile.path.type === "new") {
       await createTest($activeProject, new Test($currentFile.name, "Javascript", script));
       updateFile($currentFile.handle, { path: { type: "existing", path: "", original: "" } });
+      refetchTests($activeProject);
     } else {
       await saveTest($activeProject, $currentFile.name, script);
     }
