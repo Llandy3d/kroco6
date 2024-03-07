@@ -34,9 +34,9 @@
     <Popover.Content>
       <div class="flex flex-col gap-2">
         <Label for="k6-test-name">Test name</Label>
-        <Input id="k6-test-name" bind:value={testName} />
+        <Input id="k6-test-name" bind:value={testName} class="mb-2" />
 
-        <Button size="sm" variant="secondary" on:click={handleNameAndSave}>Save changes</Button>
+        <Button size="sm" on:click={handleNameAndSave}>Save changes</Button>
       </div>
     </Popover.Content>
   </Popover.Root>
