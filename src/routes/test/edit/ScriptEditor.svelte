@@ -8,21 +8,18 @@
   import {
     Test,
     createTest,
-    getCloudTests,
     runScriptInCloud,
     runScriptLocally,
     saveTest,
-    type CloudTest,
   } from "$lib/backend-client";
+
   import { Button } from "$lib/components/ui/button";
-  import * as Card from "$lib/components/ui/card";
-  import * as Dialog from "$lib/components/ui/dialog";
-  import * as HoverCard from "$lib/components/ui/hover-card";
   import { activeProject } from "$lib/stores/projects";
   import { refetchTests } from "$lib/stores/tests";
   import { open } from "@tauri-apps/api/shell";
   import { onDestroy, onMount } from "svelte";
   import { toast } from "svelte-sonner";
+  import ImportDialog from "./ImportDialog.svelte";
   import ScriptExamples from "./ScriptExamples.svelte";
   import TestToolbar from "./TestToolbar.svelte";
 
@@ -32,12 +29,7 @@
   let editor: monaco.editor.IStandaloneCodeEditor;
 
   let script = "";
-  let cloud_tests: Array<CloudTest> = [];
   let cloudTestDialogOpen = false;
-
-  async function loadCloudTests() {
-    cloud_tests = await getCloudTests($activeProject);
-  }
 
   function setCloudScriptInEditor(script: string | null) {
     if (script !== null) {
@@ -105,37 +97,11 @@
 <div class="flex flex-auto flex-col bg-white">
   <TestToolbar runTest={runTestLocally} {runTestInCloud} saveTest={handleSaveTest} />
   <ScriptExamples onSelectExample={handleExScript} />
-  <Dialog.Root bind:open={cloudTestDialogOpen}>
-    <Dialog.Trigger on:click={() => loadCloudTests()}>Open</Dialog.Trigger>
-    <Dialog.Content>
-      <Dialog.Header>
-        <Dialog.Title>Choose a test</Dialog.Title>
-        <Dialog.Description>
-          <div class="grid grid-cols-4">
-            {#each cloud_tests as test}
-              <Card.Root>
-                <Card.Content>
-                  <HoverCard.Root>
-                    <HoverCard.Trigger>{test.name}</HoverCard.Trigger>
-                    <HoverCard.Content>
-                      {test.script}
-                    </HoverCard.Content>
-                  </HoverCard.Root>
-                  <Button
-                    class="bottom-0"
-                    on:click={() => {
-                      setCloudScriptInEditor(test.script);
-                    }}>Use</Button
-                  >
-                </Card.Content>
-              </Card.Root>
-            {/each}
-          </div>
-          This action cannot be undone. This will permanently delete your account and remove your data
-          from our servers.
-        </Dialog.Description>
-      </Dialog.Header>
-    </Dialog.Content>
-  </Dialog.Root>
+  <Button
+    on:click={() => {
+      cloudTestDialogOpen = true;
+    }}>Import script</Button
+  >
+  <ImportDialog bind:open={cloudTestDialogOpen} {setCloudScriptInEditor} />
   <div class="full-w flex-auto" bind:this={container}></div>
 </div>
