@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { detachBlock, insertNext, test, updateBlock } from "$lib/stores/blocks";
+  import { detachBlock, insertNext, updateBlock } from "$lib/stores/blocks";
   import {
     instantiate,
     type Block as BlockType,
@@ -10,6 +10,7 @@
   import { isHttpRequestBlock, isStepBlock } from "$lib/stores/blocks/utils";
   import { PlusSquare } from "lucide-svelte";
   import { nanoid } from "nanoid";
+  import { getCurrentTest } from "../blockEditorContext";
   import AnyBlock from "./AnyBlock.svelte";
   import CheckInput from "./CheckInput.svelte";
   import { STEP_COLOR } from "./colors";
@@ -18,6 +19,8 @@
   import Field from "./primitives/Field.svelte";
 
   export let block: CheckBlock;
+
+  const test = getCurrentTest();
 
   function handleCheckChange(target: Check) {
     test.update((test) =>

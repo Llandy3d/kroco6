@@ -49,6 +49,16 @@ function loadContent(file: OpenFile): string {
   return data;
 }
 
+function loadBlockTest(file: OpenFile): Test {
+  const data = sessionStorage.getItem(file.handle);
+
+  if (data === null) {
+    return EMPTY_BLOCK_TEST;
+  }
+
+  return JSON.parse(data);
+}
+
 function storeContent(file: OpenFile, content: Test | string) {
   sessionStorage.setItem(
     file.handle,
@@ -56,4 +66,4 @@ function storeContent(file: OpenFile, content: Test | string) {
   );
 }
 
-export { NEW_BLOCKS_TEST, NEW_SCRIPT, loadContent, storeContent };
+export { NEW_BLOCKS_TEST, NEW_SCRIPT, loadBlockTest, loadContent, storeContent };

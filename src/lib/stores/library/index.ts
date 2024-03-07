@@ -1,28 +1,26 @@
 import type { OpenAPIV3 } from "openapi-types";
-import { derived } from "svelte/store";
-import { test } from "../blocks";
+import type { Test } from "../blocks/model/loose";
 import type { ApiEndpoint } from "./types";
 
-const library = derived(test, ($test) => $test.library);
-
-function syncLibrary(newLibrary: OpenAPIV3.Document) {
-  test.update((value) => ({ ...value, library: newLibrary }));
+function syncLibrary(test: Test, newLibrary: OpenAPIV3.Document) {
+  return { ...test, library: newLibrary };
 }
 
-function updateInPaths(fn: (operation: OpenAPIV3.PathsObject) => OpenAPIV3.PathsObject) {
-  test.update((test) => {
-    return {
-      ...test,
-      library: {
-        ...test.library,
-        paths: fn(test.library.paths),
-      },
-    };
-  });
+function updateInPaths(
+  test: Test,
+  fn: (operation: OpenAPIV3.PathsObject) => OpenAPIV3.PathsObject,
+) {
+  return {
+    ...test,
+    library: {
+      ...test.library,
+      paths: fn(test.library.paths),
+    },
+  };
 }
 
-function updateEndpoint(previous: ApiEndpoint, next: ApiEndpoint) {
-  updateInPaths((paths) => {
+function updateEndpoint(test: Test, previous: ApiEndpoint, next: ApiEndpoint) {
+  return updateInPaths(test, (paths) => {
     return Object.entries(paths).reduce((acc, [path, details]) => {
       const isRenamed = path === previous.path && previous.path !== next.path;
 
@@ -35,4 +33,4 @@ function updateEndpoint(previous: ApiEndpoint, next: ApiEndpoint) {
   });
 }
 
-export { library, syncLibrary, updateEndpoint };
+export { syncLibrary, updateEndpoint };

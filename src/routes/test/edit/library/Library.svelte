@@ -1,10 +1,11 @@
 <script lang="ts">
   import Button from "$lib/components/ui/button/button.svelte";
-  import { library, syncLibrary, updateEndpoint } from "$lib/stores/library";
+  import { syncLibrary, updateEndpoint } from "$lib/stores/library";
   import { HTTP_METHODS } from "$lib/stores/library/constants";
   import type { ApiEndpoint, ApiOperation } from "$lib/stores/library/types";
   import { Plus, RefreshCcw } from "lucide-svelte";
   import { derived, type Readable } from "svelte/store";
+  import { getCurrentLibrary, getCurrentTest } from "../blockEditorContext";
   import ApiPath from "./ApiPath.svelte";
   import EndpointEditor from "./EndpointEditor.svelte";
   import ImportDialog, { type ImportEvent } from "./SyncDialog.svelte";
@@ -12,6 +13,9 @@
   let importModalOpen = false;
 
   let selected: ApiOperation | undefined;
+
+  const test = getCurrentTest();
+  const library = getCurrentLibrary();
 
   const endpoints: Readable<ApiEndpoint[]> = derived(library, ($library) => {
     const paths = Object.entries($library.paths ?? {});
@@ -53,7 +57,7 @@
       return;
     }
 
-    syncLibrary(event.detail.api);
+    $test = syncLibrary($test, event.detail.api);
   };
 
   function handleItemSelected(operation: ApiOperation) {
@@ -65,7 +69,7 @@
       return;
     }
 
-    updateEndpoint(endpoint, target);
+    $test = updateEndpoint($test, endpoint, target);
 
     // If the path has changed, we have to make sure that the
     // selected operation is also updated.

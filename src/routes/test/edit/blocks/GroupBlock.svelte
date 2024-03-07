@@ -1,7 +1,8 @@
 <script lang="ts">
-  import { insertNext, insertStep, test, updateBlock } from "$lib/stores/blocks";
+  import { insertNext, insertStep, updateBlock } from "$lib/stores/blocks";
   import { type Block as BlockType, type GroupBlock } from "$lib/stores/blocks/model/loose";
   import { isStepBlock } from "$lib/stores/blocks/utils";
+  import { getCurrentTest } from "../blockEditorContext";
   import AnyBlock from "./AnyBlock.svelte";
   import { STEP_COLOR } from "./colors";
   import StringInput from "./inputs/StringInput.svelte";
@@ -10,6 +11,8 @@
   import Field from "./primitives/Field.svelte";
 
   export let block: GroupBlock;
+
+  const test = getCurrentTest();
 
   function handleNameChange(value: string) {
     test.update((test) =>

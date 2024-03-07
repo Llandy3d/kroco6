@@ -1,8 +1,9 @@
 <script lang="ts">
-  import { insertNext, test, updateBlock } from "$lib/stores/blocks";
+  import { insertNext, updateBlock } from "$lib/stores/blocks";
   import type { Block as BlockType, HttpRequestBlock } from "$lib/stores/blocks/model/loose";
   import { isStepBlock } from "$lib/stores/blocks/utils";
   import { HTTP_METHODS } from "$lib/stores/library/constants";
+  import { getCurrentTest } from "../blockEditorContext";
   import AnyBlock from "./AnyBlock.svelte";
   import { STEP_COLOR } from "./colors";
   import SelectInput from "./inputs/SelectInput.svelte";
@@ -10,6 +11,8 @@
   import Block from "./primitives/Block.svelte";
   import Field from "./primitives/Field.svelte";
   export let block: HttpRequestBlock;
+
+  const test = getCurrentTest();
 
   function handleUrlChange(value: string) {
     test.update((test) => {

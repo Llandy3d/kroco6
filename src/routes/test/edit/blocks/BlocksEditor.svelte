@@ -7,8 +7,6 @@
     saveTest,
   } from "$lib/backend-client";
   import { Button } from "$lib/components/ui/button";
-  import { loadContent, storeContent } from "$lib/files";
-  import { loadTest, test } from "$lib/stores/blocks";
   import { EMPTY_BLOCK_TEST } from "$lib/stores/blocks/constants";
   import { convertToScript } from "$lib/stores/blocks/convert";
   import { parse } from "$lib/stores/blocks/model/strict";
@@ -19,9 +17,10 @@
   import { open } from "@tauri-apps/api/shell";
   import { Tabs } from "bits-ui";
   import { Book, Code, FileCode2, Layers } from "lucide-svelte";
-  import { onDestroy, onMount } from "svelte";
+  import { onMount } from "svelte";
   import { toast } from "svelte-sonner";
   import TestToolbar from "../TestToolbar.svelte";
+  import { setBlockEditorContext } from "../blockEditorContext";
   import Library from "../library/Library.svelte";
   import Canvas from "./Canvas.svelte";
   import ScriptPreview from "./ScriptPreview.svelte";
@@ -30,6 +29,8 @@
   let tab = "build";
 
   export let file: BlockFile;
+
+  const { test } = setBlockEditorContext(EMPTY_BLOCK_TEST);
 
   async function runTestLocally() {
     try {
@@ -79,6 +80,7 @@
     if (!$currentFile) return;
 
     await saveTest("default", $currentFile.name, JSON.stringify($test));
+
     if ($currentFile.path.type === "new") {
       updateFile($currentFile.handle, { path: { type: "existing", path: "", original: "" } });
     }
@@ -95,31 +97,25 @@
   }
 
   onMount(() => {
-    // We store the block test in sessionStorage, so that changes are preserved
-    // when the user switches between tabs.
-    let content = loadContent(file);
+    let content = file.path.type === "new" ? file.path.initial : file.path.original;
 
     try {
-      const test = parse(JSON.parse(content));
+      const parsed = parse(JSON.parse(content));
 
-      if (!test.success) {
-        console.log("Failed to parse block test", test.issues);
+      if (!parsed.success) {
+        console.log("Failed to parse block test", parsed.issues);
 
-        loadTest(EMPTY_BLOCK_TEST);
+        test.set(EMPTY_BLOCK_TEST);
 
         return;
       }
 
-      loadTest(test.output);
+      test.set(parsed.output);
     } catch (e) {
-      loadTest(EMPTY_BLOCK_TEST);
+      test.set(EMPTY_BLOCK_TEST);
 
       console.error(e);
     }
-  });
-
-  onDestroy(() => {
-    storeContent(file, $test);
   });
 </script>
 

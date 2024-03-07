@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { test } from "$lib/stores/blocks";
   import { convertToScript } from "$lib/stores/blocks/convert";
   import { EMPTY_ENVIRONMENT, currentEnvironment } from "$lib/stores/projects";
   import { mode } from "mode-watcher";
@@ -8,8 +7,11 @@
   import light from "svelte-highlight/styles/github";
   import dark from "svelte-highlight/styles/github-dark";
   import { derived } from "svelte/store";
+  import { getCurrentTest } from "../blockEditorContext";
 
   let error: unknown = null;
+
+  const test = getCurrentTest();
 
   let script = derived(
     test,
