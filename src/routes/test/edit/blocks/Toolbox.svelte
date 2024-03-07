@@ -80,15 +80,17 @@
 </script>
 
 <script lang="ts">
-  import { test } from "$lib/stores/blocks";
   import type { LibraryBlock } from "$lib/stores/blocks/model/strict";
   import { isTruthy, type Falsy } from "$lib/utils/typescript";
   import { Tabs } from "bits-ui";
   import { CloudCog, FileSliders, Layers } from "lucide-svelte";
   import { nanoid } from "nanoid";
   import { derived, type Readable } from "svelte/store";
+  import { getCurrentTest } from "../blockEditorContext";
   import AnyBlock from "./AnyBlock.svelte";
   import { dropmask } from "./primitives/dnd";
+
+  const test = getCurrentTest();
 
   let current: ToolboxCategory = DEFAULT_CATEGORY;
 

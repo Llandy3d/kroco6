@@ -1,12 +1,15 @@
 <script lang="ts">
-  import { test, updateBlock } from "$lib/stores/blocks";
+  import { updateBlock } from "$lib/stores/blocks";
   import type { ExecutorBlock } from "$lib/stores/blocks/model/loose";
+  import { getCurrentTest } from "../blockEditorContext";
   import { EXECUTOR_COLOR } from "./colors";
   import StringInput from "./inputs/StringInput.svelte";
   import Block from "./primitives/Block.svelte";
   import Field from "./primitives/Field.svelte";
 
   export let block: ExecutorBlock;
+
+  const test = getCurrentTest();
 
   function handleVUsChange(value: string) {
     test.update((test) => {

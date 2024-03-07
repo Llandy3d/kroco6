@@ -1,5 +1,7 @@
 <script lang="ts" generics="TBlock extends Block, TBottom extends Block">
-  import { detachBlock, test } from "$lib/stores/blocks";
+  import { getCurrentTest } from "../../blockEditorContext";
+
+  import { detachBlock } from "$lib/stores/blocks";
 
   import { isBlock } from "$lib/stores/blocks/utils";
 
@@ -19,18 +21,10 @@
   export let color: BlockColor;
 
   let dragging = false;
+  const test = getCurrentTest();
 
   function handleDragChange(ev: CustomEvent<DragChangeEvent>) {
     dragging = ev.detail.dragging;
-  }
-
-  function handleClick(ev: MouseEvent) {
-    if (ev.target instanceof HTMLElement) {
-      ev.stopPropagation();
-      ev.preventDefault();
-
-      ev.target.parentElement?.focus();
-    }
   }
 
   function handleKeyPress(ev: KeyboardEvent) {

@@ -1,8 +1,9 @@
 <script lang="ts">
-  import { detachBlock, insertStep, test, updateBlock } from "$lib/stores/blocks";
+  import { detachBlock, insertStep, updateBlock } from "$lib/stores/blocks";
   import { type Block as BlockType, type ScenarioBlock } from "$lib/stores/blocks/model/loose";
   import { detach } from "$lib/stores/blocks/model/utils";
   import { isExecutorBlock, isStepBlock } from "$lib/stores/blocks/utils";
+  import { getCurrentTest } from "../blockEditorContext";
   import AnyBlock from "./AnyBlock.svelte";
   import { EXECUTOR_COLOR, STEP_COLOR } from "./colors";
   import StringInput from "./inputs/StringInput.svelte";
@@ -12,6 +13,8 @@
   import Field from "./primitives/Field.svelte";
 
   export let block: ScenarioBlock;
+
+  const test = getCurrentTest();
 
   function handleNameChange(value: string) {
     test.update((test) =>

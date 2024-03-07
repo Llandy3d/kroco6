@@ -1,16 +1,19 @@
 <script lang="ts">
-  import { dropOnCanvas, test } from "$lib/stores/blocks";
+  import { dropOnCanvas } from "$lib/stores/blocks";
   import type { Block } from "$lib/stores/blocks/model/loose";
   import { isBlock } from "$lib/stores/blocks/utils";
+  import { getCurrentTest } from "../blockEditorContext";
   import AnyBlock from "./AnyBlock.svelte";
   import Root from "./Root.svelte";
   import Toolbox from "./Toolbox.svelte";
   import { dropzone, type DroppedEvent } from "./primitives/dnd";
 
+  const test = getCurrentTest();
+
   function handleDrop({ detail }: CustomEvent<DroppedEvent<Block, {}>>) {
     const { dropped } = detail.data;
 
-    dropOnCanvas(dropped, {
+    $test = dropOnCanvas($test, dropped, {
       top: detail.top,
       left: detail.left,
     });

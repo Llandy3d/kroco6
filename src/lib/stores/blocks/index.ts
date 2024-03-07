@@ -1,5 +1,3 @@
-import { writable } from "svelte/store";
-import { EMPTY_LIBRARY } from "./constants";
 import {
   instantiate,
   isTemplate,
@@ -13,50 +11,39 @@ import {
 import type { StepBlock } from "./model/strict";
 import { concat, detach, replace } from "./model/utils";
 
-const test = writable<Test>({
-  library: EMPTY_LIBRARY,
-  roots: [],
-});
+function dropOnCanvas(test: Test, target: Block, position: { top: number; left: number }) {
+  const instance = instantiate(target);
 
-function loadTest(value: Test) {
-  test.set(value);
-}
+  const existing = test.roots.find((root) => root.block.id === instance.id);
 
-function dropOnCanvas(target: Block, position: { top: number; left: number }) {
-  test.update((test) => {
-    const instance = instantiate(target);
-
-    const existing = test.roots.find((root) => root.block.id === instance.id);
-
-    if (existing !== undefined) {
-      const newRoot = {
-        ...existing,
-        top: position.top,
-        left: position.left,
-      };
-
-      return {
-        ...test,
-        roots: test.roots.map((root) => (root.block.id === instance.id ? newRoot : root)),
-      };
-    }
-
-    const newRoot: Root = {
-      type: "root",
-      block: instance,
+  if (existing !== undefined) {
+    const newRoot = {
+      ...existing,
       top: position.top,
       left: position.left,
     };
 
-    const filtered = test.roots.map((root) => {
-      return { ...root, block: detach(root.block, target) };
-    });
-
     return {
       ...test,
-      roots: [...filtered, newRoot],
+      roots: test.roots.map((root) => (root.block.id === instance.id ? newRoot : root)),
     };
+  }
+
+  const newRoot: Root = {
+    type: "root",
+    block: instance,
+    top: position.top,
+    left: position.left,
+  };
+
+  const filtered = test.roots.map((root) => {
+    return { ...root, block: detach(root.block, target) };
   });
+
+  return {
+    ...test,
+    roots: [...filtered, newRoot],
+  };
 }
 
 function detachBlock(test: Test, block: Block) {
@@ -109,4 +96,4 @@ function insertNext(test: Test, block: Chainable, next: StepBlock) {
   });
 }
 
-export { detachBlock, dropOnCanvas, insertNext, insertStep, loadTest, test, updateBlock };
+export { detachBlock, dropOnCanvas, insertNext, insertStep, updateBlock };
