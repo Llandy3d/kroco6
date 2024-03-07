@@ -1,5 +1,5 @@
 import type { Environment } from "$lib/backend-client";
-import type { HttpRequestStep, Scenario, Step, Test } from "$lib/types";
+import type { Check, HttpRequestStep, Scenario, Step, Test } from "$lib/types";
 import { exhaustive } from "$lib/utils/typescript";
 import { emitScript } from "./codegen";
 import type * as loose from "./model/loose";
@@ -26,6 +26,22 @@ function toHttpRequestStep(model: model.LibraryBlock | model.HttpRequestBlock): 
   };
 }
 
+function toCheck(model: model.Check): Check {
+  switch (model.type) {
+    case "status":
+      return {
+        type: "has-status",
+        status: model.value,
+      };
+
+    case "contains":
+      return {
+        type: "body-contains",
+        value: model.value,
+      };
+  }
+}
+
 function toStep(model: model.StepBlock): Step {
   switch (model.type) {
     case "group":
@@ -39,7 +55,7 @@ function toStep(model: model.StepBlock): Step {
       return {
         type: "check",
         target: toHttpRequestStep(model.target),
-        checks: [],
+        checks: model.checks.map(toCheck),
       };
 
     case "http-request":
