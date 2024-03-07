@@ -1724,6 +1724,7 @@ dependencies = [
  "reqwest",
  "serde",
  "serde_json",
+ "serde_repr",
  "sysinfo",
  "tar",
  "tauri",

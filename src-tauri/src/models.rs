@@ -95,11 +95,12 @@ pub struct Project {
     // The (optional) description of the content
     // of the Project.
     pub description: Option<String>,
+
+    pub project_config: Option<ProjectConfig>,
     // FIXME @oleiade: eventually, we want environment to be also definable
     // at the project level (and give it precedence) but for the hackathon
     // we start and stick with an app-wide "global" environment.
     // environment: Environment,
-    pub project_config: Option<ProjectConfig>,
 }
 
 impl Project {

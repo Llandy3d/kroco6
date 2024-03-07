@@ -3,7 +3,9 @@ use std::path::{Path, PathBuf};
 use std::str::FromStr;
 use std::{fs, io};
 
+use crate::application::Error;
 use crate::models::{Environment, EnvironmentsData, Project, ProjectConfig, Test, TestKind};
+use crate::project::Config as AltProjectConfig;
 
 const PROJECTS_DIR: &str = "projects";
 const DEFAULT_PROJECT_NAME: &str = "default";

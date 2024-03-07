@@ -8,10 +8,11 @@ mod executable;
 
 use std::fs;
 use std::io::{Read, Write, BufRead, BufReader};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::sync::Mutex;
 use serde_json::Value;
+use crate::application::{Config, DEFAULT_CONFIG_FILE, DEFAULT_STATE_FILENAME};
 use tauri::{Manager, Window};
 use tauri::api::process;
 use regex::Regex;
@@ -26,40 +27,45 @@ mod application;
 mod cloud;
 mod models;
 mod operations;
+mod project;
+mod traits;
 
 fn main() {
-    // Figure out configuration file absolute path
-    let config_file = application::Config::file().expect("failed computing config file path");
+    // Figure out the path to the application directory; where
+    // the configuration and state of the application is stored.
+    let application_directory =
+        application::application_directory().expect("failed to get application directory");
 
-    // Create the configuration file if it doesn't exist
-    if !config_file.exists() {
-        let config = application::Config::new(vec![], None);
-        config.save(config_file.clone()).unwrap();
-    }
-
-    // Load the application configuration
+    // Load the application configuration from the application directory's configuration file.
+    // If no configuration file exists, initialize and create it.
     let application_config =
-        application::Config::load(config_file).expect("Failed to load application configuration");
+        Config::load_or_create(application_directory.join(DEFAULT_CONFIG_FILE))
+            .expect("Failed to load or create application configuration");
+
+    // FIXME: start WIP
+    let new_app_state =
+        application::NewState::load_or_create(application_directory.join(DEFAULT_STATE_FILENAME));
 
     // Instantiate the default application state
-    let application_state = application::State::default();
+    // let application_state = application::State::default();
 
     // Initialize the application state's ProjectManager instance
     // to ensure that the underlying projects directory exists
-    application_state
-        .project_manager
-        .initialize()
-        .expect("Failed to initialize application state");
+    // application_state
+    //     .project_manager
+    //     .initialize()
+    //     .expect("Failed to initialize application state");
 
     // Initialize the application state's EnvironmentManager instance
     // to ensure that the underlying environment file exists
-    application_state
-        .environment_manager
-        .initialize()
-        .expect("Failed to initialize application state");
+    // application_state
+    //     .environment_manager
+    //     .initialize()
+    //     .expect("Failed to initialize application state");
 
     tauri::Builder::default()
-        .manage(application_state)
+        // .manage(application_state)
+        .manage(new_app_state)
         .invoke_handler(tauri::generate_handler![
             get_cloud_tests,
             show_splashscreen,
@@ -273,16 +279,31 @@ async fn list_projects(
         .map_err(|e| e.to_string())
 }
 
+// FIXME: WIP
 #[tauri::command]
 async fn create_project(
-    state: tauri::State<'_, application::State>,
+    state: tauri::State<'_, application::NewState>,
+    path: &str,
     name: &str,
     description: Option<&str>,
 ) -> Result<models::Project, String> {
-    state
-        .project_manager
-        .create_project(models::Project::new(name, description))
-        .map_err(|e| e.to_string())
+    let as_path_buf = PathBuf::from(path);
+    if !PathBuf::from(path).exists() {
+        return Err("path does not exist".to_string());
+    }
+
+    if state.config.tracked_project_paths.contains(&as_path_buf) {
+        return Err("project already exists".to_string());
+    }
+
+    // let project = project::create_project(as_path_buf.clone(), name, description)
+    //     .map_err(|e| e.to_string())?;
+
+    // Ok(project)
+    // state
+    //     .project_manager
+    //     .create_project(models::Project::new(name, description))
+    //     .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
