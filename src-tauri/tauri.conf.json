@@ -2,9 +2,8 @@
   "build": {
     "beforeBuildCommand": "npm run build",
     "beforeDevCommand": "npm run dev",
-    "devPath": "http://localhost:5173",
-    "distDir": "../build",
-    "withGlobalTauri": true
+    "devPath": "http://localhost:1420",
+    "distDir": "../dist"
   },
   "package": {
     "productName": "kroco6",
@@ -72,7 +71,7 @@
         "title": "Kroco6",
         "width": 1200,
         "fileDropEnabled": false,
-        "visible": false
+        "visible": true
       },
       {
         "width": 800,
