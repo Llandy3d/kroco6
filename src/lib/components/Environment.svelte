@@ -60,8 +60,8 @@
 
 <Dialog.Root>
   <Dialog.Trigger>
-    <div class="flex items-center gap-2">
-      <Container size="14" />
+    <div class="flex items-center gap-1 text-sm">
+      <Container size="12" />
       {environment.name}
     </div>
   </Dialog.Trigger>

@@ -5,7 +5,7 @@
   export let environments: IEnvironment[];
 </script>
 
-<nav class="flex space-x-2 lg:flex-col lg:space-x-0 lg:space-y-1">
+<nav class="mt-1 flex space-x-2 lg:flex-col lg:space-x-0 lg:space-y-1">
   {#each environments as environment}
     <Environment bind:environment />
   {/each}

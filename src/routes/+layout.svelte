@@ -33,7 +33,7 @@
     <Sidebar bind:environmentsData />
   </div>
 
-  <div class="flex flex-auto flex-col bg-[#F9F8FC] p-4">
+  <div class="flex flex-auto flex-col bg-[#F9F8FC] p-4 pt-1">
     <slot />
   </div>
 </div>
