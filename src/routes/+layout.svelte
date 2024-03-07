@@ -22,11 +22,11 @@
 
     console.log(`loaded envs:`, environmentsData);
 
-    onMount(() => {
-      setMode("light");
-    });
-
     invoke("close_splashscreen");
+  });
+
+  onMount(() => {
+    setMode("light");
   });
 
   $: currentEnvironment.set(
