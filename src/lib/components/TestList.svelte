@@ -9,7 +9,7 @@
 </script>
 
 <div>
-  <ul role="list" class="max-h-50 mb-2 overflow-auto text-left">
+  <ul role="list" class="max-h-50 mb-2 mt-1 overflow-auto text-left">
     {#each tests as test (test.name)}
       <li>
         <button
