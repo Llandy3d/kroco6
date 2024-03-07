@@ -4,29 +4,52 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style>
-        body {
-            background-color: #454d58;
-        }
+      body {
+        background-color: #fff;
+        color: #7b7c9f;
+        font-family:
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          Roboto,
+          Oxygen,
+          Ubuntu,
+          Cantarell,
+          "Open Sans",
+          "Helvetica Neue",
+          sans-serif;
+      }
 
-        #splashscreen {
-            margin-left: 120px;
-            margin-top: 30px;
-        }
+      img {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 50%;
+      }
+
+      p {
+        position: fixed;
+        bottom: 28px;
+        width: 100%;
+        font-size: 0.8rem;
+        text-align: center;
+      }
     </style>
     <script>
-      const invoke = window.__TAURI__.invoke
+      const invoke = window.__TAURI__.invoke;
 
       // show the splashscreen
-      document.addEventListener('DOMContentLoaded', () => {
+      document.addEventListener("DOMContentLoaded", () => {
         setTimeout(() => {
-          invoke('show_splashscreen');
+          invoke("show_splashscreen");
         }, 500);
       });
     </script>
   </head>
   <body>
-      <div id="splashscreen">
-          <img src="./logo.png", alt="splashscreen image">
-      </div>
+    <img src="./logo.svg" alt="Welcome to kroco6" />
+    <p>Initializing the app and making the magic happen...</p>
   </body>
 </html>
