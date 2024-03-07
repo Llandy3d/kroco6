@@ -26,9 +26,12 @@
 {:else if $currentFile.path.type === "new"}
   <Popover.Root>
     <Popover.Trigger>
-      <Button variant="outline" class="border-2 border-primary font-bold text-primary">
-        <Save size={14} class="mr-2 h-4 w-4" />
-        Save
+      <!-- <Button variant="outline" class="border-2 border-primary font-bold text-primary"> -->
+      <!--   <Save size={14} class="mr-2 h-4 w-4" /> -->
+      <!--   Save -->
+      <!-- </Button> -->
+      <Button variant="ghost" class="font-bold">
+        <Save size={14} class="h-4 w-4" />
       </Button>
     </Popover.Trigger>
     <Popover.Content>
@@ -42,11 +45,11 @@
   </Popover.Root>
 {:else}
   <Button
-    variant="outline"
+    variant="ghost"
     class="border-2 border-primary font-bold text-primary"
     on:click={saveTest}
   >
-    <Save size={14} class="mr-2 h-4 w-4" />
+    <Save size={14} class="h-4 w-4" />
     Save
   </Button>
 {/if}

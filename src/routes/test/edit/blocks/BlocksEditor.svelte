@@ -17,7 +17,7 @@
   import { refetchTests } from "$lib/stores/tests";
   import { open } from "@tauri-apps/api/shell";
   import { Tabs } from "bits-ui";
-  import { Book, Code, FileCode2, Layers } from "lucide-svelte";
+  import { Book, Code, FileCode2, Layers, ScrollText } from "lucide-svelte";
   import { onMount } from "svelte";
   import { toast } from "svelte-sonner";
   import TestToolbar from "../TestToolbar.svelte";
@@ -132,9 +132,12 @@
         </Tabs.List>
       </svelte:fragment>
       <svelte:fragment slot="right">
-        <Button class="hidden" size="sm" variant="secondary" on:click={handleConvertToScript}>
-          <FileCode2 size={14} class="mr-2 h-4 w-4" />
-          Convert to script
+        <!-- <Button class="hidden" size="sm" variant="secondary" on:click={handleConvertToScript}> -->
+        <!--   <FileCode2 size={14} class="mr-2 h-4 w-4" /> -->
+        <!--   Convert to script -->
+        <!-- </Button> -->
+        <Button size="sm" class="ml-5" variant="ghost" on:click={handleConvertToScript}>
+          <ScrollText size={14} class="h-4 w-4" on:click={handleConvertToScript} />
         </Button>
       </svelte:fragment>
     </TestToolbar>
