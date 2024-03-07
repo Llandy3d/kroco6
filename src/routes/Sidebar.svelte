@@ -5,6 +5,7 @@
   import Logo from "$lib/components/ui/illustrations/Logo.svelte";
   import { Separator } from "$lib/components/ui/separator";
   import { tests } from "$lib/stores/tests";
+  import { ExternalLink } from "lucide-svelte";
   import ProjectSelector from "./ProjectSelector.svelte";
   import SidebarSection from "./SidebarSection.svelte";
 
@@ -29,5 +30,27 @@
   </SidebarSection>
   <SidebarSection title="Environments">
     <EnvironmentList bind:environments />
+  </SidebarSection>
+  <SidebarSection title="Discover">
+    <div class="mt-1 flex flex-col items-start text-sm">
+      <a
+        href="https://grafana.com/docs/k6/latest/"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="flex items-center gap-1 py-[4px]"><ExternalLink size="12" />k6 OSS docs</a
+      >
+      <a
+        href="https://grafana.com/docs/k6/latest/javascript-api/"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="flex items-center gap-1 py-[4px]"><ExternalLink size="12" />k6 JavaScript API</a
+      >
+      <a
+        href="https://grafana.com/docs/k6/latest/misc/integrations/"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="flex items-center gap-1 py-[4px]"><ExternalLink size="12" />Integrations</a
+      >
+    </div>
   </SidebarSection>
 </div>
