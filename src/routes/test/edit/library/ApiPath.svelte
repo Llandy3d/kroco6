@@ -29,10 +29,12 @@
     <button><Plus size={14} /></button>
   </div>
 </h3>
-{#each endpoint.operations as operation (operation.details?.operationId ?? operation.method + operation.path)}
-  <MethodButton
-    selected={isSameOperation(selected, operation)}
-    {operation}
-    onClick={(method) => onItemSelected(operation)}
-  />
-{/each}
+<ul class="list-none">
+  {#each endpoint.operations as operation (operation.details?.operationId ?? operation.method + operation.path)}
+    <MethodButton
+      selected={isSameOperation(selected, operation)}
+      {operation}
+      onClick={(method) => onItemSelected(operation)}
+    />
+  {/each}
+</ul>

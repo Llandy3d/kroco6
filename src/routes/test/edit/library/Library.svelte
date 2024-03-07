@@ -89,11 +89,11 @@
           ><RefreshCcw size={14} /> Sync</Button
         >
       </h2>
-      <ul class="list-none">
-        {#each $endpoints as endpoint (endpoint.path)}
+      {#each $endpoints as endpoint (endpoint.path)}
+        <div>
           <ApiPath {endpoint} {selected} onItemSelected={handleItemSelected} />
-        {/each}
-      </ul>
+        </div>
+      {/each}
       <div class="flex gap-2">
         <Button class="flex-1 gap-2"><Plus /> Add</Button>
       </div>
