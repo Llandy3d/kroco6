@@ -65,6 +65,7 @@ interface Test {
 
 export type {
   BodyContainsCheck,
+  Check,
   CheckStep,
   Executor,
   GroupStep,

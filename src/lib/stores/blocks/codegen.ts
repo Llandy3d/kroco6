@@ -56,7 +56,7 @@ function emitStep(step: Step, substitutions: Substitution[]): string {
                   return `body: (r) => r.body.includes(${JSON.stringify(substitute(check.value, substitutions))})`;
               }
             })
-            .join(",")},
+            .join(",\n")},
 				})
 			`;
 

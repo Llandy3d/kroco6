@@ -132,7 +132,7 @@ type Check = Output<typeof check>;
 
 interface CheckBlock extends ChainableBlock {
   type: "check";
-  target: LibraryBlock;
+  target: LibraryBlock | HttpRequestBlock;
   checks: Check[];
   next: StepBlock | null;
 }
@@ -141,7 +141,7 @@ const checkBlock: BaseSchema<CheckBlock> = merge([
   blockBase,
   object({
     type: literal("check"),
-    target: libraryBlock,
+    target: union([libraryBlock, httpRequestBlock]),
     checks: array(check),
     next: nullable(lazy(() => stepBlock)),
   }),
