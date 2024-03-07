@@ -14,6 +14,7 @@
   import { EMPTY_ENVIRONMENT, currentEnvironment } from "$lib/stores/projects";
 
   import { activeProject } from "$lib/stores/projects";
+  import { refetchTests } from "$lib/stores/tests";
   import { open } from "@tauri-apps/api/shell";
   import { Tabs } from "bits-ui";
   import { Book, Code, FileCode2, Layers } from "lucide-svelte";
@@ -91,6 +92,7 @@
         new Test($currentFile.name, "Blocks", JSON.stringify($test)),
       );
       updateFile($currentFile.handle, { path: { type: "existing", path: "", original: "" } });
+      refetchTests($activeProject);
     } else {
       await saveTest($activeProject, $currentFile.name, JSON.stringify($test));
     }
