@@ -94,8 +94,8 @@
 
     <Button
       class="rounded-full"
-      size="sm"
       variant="ghost"
+      size="icon"
       on:click={() => {
         modalOpen = true;
       }}
