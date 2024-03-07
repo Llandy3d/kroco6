@@ -96,12 +96,16 @@
 
 <div class="flex flex-auto flex-col bg-white">
   <TestToolbar runTest={runTestLocally} {runTestInCloud} saveTest={handleSaveTest} />
-  <ScriptExamples onSelectExample={handleExScript} />
-  <Button
-    on:click={() => {
-      cloudTestDialogOpen = true;
-    }}>Import script</Button
-  >
+  <div class="flex gap-2">
+    <ScriptExamples onSelectExample={handleExScript} />
+    <Button
+      size="sm"
+      variant="ghost"
+      on:click={() => {
+        cloudTestDialogOpen = true;
+      }}>Import script</Button
+    >
+  </div>
   <ImportDialog bind:open={cloudTestDialogOpen} {setCloudScriptInEditor} />
   <div class="full-w flex-auto" bind:this={container}></div>
 </div>

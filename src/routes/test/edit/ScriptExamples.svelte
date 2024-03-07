@@ -1,12 +1,19 @@
 <script lang="ts">
-    import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
-    import * as scripts from "$lib/example-scripts";
+  import { Button } from "$lib/components/ui/button";
+  import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
+  import * as scripts from "$lib/example-scripts";
+  import { ChevronDown } from "lucide-svelte";
 
-    export let onSelectExample: (script: string) => void;
+  export let onSelectExample: (script: string) => void;
 </script>
 
 <DropdownMenu.Root>
-  <DropdownMenu.Trigger>Script examples</DropdownMenu.Trigger>
+  <DropdownMenu.Trigger>
+    <Button size="sm" variant="ghost"
+      >Script examples
+      <ChevronDown class="ml-2 h-4 w-4" />
+    </Button></DropdownMenu.Trigger
+  >
   <DropdownMenu.Content>
     <DropdownMenu.Group>
       <DropdownMenu.Label>Authentication/Authorization</DropdownMenu.Label>
