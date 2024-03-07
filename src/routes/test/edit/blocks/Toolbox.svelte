@@ -144,7 +144,7 @@
     <Tabs.List class="border-r-[1px]">
       {#each categories as category (category.id)}
         <Tabs.Trigger
-          class="text-pri flex flex-col items-center gap-2 p-4  hover:bg-slate-100 data-[state=active]:text-primary"
+          class="flex flex-col items-center gap-2 p-4 hover:bg-slate-100 data-[state=active]:text-primary"
           value={category.id}
         >
           <span class="text-slate-400">

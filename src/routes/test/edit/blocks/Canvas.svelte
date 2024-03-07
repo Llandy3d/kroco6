@@ -22,15 +22,16 @@
   function handleClick() {}
 </script>
 
-<div
-  class="relative flex h-full w-full items-stretch overflow-hidden"
-  use:dropzone={{ accepts: isBlock, data: "canvas" }}
-  on:dropped={handleDrop}
->
+<div class="relative flex h-full w-full items-stretch overflow-hidden">
   <Toolbox />
   <!-- svelte-ignore a11y-click-events-have-key-events -->
   <!-- svelte-ignore a11y-no-static-element-interactions -->
-  <div class="grid-pattern flex-auto" on:click={handleClick}>
+  <div
+    class="grid-pattern relative flex-auto bg-[#F9F8FC]"
+    on:click={handleClick}
+    use:dropzone={{ accepts: isBlock, data: "canvas" }}
+    on:dropped={handleDrop}
+  >
     {#each $test.roots as root (root.block.id)}
       <Root {root}>
         <AnyBlock block={root.block} />
@@ -40,8 +41,17 @@
 </div>
 
 <style>
-  .grid-pattern {
-    background-size: 16px 16px;
-    background-image: radial-gradient(circle, #eee 1px, rgba(0, 0, 0, 0) 1px);
+  .grid-pattern::before {
+    content: " ";
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+
+    background-repeat: repeat;
+    opacity: 0.1;
+    background-size: 80px;
+    background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAADCSURBVHgB7dyxCYBAEATAwwq1/wbki1BfMRDDR14PZ+DARDYRs90IAAAAAAAAgLupXqk31xujP/nv5h/B63kl+pP/QP4Q7a7vLtGf/Hfzj1/Q/hWW81n+v/IBAAAAAAAAAAAAAAAAgGT08+0D6Odnz7cPIL+Zfr59AAAAAAAAAAAAAAAAAAAgEf18+wD6+dnz7QPIb6afbx8AAAAAAAAAAAAAAAAAAEhEP98+gH5+9nz7APKb6efbBwAAAAAAAAA+awMQDJt5iCyvlQAAAABJRU5ErkJggg==);
   }
 </style>
