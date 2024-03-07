@@ -39,7 +39,7 @@
   class="flex flex-auto flex-col"
   onValueChange={handleCurrentFileChange}
 >
-  <Tabs.List class="flex h-10 items-center gap-2 bg-secondary text-sm font-light">
+  <Tabs.List class="flex h-10 items-center gap-2 text-sm font-light">
     {#each $openFiles as file (file.handle)}
       <Tabs.Trigger
         value={file.handle}
@@ -67,8 +67,8 @@
     </DropdownMenu.Root>
   </Tabs.List>
   {#each $openFiles as file (file.handle)}
-    <Tabs.Content value={file.handle} class="flex-auto bg-white ">
-      <div class="flex h-full flex-col">
+    <Tabs.Content value={file.handle} class="flex-auto bg-white">
+      <div class="border-[1px] border-[#F2F1F5] flex h-full flex-col">
         {#if file === null}
           <EmptyEditor />
         {:else if file.type === "block"}
@@ -80,7 +80,7 @@
     </Tabs.Content>
   {/each}
   <Tabs.Content value={"empty"} class="flex-auto bg-white">
-    <div class="flex h-full flex-col">
+    <div class="border-[1px] border-[#F2F1F5] flex h-full flex-col">
       <EmptyEditor />
     </div>
   </Tabs.Content>
