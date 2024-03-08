@@ -12,6 +12,7 @@ import { convertToScript } from "@/lib/stores/blocks/convert";
 import type { BlockFile } from "@/lib/stores/editor";
 import { EMPTY_ENVIRONMENT } from "@/lib/stores/projects";
 import { Canvas } from "@/routes/test/edit/blocks/Canvas";
+import { ScriptPreview } from "@/routes/test/edit/blocks/ScriptPreview";
 import { useTest } from "@/routes/test/edit/blocks/atoms";
 import { Library } from "@/routes/test/edit/blocks/library/Library";
 import { Provider } from "jotai";
@@ -190,9 +191,9 @@ function BlocksEditorContainer({ file, project, environment }: BlocksEditorProps
         <TabsContent value="library" className="mt-0 flex-auto">
           <Library library={test.library} onChange={handleLibraryChange} />
         </TabsContent>
-        {/* <TabsContent value="script" className="flex-auto">
+        <TabsContent value="script" className="flex-auto">
           <ScriptPreview />
-        </TabsContent> */}
+        </TabsContent>
       </Tabs>
     </div>
   );

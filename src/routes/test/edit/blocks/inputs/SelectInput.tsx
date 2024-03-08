@@ -6,24 +6,26 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-interface SelectItem {
-  value: string;
+interface Selected<Value extends string> {
+  value: Value;
   label: string;
 }
 
-interface SelectInputProps {
-  value: string;
-  items: SelectItem[];
-  onChange: (value: string) => void;
+interface SelectInputProps<Value extends string> {
+  value: Value;
+  items: Selected<Value>[];
+  onChange: (value: Value) => void;
 }
 
-function SelectInput<Value>({ value, items, onChange }: SelectInputProps) {
+function SelectInput<Value extends string>({ value, items, onChange }: SelectInputProps<Value>) {
   function handleSelectedChange(value: string | undefined) {
-    if (value === undefined) {
+    const selected = items.find((item) => item.value === value);
+
+    if (selected === undefined) {
       return;
     }
 
-    onChange(value);
+    onChange(selected.value);
   }
 
   return (
@@ -44,4 +46,4 @@ function SelectInput<Value>({ value, items, onChange }: SelectInputProps) {
   );
 }
 
-export { SelectInput };
+export { SelectInput, type Selected };
