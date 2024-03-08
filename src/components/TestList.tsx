@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { atom, useSetAtom } from "jotai";
 import { FileJson2, Layers } from "lucide-react";
-import type { Test } from "../backend-client";
+import type { Test } from "../lib/backend-client";
 
 const currentFile = atom<Test | null>(null);
 

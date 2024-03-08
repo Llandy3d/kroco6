@@ -7,6 +7,7 @@ interface ApiEndpoint {
 }
 
 interface ApiOperation {
+  id: string;
   path: string;
   method: OpenAPIV3.HttpMethods;
   details: OpenAPIV3.OperationObject;

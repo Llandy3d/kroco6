@@ -1,8 +1,8 @@
+import { EnvironmentList } from "@/components/EnvironmentList";
+import { TestList } from "@/components/TestList";
 import { Logo } from "@/components/illustrations/Logo";
 import { Separator } from "@/components/ui/separator";
 import type { Environment, EnvironmentsData, Project, Test } from "@/lib/backend-client";
-import { EnvironmentList } from "@/lib/components/EnvironmentList";
-import { TestList } from "@/lib/components/TestList";
 import { ExternalLink } from "lucide-react";
 import { ProjectSelector } from "./ProjectSelector";
 import { SidebarSection } from "./SidebarSection";

@@ -1,5 +1,7 @@
 {
   "editor.codeActionsOnSave": {
     "source.organizeImports": "always"
-  }
+  },
+  "javascript.preferences.importModuleSpecifier": "non-relative",
+  "typescript.preferences.importModuleSpecifier": "non-relative"
 }

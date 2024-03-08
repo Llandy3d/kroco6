@@ -1,6 +1,6 @@
-import type { Environment } from "$lib/backend-client";
-import type { Check, HttpRequestStep, Scenario, Step, Test } from "$lib/types";
-import { exhaustive } from "$lib/utils/typescript";
+import type { Environment } from "@/lib/backend-client";
+import type { Check, HttpRequestStep, Scenario, Step, Test } from "@/lib/types";
+import { exhaustive } from "@/lib/utils/typescript";
 import { emitScript } from "./codegen";
 import type * as loose from "./model/loose";
 import type * as model from "./model/strict";

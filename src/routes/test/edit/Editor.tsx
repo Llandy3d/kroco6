@@ -50,6 +50,7 @@ import { nanoid } from "nanoid";
 import { forwardRef, useState, type HTMLAttributes } from "react";
 import { EmptyEditor } from "./EmptyEditor";
 import { ScriptEditor } from "./ScriptEditor";
+import { BlocksEditor } from "./blocks/BlocksEditor";
 
 type TabButtonProps = HTMLAttributes<HTMLButtonElement> & {
   "data-state"?: string;
@@ -88,7 +89,7 @@ function TestEditor({ file, project }: TestEditorProps) {
       return <ScriptEditor file={file} project={project} />;
 
     case "block":
-      return <div>Blocks</div>;
+      return <BlocksEditor file={file} project={project} environment={null} />;
 
     default:
       return exhaustive(file);
