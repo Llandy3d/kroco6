@@ -20,7 +20,7 @@
   import { Book, Code, Layers, ScrollText } from "lucide-svelte";
   import { onMount } from "svelte";
   import { toast } from "svelte-sonner";
-  import TestToolbar from "../TestToolbar.svelte";
+  import TestToolbar from "../TestToolbar";
   import { setBlockEditorContext } from "../blockEditorContext";
   import Library from "../library/Library.svelte";
   import Canvas from "./Canvas.svelte";

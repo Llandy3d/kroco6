@@ -96,7 +96,11 @@ function ProjectSelector({ active, projects, onChange, onCreate }: ProjectSelect
             <CommandGroup>
               {projects.map((project) => {
                 return (
-                  <CommandItem value={project.name} onSelect={handleActiveProjectChange}>
+                  <CommandItem
+                    key={project.name}
+                    value={project.name}
+                    onSelect={handleActiveProjectChange}
+                  >
                     <Check
                       className={cn(
                         "mr-2 h-4 w-4",

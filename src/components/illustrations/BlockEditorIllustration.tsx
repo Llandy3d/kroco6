@@ -10,7 +10,7 @@ function BlockEditorIllustration(props: SVGAttributes<SVGSVGElement>) {
       xmlns="http://www.w3.org/2000/svg"
       {...props}
     >
-      <g clip-path="url(#clip0_40_57016)">
+      <g clipPath="url(#clip0_40_57016)">
         <path d="M110.838 0.61084H0.611328V90.0218H110.838V0.61084Z" fill="white" />
         <path
           fillRule="evenodd"

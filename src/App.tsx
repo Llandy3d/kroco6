@@ -1,10 +1,15 @@
 import "./globals.css";
 
+import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { Page } from "./routes/Page";
 
 function App() {
-  return <Page />;
+  return (
+    <StrictMode>
+      <Page />
+    </StrictMode>
+  );
 }
 
 const container = document.getElementById("app");

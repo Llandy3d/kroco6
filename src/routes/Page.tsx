@@ -7,8 +7,11 @@ import {
 import { invoke } from "@tauri-apps/api/tauri";
 import { useEffect, useState } from "react";
 import { Layout } from "./Layout";
+import { Editor } from "./test/edit/Editor";
 
 function Page() {
+  const [activeProject, setActiveProject] = useState<Project | null>(null);
+
   const [projects, setProjects] = useState<Project[]>([]);
   const [environments, setEnvironments] = useState<EnvironmentsData>({
     active: "",
@@ -17,6 +20,8 @@ function Page() {
 
   useEffect(() => {
     Promise.all([listProjects(), loadEnvironments()]).then(([projects, environments]) => {
+      setActiveProject(projects[0] ?? null);
+
       setProjects(projects);
       setEnvironments(environments);
 
@@ -26,7 +31,7 @@ function Page() {
 
   return (
     <Layout projects={projects} environments={environments}>
-      Here's the content
+      {activeProject !== null && <Editor project={activeProject} />}
     </Layout>
   );
 }

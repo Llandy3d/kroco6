@@ -10,7 +10,7 @@ function ScriptEditorIllustration(props: SVGAttributes<SVGSVGElement>) {
       xmlns="http://www.w3.org/2000/svg"
       {...props}
     >
-      <g clip-path="url(#clip0_40_56992)">
+      <g clipPath="url(#clip0_40_56992)">
         <path d="M133.227 0.61084H23V90.0218H133.227V0.61084Z" fill="white" />
         <path
           fillRule="evenodd"

@@ -23,7 +23,11 @@ function EnvironmentList({ environments, onChange }: EnvironmentListProps) {
   return (
     <nav className="mt-1 flex space-x-2 lg:flex-col lg:space-x-0 lg:space-y-1">
       {environments.map((environment) => (
-        <Environment environment={environment} onChange={handleEnvironmentChange} />
+        <Environment
+          key={environment.name}
+          environment={environment}
+          onChange={handleEnvironmentChange}
+        />
       ))}
     </nav>
   );
