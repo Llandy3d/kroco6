@@ -11,7 +11,7 @@ import {
 import type { StepBlock } from "./model/strict";
 import { concat, detach, replace } from "./model/utils";
 
-function dropOnCanvas(test: Test, target: Block, position: { top: number; left: number }) {
+function dropOnCanvas(test: Test, target: Block, position: { top: number; left: number }): Test {
   const instance = instantiate(target);
 
   const existing = test.roots.find((root) => root.block.id === instance.id);

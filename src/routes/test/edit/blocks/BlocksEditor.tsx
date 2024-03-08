@@ -8,11 +8,13 @@ import {
   type Project,
   type ProjectConfig,
 } from "@/lib/backend-client";
-import { EMPTY_BLOCK_TEST } from "@/lib/stores/blocks/constants";
 import { convertToScript } from "@/lib/stores/blocks/convert";
 import type { BlockFile } from "@/lib/stores/editor";
 import { EMPTY_ENVIRONMENT } from "@/lib/stores/projects";
-import { Library } from "@/routes/test/edit/library/Library";
+import { Canvas } from "@/routes/test/edit/blocks/Canvas";
+import { useTest } from "@/routes/test/edit/blocks/atoms";
+import { Library } from "@/routes/test/edit/blocks/library/Library";
+import { Provider } from "jotai";
 import { Book, Code, Layers, ScrollText } from "lucide-react";
 import type { OpenAPIV3 } from "openapi-types";
 import { useEffect, useState } from "react";
@@ -25,12 +27,12 @@ interface BlocksEditorProps {
   environment: Environment | null;
 }
 
-function BlocksEditor({ file, project, environment }: BlocksEditorProps) {
+function BlocksEditorContainer({ file, project, environment }: BlocksEditorProps) {
   const { toast } = useToast();
 
+  const [test, setTest] = useTest();
   const [tab, setTab] = useState("library");
   const [running, setRunning] = useState(false);
-  const [test, setTest] = useState(EMPTY_BLOCK_TEST);
 
   async function runTestLocally() {
     try {
@@ -148,7 +150,6 @@ function BlocksEditor({ file, project, environment }: BlocksEditorProps) {
   //     console.error(e);
   //   }
   // });
-
   return (
     <div className="flex flex-auto">
       <Tabs className="flex flex-auto flex-col" value={tab} onValueChange={setTab}>
@@ -183,9 +184,9 @@ function BlocksEditor({ file, project, environment }: BlocksEditorProps) {
           onRunInCloud={runTestInCloud}
           onSave={handleSaveTest}
         />
-        {/* <TabsContent value="build" className="flex-auto">
+        <TabsContent value="build" className="flex-auto">
           <Canvas />
-        </TabsContent> */}
+        </TabsContent>
         <TabsContent value="library" className="mt-0 flex-auto">
           <Library library={test.library} onChange={handleLibraryChange} />
         </TabsContent>
@@ -194,6 +195,14 @@ function BlocksEditor({ file, project, environment }: BlocksEditorProps) {
         </TabsContent> */}
       </Tabs>
     </div>
+  );
+}
+
+function BlocksEditor({ file, project, environment }: BlocksEditorProps) {
+  return (
+    <Provider>
+      <BlocksEditorContainer file={file} project={project} environment={environment} />
+    </Provider>
   );
 }
 

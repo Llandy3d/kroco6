@@ -1,4 +1,4 @@
-import type { Block } from "$lib/stores/blocks/model/loose";
+import type { Block } from "@/lib/stores/blocks/model/loose";
 
 interface TopConnection {
   accepts: (value: Block) => boolean;
@@ -10,4 +10,4 @@ interface BottomConnection<T extends Block> {
   onDrop: (value: T) => void;
 }
 
-export { type TopConnection, type BottomConnection };
+export { type BottomConnection, type TopConnection };

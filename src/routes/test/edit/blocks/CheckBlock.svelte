@@ -16,7 +16,7 @@
   import { STEP_COLOR } from "./colors";
   import Block from "./primitives/Block.svelte";
   import BlockInset from "./primitives/BlockInset.svelte";
-  import Field from "./primitives/Field.svelte";
+  import Field from "./primitives/Field";
 
   export let block: CheckBlock;
 

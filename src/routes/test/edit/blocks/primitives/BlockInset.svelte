@@ -4,7 +4,7 @@
   import { isTemplate, type Block } from "$lib/stores/blocks/model/loose";
   import { isBlock } from "$lib/stores/blocks/utils";
   import type { BottomConnection } from "./connections/types";
-  import { dropzone, type DroppedEvent, type DroppingEvent } from "./dnd";
+  import { dropzone, type DroppedEvent, type DroppingEvent } from "./dnd2";
 
   export let owner: Block;
   export let color: BlockColor;

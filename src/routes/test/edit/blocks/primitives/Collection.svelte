@@ -3,9 +3,9 @@
 
   import { isTemplate, type Block } from "$lib/stores/blocks/model/loose";
 
-  import Bottom from "./connections/Bottom.svelte";
+  import Bottom from "./connections/Bottom";
   import type { BottomConnection } from "./connections/types";
-  import { type DroppedEvent } from "./dnd";
+  import { type DroppedEvent } from "./dnd2";
   import { toBlockColorStyle, type BlockColor } from "./types";
 
   export let owner: Block;

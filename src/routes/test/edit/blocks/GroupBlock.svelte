@@ -8,7 +8,7 @@
   import StringInput from "./inputs/StringInput.svelte";
   import Block from "./primitives/Block.svelte";
   import Collection from "./primitives/Collection.svelte";
-  import Field from "./primitives/Field.svelte";
+  import Field from "./primitives/Field";
 
   export let block: GroupBlock;
 

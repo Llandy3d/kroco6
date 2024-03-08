@@ -10,7 +10,7 @@
   import Block from "./primitives/Block.svelte";
   import BlockInset from "./primitives/BlockInset.svelte";
   import Collection from "./primitives/Collection.svelte";
-  import Field from "./primitives/Field.svelte";
+  import Field from "./primitives/Field";
 
   export let block: ScenarioBlock;
 

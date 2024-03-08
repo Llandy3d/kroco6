@@ -1,4 +1,4 @@
-import { exhaustive } from "$lib/utils/typescript";
+import { exhaustive } from "@/lib/utils/typescript";
 import { type Block } from "./loose";
 import type { ChainableBlock } from "./strict";
 

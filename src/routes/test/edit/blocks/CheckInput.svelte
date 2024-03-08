@@ -12,7 +12,7 @@
   import { XIcon } from "lucide-svelte";
   import SelectInput from "./inputs/SelectInput.svelte";
   import StringInput from "./inputs/StringInput.svelte";
-  import Field from "./primitives/Field.svelte";
+  import Field from "./primitives/Field";
 
   export let check: Check;
 

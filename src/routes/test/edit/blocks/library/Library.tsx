@@ -97,7 +97,7 @@ function Library({ library, onChange }: LibraryProps) {
             </h2>
             {endpoints.map((endpoint) => {
               return (
-                <div>
+                <div key={endpoint.path}>
                   <ApiPath
                     endpoint={endpoint}
                     selected={selected}
