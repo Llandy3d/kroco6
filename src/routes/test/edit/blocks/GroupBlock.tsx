@@ -33,6 +33,8 @@ function GroupBlock({ block }: GroupBlockProps) {
       return;
     }
 
+    console.log("step");
+
     setTest((test) => insertStep(test, block, step));
   }
 
@@ -40,6 +42,8 @@ function GroupBlock({ block }: GroupBlockProps) {
     if (!isStepBlock(next)) {
       return;
     }
+
+    console.log("next");
 
     setTest((test) => insertNext(test, block, next));
   }
@@ -69,7 +73,7 @@ function GroupBlock({ block }: GroupBlockProps) {
         connection={{ block: block.step, accepts: isStepBlock, onDrop: handleDropStep }}
         color={STEP_COLOR}
       >
-        {block.next && <AnyBlock block={block.next} />}
+        {block.step && <AnyBlock block={block.step} />}
       </Collection>
     </Block>
   );

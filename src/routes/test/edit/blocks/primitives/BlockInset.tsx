@@ -36,7 +36,7 @@ function BlockInset<TTarget extends BlockType>({
   connection,
   children,
 }: BlockInsetProps<TTarget>) {
-  const { setDropRef, dropping } = useDrop({
+  const { setDropRef, dropping, events } = useDrop({
     data: connection.block,
     accepts,
     onDrop: (ev) => {
@@ -60,6 +60,7 @@ function BlockInset<TTarget extends BlockType>({
           dropping && styles.dropping,
           connection.block !== null && styles.connected,
         )}
+        {...events}
       >
         {children}
       </div>

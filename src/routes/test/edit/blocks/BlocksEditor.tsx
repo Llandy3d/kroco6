@@ -32,7 +32,7 @@ function BlocksEditorContainer({ file, project, environment }: BlocksEditorProps
   const { toast } = useToast();
 
   const [test, setTest] = useTest();
-  const [tab, setTab] = useState("library");
+  const [tab, setTab] = useState("build");
   const [running, setRunning] = useState(false);
 
   async function runTestLocally() {

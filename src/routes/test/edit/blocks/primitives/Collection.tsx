@@ -1,9 +1,9 @@
 import { isTemplate, type Block, type Block as BlockType } from "@/lib/stores/blocks/model/loose";
 import { isBlock } from "@/lib/stores/blocks/utils";
 import { cn } from "@/lib/utils";
+import type { DropEvent } from "@/routes/test/edit/blocks/primitives/Dnd";
 import { Bottom } from "@/routes/test/edit/blocks/primitives/connections/Bottom";
 import type { BottomConnection } from "@/routes/test/edit/blocks/primitives/connections/types";
-import type { DroppedEvent } from "@/routes/test/edit/blocks/primitives/dnd2";
 import { toBlockColorStyle, type BlockColor } from "@/routes/test/edit/blocks/primitives/types";
 import { css } from "@emotion/css";
 import type { ReactNode } from "react";
@@ -27,7 +27,7 @@ function Collection<TBottom extends BlockType>({
   connection,
   children,
 }: CollectionProps<TBottom>) {
-  function handleDropped(ev: DroppedEvent<TBottom, Block | null>) {
+  function handleDropped(ev: DropEvent<Block | null, TBottom>) {
     connection.onDrop(ev.data.dropped);
   }
 

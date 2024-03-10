@@ -120,7 +120,7 @@ function EndpointEditor({
             );
           })}
           <DropdownMenu>
-            <DropdownMenuTrigger>
+            <DropdownMenuTrigger asChild>
               <Button variant="ghost">
                 <Plus />
               </Button>

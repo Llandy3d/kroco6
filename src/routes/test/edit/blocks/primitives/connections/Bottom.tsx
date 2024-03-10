@@ -44,7 +44,7 @@ function Bottom<Target, Dropped>({
   accepts,
   onDrop,
 }: BottomProps<Target, Dropped>) {
-  const { setDropRef, accepting, dragging, dropping } = useDrop({
+  const { setDropRef, accepting, dragging, dropping, events } = useDrop({
     data,
     accepts,
     onDrop,
@@ -64,6 +64,7 @@ function Bottom<Target, Dropped>({
           style={{
             height: accepting && dragging ? dragging.bounds.height : 0,
           }}
+          {...events}
         ></div>
       </div>
     </>

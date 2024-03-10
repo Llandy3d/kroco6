@@ -1,6 +1,7 @@
 import {
   createContext,
   useContext,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -178,6 +179,8 @@ function useDrop<T, D>({ data, accepts, onDrop: handleOnDrop }: DropOptions<T, D
         target: data,
       },
     });
+
+    setDropping(false);
   }
 
   function setDropRef(ref: HTMLElement | null) {
@@ -187,6 +190,10 @@ function useDrop<T, D>({ data, accepts, onDrop: handleOnDrop }: DropOptions<T, D
 
     dropEl.current = ref;
   }
+
+  useEffect(() => {
+    console.log("dropping", dropping);
+  }, [dropping]);
 
   return {
     setDropRef,

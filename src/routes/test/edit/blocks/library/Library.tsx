@@ -59,6 +59,8 @@ function Library({ library, onChange }: LibraryProps) {
     }
 
     onChange(api);
+
+    setImportModalOpen(false);
   };
 
   function handleItemSelected(operation: ApiOperation) {
