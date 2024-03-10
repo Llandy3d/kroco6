@@ -1,4 +1,4 @@
-import { insertNext, updateBlock } from "@/lib/stores/blocks";
+import { detachBlock, insertNext, updateBlock } from "@/lib/stores/blocks";
 import type {
   Block as BlockType,
   HttpRequestBlock as HttpRequestBlockType,
@@ -46,6 +46,12 @@ function HttpRequestBlock({ block }: HttpRequestBlockProps) {
     setTest((test) => insertNext(test, block, next));
   }
 
+  function handleDelete() {
+    setTest((test) => {
+      return detachBlock(test, block);
+    });
+  }
+
   const methods = HTTP_METHODS.map((method) => ({ value: method, label: method.toUpperCase() }));
 
   return (
@@ -55,6 +61,7 @@ function HttpRequestBlock({ block }: HttpRequestBlockProps) {
       top={true}
       bottom={{ block: block.next, accepts: isStepBlock, onDrop: handleNextDrop }}
       Next={AnyBlock}
+      onDelete={handleDelete}
     >
       <Field>
         <SelectInput value={block.method} items={methods} onChange={handleMethodChange} />

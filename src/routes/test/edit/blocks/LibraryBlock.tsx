@@ -1,4 +1,4 @@
-import { insertNext } from "@/lib/stores/blocks";
+import { detachBlock, insertNext } from "@/lib/stores/blocks";
 import type {
   Block as BlockType,
   LibraryBlock as LibraryBlockType,
@@ -26,6 +26,12 @@ export function LibraryBlock({ block }: LibraryBlockProps) {
     setTest((test) => insertNext(test, block, next));
   }
 
+  function handleDelete() {
+    setTest((test) => {
+      return detachBlock(test, block);
+    });
+  }
+
   return (
     <Block
       block={block}
@@ -33,6 +39,7 @@ export function LibraryBlock({ block }: LibraryBlockProps) {
       top={true}
       bottom={{ block: block.next, accepts: isStepBlock, onDrop: handleNextDrop }}
       Next={AnyBlock}
+      onDelete={handleDelete}
     >
       <Field>{block.name}</Field>
       {Object.entries(block.parameters).map(([key, param]) => {

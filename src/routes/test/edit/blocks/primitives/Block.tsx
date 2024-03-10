@@ -39,7 +39,7 @@ interface BlockProps<TBlock extends BlockType, TBottom extends BlockType> {
   bottom?: BottomConnection<TBottom> | null;
   children: React.ReactNode;
   Next?: ComponentType<{ block: BlockType }>;
-  onDelete?: (block: TBlock) => void;
+  onDelete: (block: TBlock) => void;
 }
 
 function Block<TBlock extends BlockType, TBottom extends BlockType>({

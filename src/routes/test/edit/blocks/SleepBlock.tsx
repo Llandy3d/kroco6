@@ -1,4 +1,4 @@
-import { insertNext, updateBlock } from "@/lib/stores/blocks";
+import { detachBlock, insertNext, updateBlock } from "@/lib/stores/blocks";
 import type {
   Block as BlockType,
   SleepBlock as SleepBlockType,
@@ -35,6 +35,12 @@ function SleepBlock({ block }: SleepBlockProps) {
     setTest((test) => insertNext(test, block, next));
   }
 
+  function handleDelete() {
+    setTest((test) => {
+      return detachBlock(test, block);
+    });
+  }
+
   return (
     <Block
       block={block}
@@ -42,6 +48,7 @@ function SleepBlock({ block }: SleepBlockProps) {
       top={true}
       bottom={{ block: block.next, accepts: isStepBlock, onDrop: handleNextDrop }}
       Next={AnyBlock}
+      onDelete={handleDelete}
     >
       <Field>
         Wait for <StringInput size={3} value={block.seconds} onChange={handleSecondsChange} />{" "}

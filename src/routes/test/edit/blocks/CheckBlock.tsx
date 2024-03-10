@@ -78,6 +78,12 @@ function CheckBlock({ block }: CheckBlockProps) {
     setTest((test) => insertNext(test, block, next));
   }
 
+  function handleDelete() {
+    setTest((test) => {
+      return detachBlock(test, block);
+    });
+  }
+
   return (
     <Block
       block={block}
@@ -85,6 +91,7 @@ function CheckBlock({ block }: CheckBlockProps) {
       top={true}
       bottom={{ block: block.next, accepts: isStepBlock, onDrop: handleNextDrop }}
       Next={AnyBlock}
+      onDelete={handleDelete}
     >
       <Field>
         Check that{" "}

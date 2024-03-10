@@ -1,4 +1,4 @@
-import { insertNext, insertStep, updateBlock } from "@/lib/stores/blocks";
+import { detachBlock, insertNext, insertStep, updateBlock } from "@/lib/stores/blocks";
 import type {
   Block as BlockType,
   GroupBlock as GroupBlockType,
@@ -44,6 +44,13 @@ function GroupBlock({ block }: GroupBlockProps) {
     setTest((test) => insertNext(test, block, next));
   }
 
+  function handleDelete() {
+    // TODO: put steps on canvas and connect top and bottom connection.
+    setTest((test) => {
+      return detachBlock(test, block);
+    });
+  }
+
   return (
     <Block
       block={block}
@@ -51,6 +58,7 @@ function GroupBlock({ block }: GroupBlockProps) {
       color={STEP_COLOR}
       bottom={{ block: block.next, accepts: isStepBlock, onDrop: handleDropNext }}
       Next={AnyBlock}
+      onDelete={handleDelete}
     >
       <Field>
         Grouped as <StringInput value={block.name} onChange={handleNameChange} />

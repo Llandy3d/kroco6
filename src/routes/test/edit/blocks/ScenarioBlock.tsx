@@ -51,8 +51,19 @@ function ScenarioBlock({ block }: ScenarioBlockProps) {
     );
   }
 
+  function handleDelete() {
+    // TODO: put executor and step blocks on canvas
+    setTest((test) => {
+      return detachBlock(test, block);
+    });
+  }
+
   return (
-    <Block block={block} color={{ primary: "rgb(129 140 248)", secondary: "white" }}>
+    <Block
+      block={block}
+      color={{ primary: "rgb(129 140 248)", secondary: "white" }}
+      onDelete={handleDelete}
+    >
       <Field>
         Run{" "}
         <StringInput placeholder="Scenario name" value={block.name} onChange={handleNameChange} />

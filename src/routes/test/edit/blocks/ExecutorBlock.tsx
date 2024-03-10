@@ -1,4 +1,4 @@
-import { updateBlock } from "@/lib/stores/blocks";
+import { detachBlock, updateBlock } from "@/lib/stores/blocks";
 import type { ExecutorBlock as ExecutorBlockType } from "@/lib/stores/blocks/model/loose";
 import { useSetTest } from "@/routes/test/edit/blocks/atoms";
 import { EXECUTOR_COLOR } from "@/routes/test/edit/blocks/colors";
@@ -55,8 +55,14 @@ function ExecutorBlock({ block }: ExecutorBlockProps) {
     });
   }
 
+  function handleDelete() {
+    setTest((test) => {
+      return detachBlock(test, block);
+    });
+  }
+
   return (
-    <Block block={block} color={EXECUTOR_COLOR} top={true}>
+    <Block block={block} color={EXECUTOR_COLOR} top={true} onDelete={handleDelete}>
       <Executor executor={block.executor} onChange={handleExecutorChange} />
     </Block>
   );
