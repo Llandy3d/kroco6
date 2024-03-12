@@ -304,7 +304,7 @@ impl ProjectManager for LocalProjectManager {
 
         match get_file_with_basename(project_path.as_path(), test_name) {
             Some(test_path) => {
-                let kind = test_path
+                let _kind = test_path
                     .extension()
                     .ok_or(io::Error::new(
                         io::ErrorKind::InvalidData,

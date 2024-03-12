@@ -1,4 +1,4 @@
-use std::{fmt::format, fs, io, path::Path};
+use std::{fs, io, path::Path};
 
 use serde::{Deserialize, Serialize};
 use tauri::{api::dialog::blocking::FileDialogBuilder, Runtime};
