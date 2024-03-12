@@ -13,14 +13,6 @@ const COLORS: { [P in OpenAPIV3.HttpMethods]: string } = {
   trace: "bg-green-500",
 };
 
-// <script lang="ts">
-//   import Badge from "$lib/components/ui/badge/badge.svelte";
-//   import { cn } from "$lib/utils";
-//   import type { OpenAPIV3 } from "openapi-types";
-
-//   export let method: OpenAPIV3.HttpMethods;
-// </script>
-
 function MethodBadge({ method }: { method: OpenAPIV3.HttpMethods }) {
   return (
     <Badge

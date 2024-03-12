@@ -1,15 +1,6 @@
 import type { Environment as EnvironmentType } from "@/lib/backend-client";
 import { Environment } from "./Environment";
 
-{
-  /* <script lang="ts">
-  import type { Environment as IEnvironment } from "$lib/backend-client";
-  import Environment from "./Environment";
-
-  export let environments: IEnvironment[];
-</script> */
-}
-
 interface EnvironmentListProps {
   environments: EnvironmentType[];
   onChange: (environments: EnvironmentType[]) => void;

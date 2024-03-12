@@ -1,7 +1,5 @@
 import type { ReactNode } from "react";
 
-<script lang="ts">export let title: string;</script>;
-
 interface SidebarSectionProps {
   className?: string;
   title: string;

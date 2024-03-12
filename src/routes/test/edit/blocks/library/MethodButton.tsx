@@ -2,19 +2,6 @@ import type { ApiOperation } from "@/lib/stores/library/types";
 import { ListButton } from "./ListButton";
 import { MethodBadge } from "./MethodBadge";
 
-{
-  /* <script lang="ts">
-  import type { ApiOperation } from "$lib/stores/library/types";
-  import ListButton from "./ListButton";
-  import MethodBadge from "./MethodBadge";
-
-  export let selected: boolean;
-  export let operation: ApiOperation;
-
-  export let onClick: (operation: ApiOperation) => void;
-</script> */
-}
-
 interface MethodButtonProps {
   selected: boolean;
   operation: ApiOperation;
