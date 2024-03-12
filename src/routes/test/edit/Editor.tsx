@@ -1,39 +1,3 @@
-/* <script lang="ts">
-  import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
-  import { currentFile, newFile, openFiles, type OpenFile } from "$lib/stores/editor";
-  import { Tabs } from "bits-ui";
-  import { PlusIcon, XCircle } from "lucide-svelte";
-  import EmptyEditor from "./EmptyEditor";
-  import ScriptEditor from "./ScriptEditor";
-  import BlocksEditor from "./blocks/BlocksEditor.svelte";
-
-  const handleCurrentFileChange = (handle: string | undefined) => {
-    $currentFile = $openFiles.find((file) => file.handle === handle) ?? null;
-  };
-
-  const handleClose = (file: OpenFile) => () => {
-    const openIndex = $openFiles.findIndex((f) => f.handle === file.handle);
-
-    $openFiles = $openFiles.filter((f) => f.handle !== file.handle);
-
-    if ($currentFile?.handle === file.handle) {
-      $currentFile = $openFiles[openIndex] ?? null;
-    }
-  };
-
-  const handleNewBlocksFile = () => {
-    newFile({
-      type: "block",
-    });
-  };
-
-  const handleNewScriptFile = () => {
-    newFile({
-      type: "script",
-    });
-  };
-</script> */
-
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -43,11 +7,12 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Project } from "@/lib/backend-client";
 import { EMPTY_BLOCK_TEST } from "@/lib/stores/blocks/constants";
-import type { BlockFile, OpenFile } from "@/lib/stores/editor";
+import type { BlockFile, VirtualFile } from "@/lib/stores/editor";
 import { exhaustive } from "@/lib/utils/typescript";
-import { PlusIcon, XCircle } from "lucide-react";
+import { useCurrentFile, useOpenFiles } from "@/routes/test/edit/atoms";
+import { PlusIcon, X } from "lucide-react";
 import { nanoid } from "nanoid";
-import { forwardRef, useState, type HTMLAttributes } from "react";
+import { forwardRef, type HTMLAttributes } from "react";
 import { EmptyEditor } from "./EmptyEditor";
 import { ScriptEditor } from "./ScriptEditor";
 import { BlocksEditor } from "./blocks/BlocksEditor";
@@ -72,14 +37,14 @@ const TabButton = forwardRef<HTMLDivElement, TabButtonProps>(function TabButton(
         className="absolute bottom-0 right-2 top-0 flex items-center hover:scale-110"
         onClick={onClose}
       >
-        <XCircle size={16} className="text-slate-400" />
+        <X size={14} className="text-slate-400" />
       </button>
     </div>
   );
 });
 
 interface TestEditorProps {
-  file: OpenFile;
+  file: VirtualFile;
   project: Project;
 }
 
@@ -88,7 +53,7 @@ function TestEditor({ file, project }: TestEditorProps) {
     case "script":
       return <ScriptEditor file={file} project={project} />;
 
-    case "block":
+    case "blocks":
       return <BlocksEditor file={file} project={project} environment={null} />;
 
     default:
@@ -101,14 +66,14 @@ interface EditorProps {
 }
 
 function Editor({ project }: EditorProps) {
-  const [openFiles, setOpenFiles] = useState<OpenFile[]>([]);
-  const [currentFile, setCurrentFile] = useState<OpenFile | null>(null);
+  const [openFiles, setOpenFiles] = useOpenFiles();
+  const [currentFile, setCurrentFile] = useCurrentFile();
 
   function handleCurrentFileChange(handle: string | undefined) {
     setCurrentFile(openFiles.find((file) => file.handle === handle) ?? null);
   }
 
-  function handleClose(file: OpenFile) {
+  function handleClose(file: VirtualFile) {
     const index = openFiles.findIndex((f) => f.handle === file.handle);
 
     setCurrentFile(openFiles[index + 1] ?? openFiles[index - 1] ?? null);
@@ -117,13 +82,14 @@ function Editor({ project }: EditorProps) {
 
   function handleNewBlocksFile() {
     const newFile: BlockFile = {
-      type: "block",
+      type: "blocks",
       name: "New Blocks",
       handle: nanoid(),
       path: {
         type: "new",
         initial: JSON.stringify(EMPTY_BLOCK_TEST),
       },
+      blocks: EMPTY_BLOCK_TEST,
     };
 
     setOpenFiles([...openFiles, newFile]);
@@ -131,7 +97,7 @@ function Editor({ project }: EditorProps) {
   }
 
   function handleNewScriptFile() {
-    const newFile: OpenFile = {
+    const newFile: VirtualFile = {
       type: "script",
       name: "New Script",
       handle: nanoid(),
@@ -181,7 +147,7 @@ function Editor({ project }: EditorProps) {
           </TabsContent>
         );
       })}
-      <TabsContent value={"empty"} className="flex-auto bg-white">
+      <TabsContent value="empty" className="flex-auto bg-white">
         <div className="border-[1px] border-[#F2F1F5] flex h-full flex-col">
           <EmptyEditor onNewBlocks={handleNewBlocksFile} onNewScript={handleNewScriptFile} />
         </div>

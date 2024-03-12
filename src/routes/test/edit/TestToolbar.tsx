@@ -17,20 +17,19 @@ import {
   type Project,
   type ProjectConfig,
 } from "@/lib/backend-client";
-import type { OpenFile } from "@/lib/stores/editor";
-import { Loader2, PlayCircle, Settings, UploadCloud } from "lucide-react";
+import type { VirtualFile } from "@/lib/stores/editor";
+import { Loader2, PlayCircle, Save, UploadCloud } from "lucide-react";
 import { useEffect, useState, type ChangeEvent, type ReactNode } from "react";
-import { SaveTestButton } from "./SaveTestButton";
 
 interface TestToolbarProps {
-  file: OpenFile;
+  file: VirtualFile;
   project: Project;
   running: boolean;
   leftItems?: ReactNode;
   rightItems?: ReactNode;
+  onSave: (file: VirtualFile) => void;
   onRunLocally: () => void;
   onRunInCloud: (config: ProjectConfig) => void;
-  onSave: (file: OpenFile) => void;
 }
 
 function TestToolbar({
@@ -63,8 +62,12 @@ function TestToolbar({
     ]).finally(() => setSettingsModalOpen(false));
   }
 
+  function handleSave() {
+    onSave(file);
+  }
+
   useEffect(() => {
-    loadProjectConfig(project.name).then(setProjectConfig);
+    loadProjectConfig(project.name).then(setProjectConfig).catch(console.error);
   }, []);
 
   function handleCloudTokenChange(ev: ChangeEvent<HTMLInputElement>) {
@@ -91,14 +94,16 @@ function TestToolbar({
       <div className="flex items-center gap-2">
         {rightItems}
 
-        <SaveTestButton file={file} onSave={onSave} />
+        <Button variant="ghost" onClick={handleSave}>
+          <Save size={16} />
+        </Button>
 
         <TooltipProvider>
           <Tooltip open={canRunTestsInCloud ? false : undefined}>
             <TooltipTrigger asChild>
               <Button
                 variant="outline"
-                className="border-2 border-primary font-bold text-primary"
+                className="border-2 border-primary text-primary"
                 onClick={handleRunInCloud}
                 disabled={!canRunTestsInCloud}
               >
@@ -123,17 +128,6 @@ function TestToolbar({
         <Button onClick={onRunLocally}>
           <PlayCircle size={14} className="mr-2 h-4 w-4" />
           Run locally
-        </Button>
-
-        <Button
-          className="rounded-full"
-          variant="ghost"
-          size="icon"
-          onClick={() => {
-            setSettingsModalOpen(true);
-          }}
-        >
-          <Settings size={16} />
         </Button>
       </div>
 

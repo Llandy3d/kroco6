@@ -1,47 +1,66 @@
-import { EnvironmentList } from "@/components/EnvironmentList";
-import { TestList } from "@/components/TestList";
 import { Logo } from "@/components/illustrations/Logo";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import type { Environment, EnvironmentsData, Project, Test } from "@/lib/backend-client";
+import { openProject, refreshProject, type Project } from "@/lib/backend-client";
+import { ProjectTree } from "@/routes/ProjectTree";
 import { ExternalLink } from "lucide-react";
-import { ProjectSelector } from "./ProjectSelector";
+import { useEffect, useState } from "react";
 import { SidebarSection } from "./SidebarSection";
 
-interface SidebarProps {
-  tests: Test[];
-  projects: Project[];
-  environments: EnvironmentsData;
-}
+import { listen } from "@tauri-apps/api/event";
 
-function Sidebar({ projects, tests, environments }: SidebarProps) {
-  const active: Project = { name: "" };
+function Sidebar() {
+  const [project, setProject] = useState<Project>();
 
-  function handleEnvironmentsChange(_environments: Environment[]) {}
+  function handleOpenProject() {
+    openProject().then((result) => {
+      if (result.type === "cancelled") {
+        return;
+      }
 
-  function handleActiveProjectChange(_project: Project) {}
+      setProject(result.project);
+    });
+  }
 
-  function handleCreateProject(_project: Project) {}
+  useEffect(() => {
+    const unlisten = listen("files_changed", () => {
+      console.log("files changed", project?.root);
+
+      if (project?.root === undefined) {
+        return;
+      }
+
+      console.log("refreshing project...");
+
+      refreshProject(project.root).then(setProject).catch(console.error);
+    });
+
+    return () => {
+      console.log("unlistening...");
+
+      unlisten.then((dispose) => dispose());
+    };
+  }, [project]);
 
   return (
-    <div className="flex h-screen flex-col gap-4 p-4 text-center">
+    <div className="flex h-screen flex-col gap-4 p-4">
       <Logo className="self-center" />
       <Separator />
-      <ProjectSelector
-        active={active}
-        projects={projects}
-        onChange={handleActiveProjectChange}
-        onCreate={handleCreateProject}
-      />
 
-      <SidebarSection title={`Tests (${tests.length})`}>
-        <TestList tests={tests} />
-      </SidebarSection>
-      <SidebarSection title="Environments">
-        <EnvironmentList
-          environments={environments.environments}
-          onChange={handleEnvironmentsChange}
-        />
-      </SidebarSection>
+      {project && (
+        <>
+          <h2 className="font-bold">Project</h2>
+          <ProjectTree project={project} />
+        </>
+      )}
+      {!project && (
+        <div className="flex flex-auto flex-col items-center justify-center">
+          <Button variant="ghost" onClick={handleOpenProject}>
+            Open Project
+          </Button>
+        </div>
+      )}
+
       <SidebarSection title="Discover" className="mt-auto pb-2">
         <div className="mt-1 flex flex-col items-start text-sm">
           <a

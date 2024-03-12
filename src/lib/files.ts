@@ -1,7 +1,7 @@
 import dedent from "dedent";
 import { EMPTY_BLOCK_TEST } from "./stores/blocks/constants";
 import type { Test } from "./stores/blocks/model/loose";
-import type { OpenFile } from "./stores/editor";
+import type { VirtualFile } from "./stores/editor";
 
 const NEW_BLOCKS_TEST = JSON.stringify(EMPTY_BLOCK_TEST);
 
@@ -35,7 +35,7 @@ const NEW_SCRIPT = dedent`
   }
 `;
 
-function loadContent(file: OpenFile): string {
+function loadContent(file: VirtualFile): string {
   const data = sessionStorage.getItem(file.handle);
 
   if (data === null) {
@@ -49,7 +49,7 @@ function loadContent(file: OpenFile): string {
   return data;
 }
 
-function loadBlockTest(file: OpenFile): Test {
+function loadBlockTest(file: VirtualFile): Test {
   const data = sessionStorage.getItem(file.handle);
 
   if (data === null) {
@@ -59,7 +59,7 @@ function loadBlockTest(file: OpenFile): Test {
   return JSON.parse(data);
 }
 
-function storeContent(file: OpenFile, content: Test | string) {
+function storeContent(file: VirtualFile, content: Test | string) {
   sessionStorage.setItem(
     file.handle,
     typeof content === "string" ? content : JSON.stringify(content),

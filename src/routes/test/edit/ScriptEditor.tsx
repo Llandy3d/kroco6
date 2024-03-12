@@ -1,114 +1,16 @@
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import {
   runScriptInCloud,
   runScriptLocally,
+  saveFile,
   type Project,
   type ProjectConfig,
 } from "@/lib/backend-client";
-import type { OpenFile, ScriptFile } from "@/lib/stores/editor";
+import type { ScriptFile, VirtualFile } from "@/lib/stores/editor";
+import { useSetCurrentFile, useSetOpenFiles } from "@/routes/test/edit/atoms";
 import * as monaco from "monaco-editor";
-import { useRef, useState } from "react";
-import { ImportDialog } from "./ImportDialog";
-import { ScriptExamples } from "./ScriptExamples";
+import { useEffect, useRef, useState } from "react";
 import { TestToolbar } from "./TestToolbar";
-
-{
-  /* <script lang="ts" context="module">
-  import { loadContent, storeContent } from "$lib/files";
-  import { currentFile, updateFile, type ScriptFile } from "$lib/stores/editor";
-</script>
-
-<script lang="ts">
-  import {
-    Test,
-    createTest,
-    runScriptInCloud,
-    runScriptLocally,
-    saveTest,
-  } from "$lib/backend-client";
-
-  import { Button } from "$lib/components/ui/button";
-  import { activeProject } from "$lib/stores/projects";
-  import { refetchTests } from "$lib/stores/tests";
-  import { open } from "@tauri-apps/api/shell";
-  import { onDestroy, onMount } from "svelte";
-  import { toast } from "svelte-sonner";
-  import ImportDialog from "./ImportDialog.svelte";
-  import ScriptExamples from "./ScriptExamples.svelte";
-  import TestToolbar from "./TestToolbar.svelte";
-
-  export let file: ScriptFile;
-
-  let container: HTMLDivElement;
-  let editor: monaco.editor.IStandaloneCodeEditor;
-
-  let script = "";
-  let cloudTestDialogOpen = false;
-
-  function setCloudScriptInEditor(script: string | null) {
-    if (script !== null) {
-      editor.setValue(script);
-    }
-    cloudTestDialogOpen = false;
-  }
-
-  async function runTestLocally() {
-    try {
-      const response = await runScriptLocally(script);
-
-      console.log(response);
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
-  async function runTestInCloud(projectId: string) {
-    try {
-      const results = await runScriptInCloud({ script, projectId });
-      open(results);
-    } catch (error) {
-      toast.error("Error running test in cloud. Check your configuration.");
-      console.error(error);
-    }
-  }
-
-  function handleExScript(script: string) {
-    editor.setValue(script);
-  }
-
-  async function handleSaveTest() {
-    if (!$currentFile) return;
-
-    if ($currentFile.path.type === "new") {
-      await createTest($activeProject, new Test($currentFile.name, "Javascript", script));
-      updateFile($currentFile.handle, { path: { type: "existing", path: "", original: "" } });
-      refetchTests($activeProject);
-    } else {
-      await saveTest($activeProject, $currentFile.name, script);
-    }
-  }
-
-  onMount(() => {
-    script = loadContent(file);
-
-    editor = monaco.editor.create(container, {
-      value: script,
-      language: "javascript",
-    });
-
-    editor.onDidChangeModelContent(() => {
-      script = editor.getValue();
-    });
-  });
-
-  onDestroy(() => {
-    storeContent(file, script);
-
-    editor.dispose();
-  });
-</script> */
-}
 
 interface ScriptEditorProps {
   file: ScriptFile;
@@ -121,8 +23,12 @@ function ScriptEditor({ file, project }: ScriptEditorProps) {
   const editor = useRef<monaco.editor.IStandaloneCodeEditor>();
 
   const [running, setRunning] = useState(false);
-  const [script, setScript] = useState("");
-  const [cloudTestDialogOpen, setCloudTestDialogOpen] = useState(false);
+  const [script, setScript] = useState(
+    file.path.type === "existing" ? file.path.original : file.path.initial,
+  );
+
+  const setOpenFiles = useSetOpenFiles();
+  const setCurrentFile = useSetCurrentFile();
 
   async function handleRunLocally() {
     try {
@@ -157,19 +63,13 @@ function ScriptEditor({ file, project }: ScriptEditorProps) {
     }
   }
 
-  async function handleSaveTest(_file: OpenFile) {
-    // if (!$currentFile) return;
-    // if ($currentFile.path.type === "new") {
-    //   await createTest($activeProject, new Test($currentFile.name, "Javascript", script));
-    //   updateFile($currentFile.handle, { path: { type: "existing", path: "", original: "" } });
-    //   refetchTests($activeProject);
-    // } else {
-    //   await saveTest($activeProject, $currentFile.name, script);
-    // }
-  }
-
-  function handleSelectExample(script: string) {
-    editor.current?.setValue(script);
+  async function handleSaveTest(file: VirtualFile) {
+    saveFile(file, script).then((savedFile) => {
+      setOpenFiles((files) =>
+        files.map((file) => (file.handle === savedFile.handle ? savedFile : file)),
+      );
+      setCurrentFile(file);
+    });
   }
 
   function handleContainerMount(container: HTMLDivElement | null) {
@@ -188,13 +88,13 @@ function ScriptEditor({ file, project }: ScriptEditorProps) {
     });
   }
 
-  function handleScriptImport(script: string) {
-    editor.current?.setValue(script);
-  }
+  useEffect(() => {
+    if (editor.current === undefined) {
+      return;
+    }
 
-  function handleImportDismiss() {
-    setCloudTestDialogOpen(false);
-  }
+    editor.current.setValue(file.path.type === "existing" ? file.path.original : file.path.initial);
+  }, [file]);
 
   return (
     <div className="flex flex-auto flex-col bg-white">
@@ -206,24 +106,7 @@ function ScriptEditor({ file, project }: ScriptEditorProps) {
         onRunInCloud={handleRunInCloud}
         onSave={handleSaveTest}
       />
-      <div className="flex gap-2">
-        <ScriptExamples onSelect={handleSelectExample} />
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={() => {
-            setCloudTestDialogOpen(true);
-          }}
-        >
-          Import script
-        </Button>
-      </div>
-      <ImportDialog
-        open={cloudTestDialogOpen}
-        project={project}
-        onDismiss={handleImportDismiss}
-        onImport={handleScriptImport}
-      />
+
       <div ref={handleContainerMount} className="full-w full-h flex-auto"></div>
     </div>
   );

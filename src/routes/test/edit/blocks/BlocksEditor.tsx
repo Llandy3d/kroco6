@@ -4,6 +4,7 @@ import { useToast } from "@/components/ui/use-toast";
 import {
   runScriptInCloud,
   runScriptLocally,
+  saveFile,
   type Environment,
   type Project,
   type ProjectConfig,
@@ -11,6 +12,7 @@ import {
 import { convertToScript } from "@/lib/stores/blocks/convert";
 import type { BlockFile } from "@/lib/stores/editor";
 import { EMPTY_ENVIRONMENT } from "@/lib/stores/projects";
+import { useSetCurrentFile, useSetOpenFiles } from "@/routes/test/edit/atoms";
 import { Canvas } from "@/routes/test/edit/blocks/Canvas";
 import { ScriptPreview } from "@/routes/test/edit/blocks/ScriptPreview";
 import { useTest } from "@/routes/test/edit/blocks/atoms";
@@ -34,6 +36,9 @@ function BlocksEditorContainer({ file, project, environment }: BlocksEditorProps
   const [test, setTest] = useTest();
   const [tab, setTab] = useState("build");
   const [running, setRunning] = useState(false);
+
+  const setOpenFiles = useSetOpenFiles();
+  const setCurrentFile = useSetCurrentFile();
 
   async function runTestLocally() {
     try {
@@ -98,21 +103,13 @@ function BlocksEditorContainer({ file, project, environment }: BlocksEditorProps
   }
 
   async function handleSaveTest() {
-    // if (!$currentFile) return;
-    // await saveTest("default", $currentFile.name, JSON.stringify($test));
-    // if ($currentFile.path.type === "new") {
-    //   updateFile($currentFile.handle, { path: { type: "existing", path: "", original: "" } });
-    // }
-    // if ($currentFile.path.type === "new") {
-    //   await createTest(
-    //     $activeProject,
-    //     new Test($currentFile.name, "Blocks", JSON.stringify($test)),
-    //   );
-    //   updateFile($currentFile.handle, { path: { type: "existing", path: "", original: "" } });
-    //   refetchTests($activeProject);
-    // } else {
-    //   await saveTest($activeProject, $currentFile.name, JSON.stringify($test));
-    // }
+    saveFile(file, JSON.stringify(test)).then((savedFile) => {
+      setOpenFiles((files) =>
+        files.map((file) => (file.handle === savedFile.handle ? savedFile : file)),
+      );
+
+      setCurrentFile(file);
+    });
   }
 
   function handleLibraryChange(library: OpenAPIV3.Document) {
@@ -123,11 +120,7 @@ function BlocksEditorContainer({ file, project, environment }: BlocksEditorProps
   }
 
   useEffect(() => {
-    if (file.path.type === "new") {
-      setTest(JSON.parse(file.path.initial));
-    } else {
-      setTest(JSON.parse(file.path.original));
-    }
+    setTest(file.blocks);
   }, [file]);
 
   // onMount(() => {

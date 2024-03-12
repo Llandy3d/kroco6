@@ -1,5 +1,22 @@
 import { nanoid } from "nanoid";
-import * as strict from "./strict";
+import {
+  array,
+  boolean,
+  lazy,
+  literal,
+  merge,
+  nullable,
+  number,
+  object,
+  optional,
+  record,
+  safeParse,
+  string,
+  union,
+  type BaseSchema,
+  type Output,
+} from "valibot";
+import { openapi } from "./openapi";
 
 const template = Symbol("This block is a template and should be cloned before use.");
 
@@ -7,53 +24,232 @@ type WithTemplate<T> = T & {
   [template]?: true;
 };
 
-type GroupBlock = Omit<strict.GroupBlock, "next" | "step"> & {
+interface BlockBase {
+  [template]?: boolean;
+  id: string;
+}
+
+interface ChainableBlock extends BlockBase {
+  next: Block | null;
+}
+
+const blockBase = object({
+  id: string(),
+  [template]: optional(boolean()),
+});
+
+interface GroupBlock extends ChainableBlock {
+  type: "group";
+  name: string;
   step: Block | null;
   next: Block | null;
-};
+}
 
-type HttpRequestBlock = Omit<strict.HttpRequestBlock, "next"> & {
+const groupBlock: BaseSchema<GroupBlock> = merge([
+  blockBase,
+  object({
+    type: literal("group"),
+    name: string(),
+    step: nullable(lazy(() => block)),
+    next: nullable(lazy(() => block)),
+  }),
+]);
+
+const stringParameter = object({
+  type: literal("string"),
+  value: string(),
+});
+
+const numberParameter = object({
+  type: literal("number"),
+  value: number(),
+});
+
+const booleanParameter = object({
+  type: literal("boolean"),
+  value: boolean(),
+});
+
+const parameter = union([stringParameter, numberParameter, booleanParameter]);
+
+type Parameter = Output<typeof parameter>;
+
+interface LibraryBlock extends ChainableBlock {
+  type: "library";
+  name: string;
+  url: string;
+  method: string;
+  parameters: Record<string, Parameter>;
   next: Block | null;
-};
+}
 
-type LibraryBlock = Omit<strict.LibraryBlock, "next"> & {
+const libraryBlock: BaseSchema<LibraryBlock> = merge([
+  blockBase,
+  object({
+    type: literal("library"),
+    name: string(),
+    method: string(),
+    url: string(),
+    parameters: record(parameter),
+    next: nullable(lazy(() => block)),
+  }),
+]);
+
+interface HttpRequestBlock extends ChainableBlock {
+  type: "http-request";
+  name: string;
+  url: string;
+  method: string;
+  parameters: Record<string, Parameter>;
   next: Block | null;
-};
+}
 
-type CheckBlock = Omit<strict.CheckBlock, "next" | "target"> & {
+const httpRequestBlock: BaseSchema<HttpRequestBlock> = merge([
+  blockBase,
+  object({
+    type: literal("http-request"),
+    name: string(),
+    method: string(),
+    url: string(),
+    parameters: record(parameter),
+    next: nullable(lazy(() => block)),
+  }),
+]);
+
+const checkBase = object({
+  id: string(),
+});
+
+const statusCheck = merge([
+  checkBase,
+  object({
+    type: literal("status"),
+    value: number(),
+  }),
+]);
+
+const containsCheck = merge([
+  checkBase,
+  object({
+    type: literal("contains"),
+    value: string(),
+  }),
+]);
+
+const check = union([statusCheck, containsCheck]);
+
+type Check = Output<typeof check>;
+
+interface CheckBlock extends ChainableBlock {
+  type: "check";
   target: Block | null;
+  checks: Check[];
   next: Block | null;
-};
+}
 
-type ScenarioBlock = Omit<strict.ScenarioBlock, "step" | "executor"> & {
+const checkBlock: BaseSchema<CheckBlock> = merge([
+  blockBase,
+  object({
+    type: literal("check"),
+    target: nullable(lazy(() => block)),
+    checks: array(check),
+    next: nullable(lazy(() => block)),
+  }),
+]);
+
+interface SleepBlock extends ChainableBlock {
+  type: "sleep";
+  seconds: number;
+  next: Block | null;
+}
+
+const sleepBlock: BaseSchema<SleepBlock> = merge([
+  blockBase,
+  object({
+    type: literal("sleep"),
+    seconds: number(),
+    next: nullable(lazy(() => block)),
+  }),
+]);
+
+const stepBlock = union([groupBlock, libraryBlock, checkBlock, sleepBlock, httpRequestBlock]);
+
+type StepBlock = Output<typeof stepBlock>;
+
+const constantVusExecutor = object({
+  type: literal("constant-vus"),
+  vus: number(),
+  duration: string(),
+});
+
+const executor = union([constantVusExecutor]);
+
+type Executor = Output<typeof executor>;
+
+interface ExecutorBlock extends BlockBase {
+  type: "executor";
+  executor: Executor;
+}
+
+const executorBlock: BaseSchema<ExecutorBlock> = merge([
+  blockBase,
+  object({
+    type: literal("executor"),
+    executor,
+  }),
+]);
+
+interface ScenarioBlock extends BlockBase {
+  type: "scenario";
+  name: string;
   executor: Block | null;
   step: Block | null;
-};
+}
 
-type SleepBlock = Omit<strict.SleepBlock, "next"> & {
-  next: Block | null;
-};
+const scenarioBlock: BaseSchema<ScenarioBlock> = merge([
+  blockBase,
+  object({
+    type: literal("scenario"),
+    name: string(),
+    executor: nullable(lazy(() => block)),
+    step: nullable(lazy(() => block)),
+  }),
+]);
 
-type ExecutorBlock = strict.ExecutorBlock;
+const block = union([
+  groupBlock,
+  libraryBlock,
+  checkBlock,
+  executorBlock,
+  scenarioBlock,
+  sleepBlock,
+  httpRequestBlock,
+]);
 
-type Block =
-  | WithTemplate<GroupBlock>
-  | WithTemplate<LibraryBlock>
-  | WithTemplate<CheckBlock>
-  | WithTemplate<ScenarioBlock>
-  | WithTemplate<ExecutorBlock>
-  | WithTemplate<HttpRequestBlock>
-  | WithTemplate<SleepBlock>;
+type Block = Output<typeof block>;
 
-type Chainable = Extract<Block, { next: Block | null }>;
+const root = object({
+  type: literal("root"),
+  top: number(),
+  left: number(),
+  block: block,
+});
 
-type Root = Omit<strict.Root, "block"> & {
-  block: Block;
-};
+type Root = Output<typeof root>;
 
-type Test = Omit<strict.Test, "roots"> & {
-  roots: Root[];
-};
+const test = object({
+  library: openapi,
+  roots: array(root),
+});
+
+type Test = Output<typeof test>;
+
+// The strict schema is used when trying to convert the blocks to a test and should
+// always represent a _valid_ test. The loose schema is used when working with the
+// blocks in the editor where the user can make mistakes.
+function parse(data: unknown) {
+  return safeParse(test, data);
+}
 
 function defineTemplate<T extends Block>(block: T): WithTemplate<T> {
   return {
@@ -85,8 +281,10 @@ export {
   defineTemplate,
   instantiate,
   isTemplate,
+  parse,
   type Block,
-  type Chainable,
+  type ChainableBlock,
+  type Check,
   type CheckBlock,
   type ExecutorBlock,
   type GroupBlock,
@@ -95,5 +293,6 @@ export {
   type Root,
   type ScenarioBlock,
   type SleepBlock,
+  type StepBlock,
   type Test,
 };

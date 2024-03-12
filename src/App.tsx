@@ -21,3 +21,7 @@ if (container === null) {
 const root = createRoot(container);
 
 root.render(<App />);
+
+window.addEventListener("unhandledrejection", (event) => {
+  console.error(event.reason);
+});

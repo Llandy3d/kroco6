@@ -1,18 +1,18 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod cloud;
+mod js;
 mod models;
 mod operations;
-mod cloud;
 
-use core::fmt;
+use regex::Regex;
 use std::fs;
-use std::io::{Read, Write, BufRead, BufReader};
+use std::io::{BufRead, BufReader, Read, Write};
 use std::path::Path;
 use std::process::{Command, Stdio};
 use std::sync::Mutex;
 use tauri::{Manager, Window};
-use regex::Regex;
 
 use crate::operations::ProjectManager;
 
@@ -32,7 +32,6 @@ fn main() {
         .environment_manager
         .initialize()
         .expect("Failed to initialize application state");
-
 
     tauri::Builder::default()
         .manage(application_state)
@@ -56,13 +55,22 @@ fn main() {
             save_test,
             load_project_config,
             save_project_config,
+            js::open_project,
+            js::open_file,
+            js::save_file,
+            js::save_file_as,
+            js::refresh_project,
+            js::rename,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
 
 #[tauri::command]
-async fn get_cloud_tests(state: tauri::State<'_, ApplicationState>, project_name: &str) -> Result<Vec<models::CloudTest>, String> {
+async fn get_cloud_tests(
+    state: tauri::State<'_, ApplicationState>,
+    project_name: &str,
+) -> Result<Vec<models::CloudTest>, String> {
     let project_config = state
         .project_manager
         .load_project_config(project_name)
@@ -74,11 +82,10 @@ async fn get_cloud_tests(state: tauri::State<'_, ApplicationState>, project_name
     let cloud_token = project_config.cloud_token.unwrap();
     let cloud_project_id = project_config.cloud_project_id.unwrap();
 
-    let cloud_tests: Vec<models::CloudTest> = cloud::get_cloud_tests(&cloud_token, &cloud_project_id)
-        .await
-        .map_err(|e| {
-            e.to_string()
-        })?;
+    let cloud_tests: Vec<models::CloudTest> =
+        cloud::get_cloud_tests(&cloud_token, &cloud_project_id)
+            .await
+            .map_err(|e| e.to_string())?;
     Ok(cloud_tests)
 }
 
