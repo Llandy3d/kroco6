@@ -10,13 +10,7 @@ import { css } from "@emotion/css";
 import type { ComponentType, KeyboardEvent } from "react";
 
 const styles = {
-  root: css`
-    .block-insert & {
-      margin-top: 0;
-      border-width: 1px;
-      border-style: solid;
-    }
-  `,
+  root: css``,
   body: css`
     border-color: var(--block-bg-primary);
   `,

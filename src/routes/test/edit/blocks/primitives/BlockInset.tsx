@@ -9,10 +9,8 @@ import type { ReactNode } from "react";
 
 const styles = {
   root: css`
-    .block-insert & {
-      opacity: 0.5;
-      border-color: var(--block-bg-primary);
-    }
+    opacity: 0.5;
+    border-color: var(--block-bg-primary);
   `,
   connected: css`
     border: none;
@@ -37,7 +35,7 @@ function BlockInset<TTarget extends BlockType>({
   children,
 }: BlockInsetProps<TTarget>) {
   const { setDropRef, dropping, events } = useDrop({
-    data: connection.block,
+    data: owner,
     accepts,
     onDrop: (ev) => {
       connection.onDrop(ev.data.dropped);
@@ -55,6 +53,7 @@ function BlockInset<TTarget extends BlockType>({
       <div
         ref={setDropRef}
         className={cn(
+          styles.root,
           "block-inset min-h-8 min-w-16 border-2 bg-white",
           dropping && "bg-slate-400",
           dropping && styles.dropping,
