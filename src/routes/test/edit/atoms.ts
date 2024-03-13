@@ -2,7 +2,20 @@ import type { VirtualFile } from "@/lib/stores/editor";
 import { atom, useAtom, useSetAtom } from "jotai";
 
 const openFiles = atom<VirtualFile[]>([]);
-const currentFile = atom<VirtualFile | null>(null);
+
+const currentHandle = atom<string | null>(null);
+
+const currentFile = atom(
+  (get) => {
+    const handle = get(currentHandle);
+    const files = get(openFiles);
+
+    return files.find((file) => file.handle === handle) ?? null;
+  },
+  (_get, set, handle: string | null) => {
+    set(currentHandle, handle);
+  },
+);
 
 function useOpenFiles() {
   return useAtom(openFiles);

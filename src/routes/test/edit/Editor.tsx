@@ -70,13 +70,13 @@ function Editor({ project }: EditorProps) {
   const [currentFile, setCurrentFile] = useCurrentFile();
 
   function handleCurrentFileChange(handle: string | undefined) {
-    setCurrentFile(openFiles.find((file) => file.handle === handle) ?? null);
+    setCurrentFile(handle ?? null);
   }
 
   function handleClose(file: VirtualFile) {
     const index = openFiles.findIndex((f) => f.handle === file.handle);
 
-    setCurrentFile(openFiles[index + 1] ?? openFiles[index - 1] ?? null);
+    setCurrentFile(openFiles[index + 1]?.handle ?? openFiles[index - 1]?.handle ?? null);
     setOpenFiles(openFiles.filter((f) => f.handle !== file.handle));
   }
 
@@ -93,7 +93,7 @@ function Editor({ project }: EditorProps) {
     };
 
     setOpenFiles([...openFiles, newFile]);
-    setCurrentFile(newFile);
+    setCurrentFile(newFile.handle);
   }
 
   function handleNewScriptFile() {
@@ -108,7 +108,7 @@ function Editor({ project }: EditorProps) {
     };
 
     setOpenFiles([...openFiles, newFile]);
-    setCurrentFile(newFile);
+    setCurrentFile(newFile.handle);
   }
 
   return (

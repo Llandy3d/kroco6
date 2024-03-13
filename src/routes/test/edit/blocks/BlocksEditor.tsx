@@ -108,7 +108,7 @@ function BlocksEditorContainer({ file, project, environment }: BlocksEditorProps
         files.map((file) => (file.handle === savedFile.handle ? savedFile : file)),
       );
 
-      setCurrentFile(file);
+      setCurrentFile(file.handle);
     });
   }
 

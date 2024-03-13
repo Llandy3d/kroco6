@@ -68,7 +68,8 @@ function ScriptEditor({ file, project }: ScriptEditorProps) {
       setOpenFiles((files) =>
         files.map((file) => (file.handle === savedFile.handle ? savedFile : file)),
       );
-      setCurrentFile(file);
+
+      setCurrentFile(file.handle);
     });
   }
 
