@@ -1,4 +1,4 @@
-import { detachBlock, insertNext, updateBlock } from "@/lib/stores/blocks";
+import { detachBlock, updateBlock } from "@/lib/stores/blocks";
 import {
   instantiate,
   type Block as BlockType,
@@ -70,14 +70,6 @@ function CheckBlock({ block }: CheckBlockProps) {
     });
   }
 
-  function handleNextDrop(next: BlockType) {
-    if (!isStepBlock(next)) {
-      return;
-    }
-
-    setTest((test) => insertNext(test, block, next));
-  }
-
   function handleDelete() {
     setTest((test) => {
       return detachBlock(test, block);
@@ -89,8 +81,12 @@ function CheckBlock({ block }: CheckBlockProps) {
       block={block}
       color={STEP_COLOR}
       top={true}
-      bottom={{ block: block.next, accepts: isStepBlock, onDrop: handleNextDrop }}
-      Next={AnyBlock}
+      bottom={{
+        key: `next`,
+        node: <AnyBlock block={block.next} />,
+        action: { type: "attach-step", target: block },
+        accepts: isStepBlock,
+      }}
       onDelete={handleDelete}
     >
       <Field>

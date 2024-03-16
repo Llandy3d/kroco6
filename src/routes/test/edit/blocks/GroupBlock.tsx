@@ -1,8 +1,5 @@
-import { detachBlock, insertNext, insertStep, updateBlock } from "@/lib/stores/blocks";
-import type {
-  Block as BlockType,
-  GroupBlock as GroupBlockType,
-} from "@/lib/stores/blocks/model/loose";
+import { detachBlock, updateBlock } from "@/lib/stores/blocks";
+import type { GroupBlock as GroupBlockType } from "@/lib/stores/blocks/model/loose";
 import { isStepBlock } from "@/lib/stores/blocks/utils";
 import { AnyBlock } from "@/routes/test/edit/blocks/AnyBlock";
 import { useSetTest } from "@/routes/test/edit/blocks/atoms";
@@ -28,26 +25,6 @@ function GroupBlock({ block }: GroupBlockProps) {
     );
   }
 
-  function handleDropStep(step: BlockType) {
-    if (!isStepBlock(step)) {
-      return;
-    }
-
-    console.log("step");
-
-    setTest((test) => insertStep(test, block, step));
-  }
-
-  function handleDropNext(next: BlockType) {
-    if (!isStepBlock(next)) {
-      return;
-    }
-
-    console.log("next");
-
-    setTest((test) => insertNext(test, block, next));
-  }
-
   function handleDelete() {
     // TODO: put steps on canvas and connect top and bottom connection.
     setTest((test) => {
@@ -60,8 +37,15 @@ function GroupBlock({ block }: GroupBlockProps) {
       block={block}
       top={true}
       color={STEP_COLOR}
-      bottom={{ block: block.next, accepts: isStepBlock, onDrop: handleDropNext }}
-      Next={AnyBlock}
+      bottom={{
+        key: `${block.id}-next`,
+        node: <AnyBlock block={block.next} />,
+        action: {
+          type: "attach-step",
+          target: block,
+        },
+        accepts: isStepBlock,
+      }}
       onDelete={handleDelete}
     >
       <Field>
@@ -70,11 +54,17 @@ function GroupBlock({ block }: GroupBlockProps) {
       <Field>do the following:</Field>
       <Collection
         owner={block}
-        connection={{ block: block.step, accepts: isStepBlock, onDrop: handleDropStep }}
+        connection={{
+          key: `child`,
+          node: <AnyBlock block={block.step} />,
+          action: {
+            type: "attach-child",
+            target: block,
+          },
+          accepts: isStepBlock,
+        }}
         color={STEP_COLOR}
-      >
-        {block.step && <AnyBlock block={block.step} />}
-      </Collection>
+      />
     </Block>
   );
 }

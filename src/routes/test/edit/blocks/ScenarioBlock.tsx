@@ -1,4 +1,4 @@
-import { detachBlock, insertStep, updateBlock } from "@/lib/stores/blocks";
+import { detachBlock, updateBlock } from "@/lib/stores/blocks";
 import type {
   Block as BlockType,
   ScenarioBlock as ScenarioBlockType,
@@ -28,14 +28,6 @@ function ScenarioBlock({ block }: ScenarioBlockProps) {
         name: value,
       }),
     );
-  }
-
-  function handleDropStep(step: BlockType) {
-    if (!isStepBlock(step)) {
-      return;
-    }
-
-    setTest((test) => insertStep(test, block, step));
   }
 
   function handleExecutorDrop(executor: BlockType) {
@@ -84,10 +76,16 @@ function ScenarioBlock({ block }: ScenarioBlockProps) {
       <Collection
         owner={block}
         color={STEP_COLOR}
-        connection={{ block: block.step, accepts: isStepBlock, onDrop: handleDropStep }}
-      >
-        {block.step && <AnyBlock block={block.step} />}
-      </Collection>
+        connection={{
+          key: `child`,
+          node: <AnyBlock block={block.step} />,
+          accepts: isStepBlock,
+          action: {
+            type: "attach-child",
+            target: block,
+          },
+        }}
+      />
     </Block>
   );
 }

@@ -1,11 +1,14 @@
-import { dropOnCanvas } from "@/lib/stores/blocks";
-import { isBlock } from "@/lib/stores/blocks/utils";
+import { dropOnCanvas, insertNext, insertStep } from "@/lib/stores/blocks";
+import { isStepBlock } from "@/lib/stores/blocks/utils";
 import { cn } from "@/lib/utils";
 import { AnyBlock } from "@/routes/test/edit/blocks/AnyBlock";
 import { Root } from "@/routes/test/edit/blocks/Root";
 import { Toolbox } from "@/routes/test/edit/blocks/Toolbox";
-import { useTest } from "@/routes/test/edit/blocks/atoms";
-import { DndProvider, useDrop } from "@/routes/test/edit/blocks/primitives/Dnd";
+import { useSetTest, useTestValue } from "@/routes/test/edit/blocks/atoms";
+import type { DragData, DropAction, DropOnCanvasAction } from "@/routes/test/edit/blocks/dnd/types";
+import { DndProvider } from "@/routes/test/edit/blocks/primitives/Dnd";
+import { DndContext, useDroppable, type DragEndEvent } from "@dnd-kit/core";
+
 import { css } from "@emotion/css";
 
 const styles = {
@@ -27,19 +30,13 @@ const styles = {
 };
 
 function CanvasRoot() {
-  const [test, setTest] = useTest();
+  const test = useTestValue();
 
-  const { setDropRef, events } = useDrop({
-    data: "canvas",
-    accepts: isBlock,
-    onDrop: (ev) => {
-      setTest((previous) => {
-        return dropOnCanvas(previous, ev.data.dropped, {
-          top: ev.top,
-          left: ev.left,
-        });
-      });
-    },
+  const { setNodeRef } = useDroppable({
+    id: "canvas",
+    data: {
+      type: "drop-on-canvas",
+    } satisfies DropOnCanvasAction,
   });
 
   function handleClick() {}
@@ -48,10 +45,9 @@ function CanvasRoot() {
     <div className="relative flex h-full w-full items-stretch overflow-hidden">
       <Toolbox test={test} />
       <div
-        ref={setDropRef}
+        ref={setNodeRef}
         className={cn(styles.grid, "relative flex-auto bg-[#F9F8FC]")}
         onClick={handleClick}
-        {...events}
       >
         {test.roots.map((root) => {
           return (
@@ -66,9 +62,70 @@ function CanvasRoot() {
 }
 
 function Canvas() {
+  const setTest = useSetTest();
+
+  function handleDragEnd({ active, over }: DragEndEvent) {
+    if (over === null) {
+      return;
+    }
+
+    if (!over?.data.current || !active.data.current) {
+      return;
+    }
+
+    const action = over.data.current as DropAction;
+    const dropped = active.data.current as DragData;
+
+    switch (action.type) {
+      case "drop-on-canvas": {
+        setTest((test) => {
+          const activeTop = active.rect.current.translated?.top ?? 0;
+          const activeLeft = active.rect.current.translated?.left ?? 0;
+
+          return dropOnCanvas(test, dropped.block, {
+            top: activeTop - over.rect.top,
+            left: activeLeft - over.rect.left,
+          });
+        });
+
+        break;
+      }
+
+      case "attach-step": {
+        const block = dropped.block;
+
+        if (!isStepBlock(block)) {
+          return;
+        }
+
+        setTest((test) => {
+          return insertNext(test, action.target, block);
+        });
+
+        break;
+      }
+
+      case "attach-child": {
+        const block = dropped.block;
+
+        if (!isStepBlock(block)) {
+          return;
+        }
+
+        setTest((test) => {
+          return insertStep(test, action.target, block);
+        });
+
+        break;
+      }
+    }
+  }
+
   return (
     <DndProvider>
-      <CanvasRoot />
+      <DndContext onDragEnd={handleDragEnd}>
+        <CanvasRoot />
+      </DndContext>
     </DndProvider>
   );
 }

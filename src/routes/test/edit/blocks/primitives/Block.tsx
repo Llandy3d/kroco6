@@ -1,13 +1,13 @@
-import { isTemplate, type Block as BlockType } from "@/lib/stores/blocks/model/loose";
-import { isBlock } from "@/lib/stores/blocks/utils";
+import type { Block as BlockType } from "@/lib/stores/blocks/model/loose";
 import { cn } from "@/lib/utils";
-import { useDrag, type DropEvent } from "@/routes/test/edit/blocks/primitives/Dnd";
 import { Bottom } from "@/routes/test/edit/blocks/primitives/connections/Bottom";
 import { Top } from "@/routes/test/edit/blocks/primitives/connections/Top";
-import type { BottomConnection } from "@/routes/test/edit/blocks/primitives/connections/types";
+import type { Connection } from "@/routes/test/edit/blocks/primitives/connections/types";
 import { toBlockColorStyle, type BlockColor } from "@/routes/test/edit/blocks/primitives/types";
+import { useDraggable } from "@dnd-kit/core";
+import { CSS } from "@dnd-kit/utilities";
 import { css } from "@emotion/css";
-import type { ComponentType, KeyboardEvent } from "react";
+import type { KeyboardEvent } from "react";
 
 const styles = {
   root: css``,
@@ -15,7 +15,7 @@ const styles = {
     border-color: var(--block-bg-primary);
   `,
   dragging: css`
-    opacity: 0.8;
+    z-index: 1000;
 
     * {
       pointer-events: none;
@@ -26,28 +26,28 @@ const styles = {
   `,
 };
 
-interface BlockProps<TBlock extends BlockType, TBottom extends BlockType> {
+interface BlockProps<TBlock extends BlockType> {
   block: TBlock;
   color: BlockColor;
   top?: ((value: unknown) => boolean) | boolean;
-  bottom?: BottomConnection<TBottom> | null;
+  bottom?: Connection;
   children: React.ReactNode;
-  Next?: ComponentType<{ block: BlockType }>;
   onDelete: (block: TBlock) => void;
 }
 
-function Block<TBlock extends BlockType, TBottom extends BlockType>({
+function Block<TBlock extends BlockType>({
   block,
   color,
   top,
   bottom,
   children,
-  Next,
   onDelete,
-}: BlockProps<TBlock, TBottom>) {
-  const { setDraggableRef, dragging, events } = useDrag({
-    data: block,
-    accepts: acceptsTop,
+}: BlockProps<TBlock>) {
+  const { isDragging, listeners, attributes, transform, setNodeRef } = useDraggable({
+    id: block.id,
+    data: {
+      block,
+    },
   });
 
   function handleKeyPress(ev: KeyboardEvent<HTMLDivElement>) {
@@ -59,52 +59,23 @@ function Block<TBlock extends BlockType, TBottom extends BlockType>({
     }
   }
 
-  function acceptsTop(value: unknown) {
-    if (value === "canvas") {
-      return true;
-    }
-
-    if (!isBlock(value) || value.id === block.id) {
-      return false;
-    }
-
-    if (top === undefined) {
-      return false;
-    }
-
-    if (typeof top === "boolean") {
-      return top;
-    }
-
-    return top(value);
-  }
-
-  function acceptsBottom(value: unknown): value is TBottom {
-    if (!bottom) {
-      return false;
-    }
-
-    return !isTemplate(block) && isBlock(value) && bottom.accepts(value);
-  }
-
-  function handleDropBottom(ev: DropEvent<BlockType, TBottom>) {
-    bottom?.onDrop(ev.data.dropped);
-  }
-
   return (
     <>
       <div
-        ref={setDraggableRef}
+        ref={setNodeRef}
         id={block.id}
-        tabIndex={0}
         className={cn(
           styles.root,
-          "z-10 flex w-min flex-col outline-2 outline-indigo-500 focus:outline",
-          dragging && styles.dragging,
+          "relative z-10 flex w-min flex-col outline-2 outline-indigo-500 focus:outline",
+          isDragging && styles.dragging,
         )}
-        style={toBlockColorStyle(color)}
+        style={{
+          ...toBlockColorStyle(color),
+          transform: CSS.Translate.toString(transform),
+        }}
         onKeyUp={handleKeyPress}
-        {...events}
+        {...listeners}
+        {...attributes}
       >
         <div
           className={cn(
@@ -113,13 +84,10 @@ function Block<TBlock extends BlockType, TBottom extends BlockType>({
             top && styles.hasTop,
           )}
         >
-          <div className="relative flex flex-col">
-            {top && <Top />}
-            <div className="px-2 py-1">{children}</div>
-          </div>
-          {bottom && <Bottom data={block} accepts={acceptsBottom} onDrop={handleDropBottom} />}
+          {top && <Top />}
+          <div className="px-2 py-1">{children}</div>
         </div>
-        <div>{Next && bottom?.block && <Next block={bottom.block} />}</div>
+        {bottom && <Bottom owner={block} connection={bottom} />}
       </div>
     </>
   );

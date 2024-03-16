@@ -1,8 +1,5 @@
-import { detachBlock, insertNext, updateBlock } from "@/lib/stores/blocks";
-import type {
-  Block as BlockType,
-  SleepBlock as SleepBlockType,
-} from "@/lib/stores/blocks/model/loose";
+import { detachBlock, updateBlock } from "@/lib/stores/blocks";
+import type { SleepBlock as SleepBlockType } from "@/lib/stores/blocks/model/loose";
 import { isStepBlock } from "@/lib/stores/blocks/utils";
 import { AnyBlock } from "@/routes/test/edit/blocks/AnyBlock";
 import { useSetTest } from "@/routes/test/edit/blocks/atoms";
@@ -27,14 +24,6 @@ function SleepBlock({ block }: SleepBlockProps) {
     });
   }
 
-  function handleNextDrop(next: BlockType) {
-    if (!isStepBlock(next)) {
-      return;
-    }
-
-    setTest((test) => insertNext(test, block, next));
-  }
-
   function handleDelete() {
     setTest((test) => {
       return detachBlock(test, block);
@@ -46,8 +35,16 @@ function SleepBlock({ block }: SleepBlockProps) {
       block={block}
       color={STEP_COLOR}
       top={true}
-      bottom={{ block: block.next, accepts: isStepBlock, onDrop: handleNextDrop }}
-      Next={AnyBlock}
+      bottom={{
+        key: `next`,
+        owner: block,
+        node: <AnyBlock block={block.next} />,
+        action: {
+          type: "attach-step",
+          target: block,
+        },
+        accepts: isStepBlock,
+      }}
       onDelete={handleDelete}
     >
       <Field>

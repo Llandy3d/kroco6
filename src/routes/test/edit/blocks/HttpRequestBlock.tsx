@@ -1,8 +1,5 @@
-import { detachBlock, insertNext, updateBlock } from "@/lib/stores/blocks";
-import type {
-  Block as BlockType,
-  HttpRequestBlock as HttpRequestBlockType,
-} from "@/lib/stores/blocks/model/loose";
+import { detachBlock, updateBlock } from "@/lib/stores/blocks";
+import type { HttpRequestBlock as HttpRequestBlockType } from "@/lib/stores/blocks/model/loose";
 import { isStepBlock } from "@/lib/stores/blocks/utils";
 import { HTTP_METHODS } from "@/lib/stores/library/constants";
 import { AnyBlock } from "@/routes/test/edit/blocks/AnyBlock";
@@ -38,14 +35,6 @@ function HttpRequestBlock({ block }: HttpRequestBlockProps) {
     });
   }
 
-  function handleNextDrop(next: BlockType) {
-    if (!isStepBlock(next)) {
-      return;
-    }
-
-    setTest((test) => insertNext(test, block, next));
-  }
-
   function handleDelete() {
     setTest((test) => {
       return detachBlock(test, block);
@@ -59,8 +48,15 @@ function HttpRequestBlock({ block }: HttpRequestBlockProps) {
       block={block}
       color={STEP_COLOR}
       top={true}
-      bottom={{ block: block.next, accepts: isStepBlock, onDrop: handleNextDrop }}
-      Next={AnyBlock}
+      bottom={{
+        key: `next`,
+        node: <AnyBlock block={block.next} />,
+        action: {
+          type: "attach-step",
+          target: block,
+        },
+        accepts: isStepBlock,
+      }}
       onDelete={handleDelete}
     >
       <Field>

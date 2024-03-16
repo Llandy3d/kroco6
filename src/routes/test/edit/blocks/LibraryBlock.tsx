@@ -1,8 +1,5 @@
-import { detachBlock, insertNext } from "@/lib/stores/blocks";
-import type {
-  Block as BlockType,
-  LibraryBlock as LibraryBlockType,
-} from "@/lib/stores/blocks/model/loose";
+import { detachBlock } from "@/lib/stores/blocks";
+import type { LibraryBlock as LibraryBlockType } from "@/lib/stores/blocks/model/loose";
 import { isStepBlock } from "@/lib/stores/blocks/utils";
 import { AnyBlock } from "@/routes/test/edit/blocks/AnyBlock";
 import { useSetTest } from "@/routes/test/edit/blocks/atoms";
@@ -18,14 +15,6 @@ interface LibraryBlockProps {
 export function LibraryBlock({ block }: LibraryBlockProps) {
   const setTest = useSetTest();
 
-  function handleNextDrop(next: BlockType) {
-    if (!isStepBlock(next)) {
-      return;
-    }
-
-    setTest((test) => insertNext(test, block, next));
-  }
-
   function handleDelete() {
     setTest((test) => {
       return detachBlock(test, block);
@@ -37,8 +26,12 @@ export function LibraryBlock({ block }: LibraryBlockProps) {
       block={block}
       color={STEP_COLOR}
       top={true}
-      bottom={{ block: block.next, accepts: isStepBlock, onDrop: handleNextDrop }}
-      Next={AnyBlock}
+      bottom={{
+        key: `next`,
+        node: <AnyBlock block={block.next} />,
+        action: { type: "attach-step", target: block },
+        accepts: isStepBlock,
+      }}
       onDelete={handleDelete}
     >
       <Field>{block.name}</Field>

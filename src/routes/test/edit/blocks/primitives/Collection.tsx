@@ -1,12 +1,9 @@
-import { isTemplate, type Block, type Block as BlockType } from "@/lib/stores/blocks/model/loose";
-import { isBlock } from "@/lib/stores/blocks/utils";
+import { type Block as BlockType } from "@/lib/stores/blocks/model/loose";
 import { cn } from "@/lib/utils";
-import type { DropEvent } from "@/routes/test/edit/blocks/primitives/Dnd";
 import { Bottom } from "@/routes/test/edit/blocks/primitives/connections/Bottom";
-import type { BottomConnection } from "@/routes/test/edit/blocks/primitives/connections/types";
+import type { Connection } from "@/routes/test/edit/blocks/primitives/connections/types";
 import { toBlockColorStyle, type BlockColor } from "@/routes/test/edit/blocks/primitives/types";
 import { css } from "@emotion/css";
-import type { ReactNode } from "react";
 
 const styles = {
   container: css`
@@ -14,27 +11,13 @@ const styles = {
   `,
 };
 
-interface CollectionProps<TBottom extends BlockType> {
+interface CollectionProps {
   owner: BlockType;
   color: BlockColor;
-  connection: BottomConnection<TBottom>;
-  children: ReactNode;
+  connection: Connection;
 }
 
-function Collection<TBottom extends BlockType>({
-  owner,
-  color,
-  connection,
-  children,
-}: CollectionProps<TBottom>) {
-  function handleDropped(ev: DropEvent<Block | null, TBottom>) {
-    connection.onDrop(ev.data.dropped);
-  }
-
-  function acceptsBlock(value: unknown): value is TBottom {
-    return !isTemplate(owner) && isBlock(value) && connection.accepts(value);
-  }
-
+function Collection({ owner, color, connection }: CollectionProps) {
   return (
     <div className="collection-root">
       <div className="select-none">
@@ -46,8 +29,7 @@ function Collection<TBottom extends BlockType>({
             )}
             style={toBlockColorStyle(color)}
           >
-            <Bottom accepts={acceptsBlock} data={owner} collection={true} onDrop={handleDropped} />
-            {children}
+            <Bottom owner={owner} connection={connection} />
           </div>
         </div>
       </div>

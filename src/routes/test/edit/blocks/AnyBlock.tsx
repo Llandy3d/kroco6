@@ -9,10 +9,14 @@ import { ScenarioBlock } from "@/routes/test/edit/blocks/ScenarioBlock";
 import { SleepBlock } from "@/routes/test/edit/blocks/SleepBlock";
 
 interface AnyBlockProps {
-  block: Block;
+  block: Block | null;
 }
 
 function AnyBlock({ block }: AnyBlockProps) {
+  if (block === null) {
+    return null;
+  }
+
   switch (block.type) {
     case "scenario":
       return <ScenarioBlock block={block} />;

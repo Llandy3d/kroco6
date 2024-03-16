@@ -96,4 +96,20 @@ function insertNext(test: Test, block: Chainable, next: StepBlock) {
   });
 }
 
-export { detachBlock, dropOnCanvas, insertNext, insertStep, updateBlock };
+function snapStepToBottom(target: StepBlock, step: StepBlock) {
+  function concat<T extends { next: T | null }>(current: T, newNext: T): T {
+    return {
+      ...current,
+      next: current.next !== null ? concat(current.next, newNext) : newNext,
+    };
+  }
+
+  const newStep = instantiate(step);
+
+  return {
+    ...detach(target, instantiate(newStep)),
+    next: target.next !== null ? concat(newStep, target.next) : newStep,
+  };
+}
+
+export { detachBlock, dropOnCanvas, insertNext, insertStep, snapStepToBottom, updateBlock };

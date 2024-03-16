@@ -1,13 +1,16 @@
 import type { Block } from "@/lib/stores/blocks/model/loose";
+import type { DropAction } from "@/routes/test/edit/blocks/dnd/types";
+import type { ReactNode } from "react";
 
 interface TopConnection {
   accepts: (value: Block) => boolean;
 }
 
-interface BottomConnection<T extends Block> {
-  block: T | null;
-  accepts: (value: Block) => value is T;
-  onDrop: (value: T) => void;
+interface Connection {
+  key: string;
+  node: ReactNode;
+  action: DropAction;
+  accepts: (value: unknown) => boolean;
 }
 
-export { type BottomConnection, type TopConnection };
+export { type Connection, type TopConnection };
