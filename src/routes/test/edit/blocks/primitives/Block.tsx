@@ -1,11 +1,10 @@
 import { isTemplate, type Block as BlockType } from "@/lib/stores/blocks/model/loose";
 import { cn } from "@/lib/utils";
+import { useDragging } from "@/routes/test/edit/blocks/dnd/Draggable";
 import { Bottom } from "@/routes/test/edit/blocks/primitives/connections/Bottom";
 import { Top } from "@/routes/test/edit/blocks/primitives/connections/Top";
 import type { Connection } from "@/routes/test/edit/blocks/primitives/connections/types";
 import { toBlockColorStyle, type BlockColor } from "@/routes/test/edit/blocks/primitives/types";
-import { useDraggable } from "@dnd-kit/core";
-import { CSS } from "@dnd-kit/utilities";
 import { css } from "@emotion/css";
 import type { KeyboardEvent } from "react";
 
@@ -15,7 +14,7 @@ const styles = {
     border-color: var(--block-bg-primary);
   `,
   dragging: css`
-    z-index: 1000;
+    opacity: 0.5;
 
     * {
       pointer-events: none;
@@ -43,12 +42,7 @@ function Block<TBlock extends BlockType>({
   children,
   onDelete,
 }: BlockProps<TBlock>) {
-  const { isDragging, listeners, attributes, transform, setNodeRef } = useDraggable({
-    id: block.id,
-    data: {
-      block,
-    },
-  });
+  const { isDragging, listeners, attributes, setNodeRef } = useDragging();
 
   function handleKeyPress(ev: KeyboardEvent<HTMLDivElement>) {
     if (ev.key === "Backspace" && onDelete) {
@@ -72,7 +66,6 @@ function Block<TBlock extends BlockType>({
         )}
         style={{
           ...toBlockColorStyle(color),
-          transform: CSS.Translate.toString(transform),
         }}
         onKeyUp={handleKeyPress}
         {...listeners}

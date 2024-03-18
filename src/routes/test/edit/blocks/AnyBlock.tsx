@@ -7,12 +7,14 @@ import { HttpRequestBlock } from "@/routes/test/edit/blocks/HttpRequestBlock";
 import { LibraryBlock } from "@/routes/test/edit/blocks/LibraryBlock";
 import { ScenarioBlock } from "@/routes/test/edit/blocks/ScenarioBlock";
 import { SleepBlock } from "@/routes/test/edit/blocks/SleepBlock";
+import { useDragEnabled } from "@/routes/test/edit/blocks/dnd/DragEnabled";
+import { Draggable } from "@/routes/test/edit/blocks/dnd/Draggable";
 
-interface AnyBlockProps {
-  block: Block | null;
+interface AnyBlockSwitchProps {
+  block: Block;
 }
 
-function AnyBlock({ block }: AnyBlockProps) {
+function AnyBlockSwitch({ block }: AnyBlockSwitchProps) {
   if (block === null) {
     return null;
   }
@@ -42,6 +44,28 @@ function AnyBlock({ block }: AnyBlockProps) {
     default:
       return <p>{exhaustive(block)}</p>;
   }
+}
+
+interface AnyBlockProps {
+  block: Block | null;
+}
+
+function AnyBlock({ block }: AnyBlockProps) {
+  const isDragEnabled = useDragEnabled();
+
+  if (block === null) {
+    return null;
+  }
+
+  if (isDragEnabled) {
+    return (
+      <Draggable block={block}>
+        <AnyBlockSwitch block={block} />
+      </Draggable>
+    );
+  }
+
+  return <AnyBlockSwitch block={block} />;
 }
 
 export { AnyBlock };

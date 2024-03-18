@@ -15,6 +15,7 @@ import type { DragData, DropAction, DropOnCanvasAction } from "@/routes/test/edi
 import { DndProvider } from "@/routes/test/edit/blocks/primitives/Dnd";
 import {
   DndContext,
+  DragOverlay,
   KeyboardSensor,
   MouseSensor,
   useDroppable,
@@ -22,10 +23,11 @@ import {
   useSensors,
   type DragEndEvent,
 } from "@dnd-kit/core";
-import type { MouseEvent } from "react";
+import { useState, type MouseEvent } from "react";
 
-import { instantiate } from "@/lib/stores/blocks/model/loose";
+import { instantiate, type Block } from "@/lib/stores/blocks/model/loose";
 import { exhaustive } from "@/lib/utils/typescript";
+import { DragEnabled } from "@/routes/test/edit/blocks/dnd/DragEnabled";
 import { css } from "@emotion/css";
 
 const interactiveElements = ["input", "button", "textarea", "select"];
@@ -100,12 +102,22 @@ function CanvasRoot() {
 function Canvas() {
   const setTest = useSetTest();
 
+  const [dragging, setDragging] = useState<Block | null>(null);
+
   const sensors = useSensors(
     useSensor(NonInteractiveMouseSensor, {}),
     useSensor(KeyboardSensor, {}),
   );
 
+  function handleDragStart({ active }: DragEndEvent) {
+    if (active.data.current) {
+      setDragging(active.data.current.block);
+    }
+  }
+
   function handleDragEnd({ active, over }: DragEndEvent) {
+    setDragging(null);
+
     if (over === null) {
       return;
     }
@@ -201,8 +213,13 @@ function Canvas() {
 
   return (
     <DndProvider>
-      <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
-        <CanvasRoot />
+      <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+        <DragEnabled>
+          <CanvasRoot />
+        </DragEnabled>
+        <DragOverlay dropAnimation={null}>
+          <AnyBlock block={dragging} />
+        </DragOverlay>
       </DndContext>
     </DndProvider>
   );
