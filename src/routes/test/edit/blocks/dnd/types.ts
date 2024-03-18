@@ -41,4 +41,9 @@ type DropAction =
   | AssignExecutorAction
   | AssignCheckTargetAction;
 
-export { type DragData, type DropAction, type DropOnCanvasAction };
+interface DropData {
+  kind: "bottom" | "inset" | "canvas";
+  action: DropAction;
+}
+
+export { type DragData, type DropAction, type DropData, type DropOnCanvasAction };

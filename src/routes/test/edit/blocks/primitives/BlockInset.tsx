@@ -1,6 +1,7 @@
 import { isTemplate, type Block as BlockType } from "@/lib/stores/blocks/model/loose";
 import { isDescendantOf } from "@/lib/stores/blocks/model/utils";
 import { cn } from "@/lib/utils";
+import type { DropData } from "@/routes/test/edit/blocks/dnd/types";
 import type { Connection } from "@/routes/test/edit/blocks/primitives/connections/types";
 import { toBlockColorStyle, type BlockColor } from "@/routes/test/edit/blocks/primitives/types";
 import { useDroppable } from "@dnd-kit/core";
@@ -29,7 +30,10 @@ interface BlockInsetProps {
 function BlockInset({ owner, color, connection }: BlockInsetProps) {
   const { isOver, active, setNodeRef } = useDroppable({
     id: `${owner.id}-${connection.key}`,
-    data: connection.action,
+    data: {
+      kind: "inset",
+      action: connection.action,
+    } satisfies DropData,
   });
 
   const block = active?.data.current?.block;
@@ -45,15 +49,18 @@ function BlockInset({ owner, color, connection }: BlockInsetProps) {
   return (
     <div className="inline-block flex-auto" style={toBlockColorStyle(color)}>
       <div
-        ref={setNodeRef}
         className={cn(
           styles.root,
-          "block-inset min-h-8 min-w-16 border-2 bg-white",
+          "block-inset relative min-h-8 min-w-16 border-2 bg-white",
           connection.connected && styles.connected,
           dropping && "bg-slate-400",
           dropping && styles.dropping,
         )}
       >
+        <div
+          ref={setNodeRef}
+          className={cn("absolute bottom-0 left-0 right-0 top-0 hidden", accepting && "block")}
+        ></div>
         {connection.node}
       </div>
     </div>

@@ -11,16 +11,19 @@ import { AnyBlock } from "@/routes/test/edit/blocks/AnyBlock";
 import { Root } from "@/routes/test/edit/blocks/Root";
 import { Toolbox } from "@/routes/test/edit/blocks/Toolbox";
 import { useSetTest, useTestValue } from "@/routes/test/edit/blocks/atoms";
-import type { DragData, DropAction, DropOnCanvasAction } from "@/routes/test/edit/blocks/dnd/types";
-import { DndProvider } from "@/routes/test/edit/blocks/primitives/Dnd";
+import type { DragData, DropData } from "@/routes/test/edit/blocks/dnd/types";
 import {
   DndContext,
   DragOverlay,
   KeyboardSensor,
   MouseSensor,
+  pointerWithin,
   useDroppable,
   useSensor,
   useSensors,
+  type ClientRect,
+  type Collision,
+  type CollisionDetection,
   type DragEndEvent,
 } from "@dnd-kit/core";
 import { useState, type MouseEvent } from "react";
@@ -73,8 +76,11 @@ function CanvasRoot() {
   const { setNodeRef } = useDroppable({
     id: "canvas",
     data: {
-      type: "drop-on-canvas",
-    } satisfies DropOnCanvasAction,
+      kind: "canvas",
+      action: {
+        type: "drop-on-canvas",
+      },
+    } satisfies DropData,
   });
 
   function handleClick() {}
@@ -98,6 +104,59 @@ function CanvasRoot() {
     </div>
   );
 }
+
+function isInRange(value: number, min: number, max: number) {
+  return value >= min && value <= max;
+}
+
+function isOverlappingHorizontally(left: ClientRect, right: ClientRect, toleranceX: number) {
+  return isInRange(left.left, right.left - toleranceX, right.right);
+}
+
+const collisionDetection: CollisionDetection = (args) => {
+  const collisions: Array<Collision & { difference: number }> = [];
+  const collisionRect = args.collisionRect;
+
+  const toleranceX = (args.pointerCoordinates?.x ?? 0) - collisionRect.left;
+  const toleranceY = (args.pointerCoordinates?.y ?? 0) - collisionRect.top;
+
+  for (const container of args.droppableContainers) {
+    const rect = args.droppableRects.get(container.id);
+
+    if (rect === undefined || collisionRect.top < rect.top - toleranceY) {
+      continue;
+    }
+
+    if (!isOverlappingHorizontally(collisionRect, rect, toleranceX)) {
+      continue;
+    }
+
+    const distance = collisionRect.top - rect.top;
+
+    if (distance > 16) {
+      continue;
+    }
+
+    collisions.push({
+      id: container.id,
+      data: container.data,
+      difference: distance,
+    });
+  }
+
+  const sorted: Collision[] = collisions.sort((a, b) => a.difference - b.difference);
+
+  const canvas = pointerWithin({
+    ...args,
+    droppableContainers: args.droppableContainers.filter(
+      (container) => container.data.current?.kind === "canvas",
+    ),
+  });
+
+  sorted.push(...canvas);
+
+  return collisions;
+};
 
 function Canvas() {
   const setTest = useSetTest();
@@ -126,8 +185,8 @@ function Canvas() {
       return;
     }
 
-    const action = over.data.current as DropAction;
-    const dropped = active.data.current as DragData;
+    const { action } = over.data.current as DropData;
+    const { block: dropped } = active.data.current as DragData;
 
     switch (action.type) {
       case "drop-on-canvas": {
@@ -135,7 +194,7 @@ function Canvas() {
           const activeTop = active.rect.current.translated?.top ?? 0;
           const activeLeft = active.rect.current.translated?.left ?? 0;
 
-          return dropOnCanvas(test, dropped.block, {
+          return dropOnCanvas(test, dropped, {
             top: Math.round(activeTop - over.rect.top),
             left: Math.round(activeLeft - over.rect.left),
           });
@@ -145,44 +204,38 @@ function Canvas() {
       }
 
       case "attach-step": {
-        const block = dropped.block;
-
-        if (!isStepBlock(block)) {
+        if (!isStepBlock(dropped)) {
           return;
         }
 
         setTest((test) => {
-          return insertNext(test, action.target, block);
+          return insertNext(test, action.target, dropped);
         });
 
         break;
       }
 
       case "attach-child": {
-        const block = dropped.block;
-
-        if (!isStepBlock(block)) {
+        if (!isStepBlock(dropped)) {
           return;
         }
 
         setTest((test) => {
-          return insertStep(test, action.target, block);
+          return insertStep(test, action.target, dropped);
         });
 
         break;
       }
 
       case "assign-executor": {
-        const block = dropped.block;
-
-        if (!isExecutorBlock(block)) {
+        if (!isExecutorBlock(dropped)) {
           return;
         }
 
         setTest((test) => {
-          return updateBlock(detachBlock(test, block), {
+          return updateBlock(detachBlock(test, dropped), {
             ...action.target,
-            executor: instantiate(block),
+            executor: instantiate(dropped),
           });
         });
 
@@ -190,16 +243,14 @@ function Canvas() {
       }
 
       case "assign-check-target": {
-        const block = dropped.block;
-
-        if (!isHttpRequestBlock(block)) {
+        if (!isHttpRequestBlock(dropped)) {
           return;
         }
 
         setTest((test) => {
-          return updateBlock(detachBlock(test, block), {
+          return updateBlock(detachBlock(test, dropped), {
             ...action.target,
-            target: instantiate(block),
+            target: instantiate(dropped),
           });
         });
 
@@ -212,16 +263,19 @@ function Canvas() {
   }
 
   return (
-    <DndProvider>
-      <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-        <DragEnabled>
-          <CanvasRoot />
-        </DragEnabled>
-        <DragOverlay dropAnimation={null}>
-          <AnyBlock block={dragging} />
-        </DragOverlay>
-      </DndContext>
-    </DndProvider>
+    <DndContext
+      sensors={sensors}
+      collisionDetection={collisionDetection}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+    >
+      <DragEnabled>
+        <CanvasRoot />
+      </DragEnabled>
+      <DragOverlay dropAnimation={null}>
+        <AnyBlock block={dragging} />
+      </DragOverlay>
+    </DndContext>
   );
 }
 

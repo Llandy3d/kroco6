@@ -1,6 +1,7 @@
 import { isTemplate, type Block } from "@/lib/stores/blocks/model/loose";
 import { isDescendantOf } from "@/lib/stores/blocks/model/utils";
 import { cn } from "@/lib/utils";
+import type { DropData } from "@/routes/test/edit/blocks/dnd/types";
 import type { Connection } from "@/routes/test/edit/blocks/primitives/connections/types";
 import { useDroppable } from "@dnd-kit/core";
 import { css } from "@emotion/css";
@@ -16,7 +17,6 @@ const styles = {
     svg {
       position: absolute;
       left: 40px;
-      /* top: 1px; */
       fill: var(--block-bg-primary);
     }
   `,
@@ -35,10 +35,13 @@ interface BottomProps {
 function Bottom({ owner, connection }: BottomProps) {
   const { active, isOver, setNodeRef } = useDroppable({
     id: `${owner.id}-${connection.key}`,
-    data: connection.action,
+    data: {
+      kind: "bottom",
+      action: connection.action,
+    } satisfies DropData,
   });
 
-  const block = active?.data.current?.block;
+  const block = active?.data.current?.block as Block;
 
   const accepting =
     block !== undefined &&
@@ -60,6 +63,7 @@ function Bottom({ owner, connection }: BottomProps) {
           ref={setNodeRef}
           className={cn("absolute w-full", dropping && styles.dropping)}
           style={{
+            display: accepting ? "block" : "none",
             height: accepting ? active?.rect.current.initial?.height : 0,
           }}
         ></div>
