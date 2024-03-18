@@ -65,6 +65,7 @@ function Bottom({ owner, connection }: BottomProps) {
           style={{
             display: accepting ? "block" : "none",
             height: accepting ? active?.rect.current.initial?.height : 0,
+            width: accepting ? active?.rect.current.initial?.width : 0,
           }}
         ></div>
       </div>

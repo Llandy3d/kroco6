@@ -14,7 +14,14 @@ const styles = {
     border-color: var(--block-bg-primary);
   `,
   dragging: css`
-    opacity: 0.5;
+    height: 0;
+    overflow: hidden;
+    outline: none;
+
+    &.template {
+      height: auto;
+      opacity: 0.5;
+    }
 
     * {
       pointer-events: none;
@@ -62,6 +69,7 @@ function Block<TBlock extends BlockType>({
           styles.root,
           "relative z-10 flex w-min flex-col outline-2 outline-indigo-500 focus:outline",
           isDragging && styles.dragging,
+          !isTemplate(block) && isDragging && "focus:outline-none",
           isTemplate(block) && "template",
         )}
         style={{
