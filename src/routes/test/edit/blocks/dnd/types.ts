@@ -1,4 +1,10 @@
-import type { Block, GroupBlock, ScenarioBlock, StepBlock } from "@/lib/stores/blocks/model/loose";
+import type {
+  Block,
+  CheckBlock,
+  GroupBlock,
+  ScenarioBlock,
+  StepBlock,
+} from "@/lib/stores/blocks/model/loose";
 
 interface DragData {
   block: Block;
@@ -18,6 +24,21 @@ interface AttachChildAction {
   target: ScenarioBlock | GroupBlock;
 }
 
-type DropAction = DropOnCanvasAction | AttachStepAction | AttachChildAction;
+interface AssignExecutorAction {
+  type: "assign-executor";
+  target: ScenarioBlock;
+}
+
+interface AssignCheckTargetAction {
+  type: "assign-check-target";
+  target: CheckBlock;
+}
+
+type DropAction =
+  | DropOnCanvasAction
+  | AttachStepAction
+  | AttachChildAction
+  | AssignExecutorAction
+  | AssignCheckTargetAction;
 
 export { type DragData, type DropAction, type DropOnCanvasAction };

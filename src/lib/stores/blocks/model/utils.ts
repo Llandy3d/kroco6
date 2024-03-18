@@ -221,4 +221,36 @@ function concat<T extends ChainableBlock>(left: T, right: Block): T {
   };
 }
 
-export { concat, detach, replace };
+function isDescendantOf(current: Block | null, target: Block): boolean {
+  if (current === null) {
+    return false;
+  }
+
+  if (current.id === target.id) {
+    return true;
+  }
+
+  switch (current.type) {
+    case "scenario":
+      return isDescendantOf(current.executor, target) || isDescendantOf(current.step, target);
+
+    case "group":
+      return isDescendantOf(current.step, target) || isDescendantOf(current.next, target);
+
+    case "check":
+      return isDescendantOf(current.next, target) || isDescendantOf(current.target, target);
+
+    case "sleep":
+    case "http-request":
+    case "library":
+      return isDescendantOf(current.next, target);
+
+    case "executor":
+      return current.id === target.id;
+
+    default:
+      return exhaustive(current);
+  }
+}
+
+export { concat, detach, isDescendantOf, replace };

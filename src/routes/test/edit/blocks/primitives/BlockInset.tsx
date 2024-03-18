@@ -1,11 +1,10 @@
 import { isTemplate, type Block as BlockType } from "@/lib/stores/blocks/model/loose";
-import { isBlock } from "@/lib/stores/blocks/utils";
+import { isDescendantOf } from "@/lib/stores/blocks/model/utils";
 import { cn } from "@/lib/utils";
-import { useDrop } from "@/routes/test/edit/blocks/primitives/Dnd";
-import type { BottomConnection } from "@/routes/test/edit/blocks/primitives/connections/types";
+import type { Connection } from "@/routes/test/edit/blocks/primitives/connections/types";
 import { toBlockColorStyle, type BlockColor } from "@/routes/test/edit/blocks/primitives/types";
+import { useDroppable } from "@dnd-kit/core";
 import { css } from "@emotion/css";
-import type { ReactNode } from "react";
 
 const styles = {
   root: css`
@@ -21,47 +20,41 @@ const styles = {
   `,
 };
 
-interface BlockInsetProps<TTarget extends BlockType> {
+interface BlockInsetProps {
   owner: BlockType;
   color: BlockColor;
-  connection: BottomConnection<TTarget>;
-  children: ReactNode;
+  connection: Connection;
 }
 
-function BlockInset<TTarget extends BlockType>({
-  owner,
-  color,
-  connection,
-  children,
-}: BlockInsetProps<TTarget>) {
-  const { setDropRef, dropping, events } = useDrop({
-    data: owner,
-    accepts,
-    onDrop: (ev) => {
-      connection.onDrop(ev.data.dropped);
-    },
+function BlockInset({ owner, color, connection }: BlockInsetProps) {
+  const { isOver, active, setNodeRef } = useDroppable({
+    id: `${owner.id}-${connection.key}`,
+    data: connection.action,
   });
 
-  function accepts(value: unknown): value is TTarget {
-    console.log("accepts", value);
+  const block = active?.data.current?.block;
 
-    return !isTemplate(owner) && isBlock(value) && connection.accepts(value);
-  }
+  const accepting =
+    block !== undefined &&
+    !isTemplate(owner) &&
+    !isDescendantOf(block, owner) &&
+    connection.accepts(block);
+
+  const dropping = accepting && isOver;
 
   return (
     <div className="inline-block flex-auto" style={toBlockColorStyle(color)}>
       <div
-        ref={setDropRef}
+        ref={setNodeRef}
         className={cn(
           styles.root,
           "block-inset min-h-8 min-w-16 border-2 bg-white",
+          connection.connected && styles.connected,
           dropping && "bg-slate-400",
           dropping && styles.dropping,
-          connection.block !== null && styles.connected,
         )}
-        {...events}
       >
-        {children}
+        {connection.node}
       </div>
     </div>
   );

@@ -30,6 +30,7 @@ export function LibraryBlock({ block }: LibraryBlockProps) {
         key: `next`,
         node: <AnyBlock block={block.next} />,
         action: { type: "attach-step", target: block },
+        connected: block.next !== null,
         accepts: isStepBlock,
       }}
       onDelete={handleDelete}

@@ -1,5 +1,11 @@
-import { dropOnCanvas, insertNext, insertStep } from "@/lib/stores/blocks";
-import { isStepBlock } from "@/lib/stores/blocks/utils";
+import {
+  detachBlock,
+  dropOnCanvas,
+  insertNext,
+  insertStep,
+  updateBlock,
+} from "@/lib/stores/blocks";
+import { isExecutorBlock, isHttpRequestBlock, isStepBlock } from "@/lib/stores/blocks/utils";
 import { cn } from "@/lib/utils";
 import { AnyBlock } from "@/routes/test/edit/blocks/AnyBlock";
 import { Root } from "@/routes/test/edit/blocks/Root";
@@ -7,9 +13,39 @@ import { Toolbox } from "@/routes/test/edit/blocks/Toolbox";
 import { useSetTest, useTestValue } from "@/routes/test/edit/blocks/atoms";
 import type { DragData, DropAction, DropOnCanvasAction } from "@/routes/test/edit/blocks/dnd/types";
 import { DndProvider } from "@/routes/test/edit/blocks/primitives/Dnd";
-import { DndContext, useDroppable, type DragEndEvent } from "@dnd-kit/core";
+import {
+  DndContext,
+  KeyboardSensor,
+  MouseSensor,
+  useDroppable,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import type { MouseEvent } from "react";
 
+import { instantiate } from "@/lib/stores/blocks/model/loose";
+import { exhaustive } from "@/lib/utils/typescript";
 import { css } from "@emotion/css";
+
+const interactiveElements = ["input", "button", "textarea", "select"];
+
+class NonInteractiveMouseSensor extends MouseSensor {
+  static activators = [
+    {
+      eventName: "onMouseDown" as const,
+      handler({ nativeEvent: event }: MouseEvent) {
+        if (event.target instanceof HTMLElement) {
+          return (
+            event.button === 0 && !interactiveElements.includes(event.target.tagName.toLowerCase())
+          );
+        }
+
+        return true;
+      },
+    },
+  ];
+}
 
 const styles = {
   grid: css`
@@ -64,6 +100,11 @@ function CanvasRoot() {
 function Canvas() {
   const setTest = useSetTest();
 
+  const sensors = useSensors(
+    useSensor(NonInteractiveMouseSensor, {}),
+    useSensor(KeyboardSensor, {}),
+  );
+
   function handleDragEnd({ active, over }: DragEndEvent) {
     if (over === null) {
       return;
@@ -83,8 +124,8 @@ function Canvas() {
           const activeLeft = active.rect.current.translated?.left ?? 0;
 
           return dropOnCanvas(test, dropped.block, {
-            top: activeTop - over.rect.top,
-            left: activeLeft - over.rect.left,
+            top: Math.round(activeTop - over.rect.top),
+            left: Math.round(activeLeft - over.rect.left),
           });
         });
 
@@ -118,12 +159,49 @@ function Canvas() {
 
         break;
       }
+
+      case "assign-executor": {
+        const block = dropped.block;
+
+        if (!isExecutorBlock(block)) {
+          return;
+        }
+
+        setTest((test) => {
+          return updateBlock(detachBlock(test, block), {
+            ...action.target,
+            executor: instantiate(block),
+          });
+        });
+
+        break;
+      }
+
+      case "assign-check-target": {
+        const block = dropped.block;
+
+        if (!isHttpRequestBlock(block)) {
+          return;
+        }
+
+        setTest((test) => {
+          return updateBlock(detachBlock(test, block), {
+            ...action.target,
+            target: instantiate(block),
+          });
+        });
+
+        break;
+      }
+
+      default:
+        return exhaustive(action);
     }
   }
 
   return (
     <DndProvider>
-      <DndContext onDragEnd={handleDragEnd}>
+      <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
         <CanvasRoot />
       </DndContext>
     </DndProvider>

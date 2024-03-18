@@ -1,9 +1,5 @@
 import { detachBlock, updateBlock } from "@/lib/stores/blocks";
-import type {
-  Block as BlockType,
-  ScenarioBlock as ScenarioBlockType,
-} from "@/lib/stores/blocks/model/loose";
-import { detach } from "@/lib/stores/blocks/model/utils";
+import type { ScenarioBlock as ScenarioBlockType } from "@/lib/stores/blocks/model/loose";
 import { isExecutorBlock, isStepBlock } from "@/lib/stores/blocks/utils";
 import { AnyBlock } from "@/routes/test/edit/blocks/AnyBlock";
 import { useSetTest } from "@/routes/test/edit/blocks/atoms";
@@ -30,19 +26,6 @@ function ScenarioBlock({ block }: ScenarioBlockProps) {
     );
   }
 
-  function handleExecutorDrop(executor: BlockType) {
-    if (!isExecutorBlock(executor)) {
-      return;
-    }
-
-    setTest((test) =>
-      updateBlock(detachBlock(test, executor), {
-        ...detach(block, executor),
-        executor,
-      }),
-    );
-  }
-
   function handleDelete() {
     // TODO: put executor and step blocks on canvas
     setTest((test) => {
@@ -64,13 +47,16 @@ function ScenarioBlock({ block }: ScenarioBlockProps) {
           owner={block}
           color={EXECUTOR_COLOR}
           connection={{
-            block: block.executor,
+            key: "executor",
+            node: <AnyBlock block={block.executor} />,
+            action: {
+              type: "assign-executor",
+              target: block,
+            },
+            connected: block.executor !== null,
             accepts: isExecutorBlock,
-            onDrop: handleExecutorDrop,
           }}
-        >
-          {block.executor && <AnyBlock block={block.executor} />}
-        </BlockInset>
+        />
       </Field>
       <Field>and do the following:</Field>
       <Collection
@@ -79,11 +65,12 @@ function ScenarioBlock({ block }: ScenarioBlockProps) {
         connection={{
           key: `child`,
           node: <AnyBlock block={block.step} />,
-          accepts: isStepBlock,
           action: {
             type: "attach-child",
             target: block,
           },
+          connected: block.step !== null,
+          accepts: isStepBlock,
         }}
       />
     </Block>

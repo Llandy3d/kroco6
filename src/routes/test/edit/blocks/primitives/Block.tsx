@@ -1,4 +1,4 @@
-import type { Block as BlockType } from "@/lib/stores/blocks/model/loose";
+import { isTemplate, type Block as BlockType } from "@/lib/stores/blocks/model/loose";
 import { cn } from "@/lib/utils";
 import { Bottom } from "@/routes/test/edit/blocks/primitives/connections/Bottom";
 import { Top } from "@/routes/test/edit/blocks/primitives/connections/Top";
@@ -68,6 +68,7 @@ function Block<TBlock extends BlockType>({
           styles.root,
           "relative z-10 flex w-min flex-col outline-2 outline-indigo-500 focus:outline",
           isDragging && styles.dragging,
+          isTemplate(block) && "template",
         )}
         style={{
           ...toBlockColorStyle(color),

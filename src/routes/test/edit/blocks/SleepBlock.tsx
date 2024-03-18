@@ -37,12 +37,12 @@ function SleepBlock({ block }: SleepBlockProps) {
       top={true}
       bottom={{
         key: `next`,
-        owner: block,
         node: <AnyBlock block={block.next} />,
         action: {
           type: "attach-step",
           target: block,
         },
+        connected: block.next !== null,
         accepts: isStepBlock,
       }}
       onDelete={handleDelete}

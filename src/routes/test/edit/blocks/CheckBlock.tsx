@@ -1,11 +1,6 @@
 import { detachBlock, updateBlock } from "@/lib/stores/blocks";
-import {
-  instantiate,
-  type Block as BlockType,
-  type CheckBlock as CheckBlockType,
-} from "@/lib/stores/blocks/model/loose";
+import { type CheckBlock as CheckBlockType } from "@/lib/stores/blocks/model/loose";
 import type { Check } from "@/lib/stores/blocks/model/strict";
-import { detach } from "@/lib/stores/blocks/model/utils";
 import { isHttpRequestBlock, isStepBlock } from "@/lib/stores/blocks/utils";
 import { AnyBlock } from "@/routes/test/edit/blocks/AnyBlock";
 import { CheckInput } from "@/routes/test/edit/blocks/CheckInput";
@@ -57,19 +52,6 @@ function CheckBlock({ block }: CheckBlockProps) {
     );
   }
 
-  function handleTargetDrop(target: BlockType) {
-    if (!isHttpRequestBlock(target)) {
-      return;
-    }
-
-    setTest((test) => {
-      return updateBlock(detachBlock(test, target), {
-        ...detach(block, target),
-        target: instantiate(target),
-      });
-    });
-  }
-
   function handleDelete() {
     setTest((test) => {
       return detachBlock(test, block);
@@ -85,6 +67,7 @@ function CheckBlock({ block }: CheckBlockProps) {
         key: `next`,
         node: <AnyBlock block={block.next} />,
         action: { type: "attach-step", target: block },
+        connected: block.next !== null,
         accepts: isStepBlock,
       }}
       onDelete={handleDelete}
@@ -95,13 +78,16 @@ function CheckBlock({ block }: CheckBlockProps) {
           owner={block}
           color={STEP_COLOR}
           connection={{
-            block: block.target,
+            key: "target",
+            node: <AnyBlock block={block.target} />,
+            action: {
+              type: "assign-check-target",
+              target: block,
+            },
+            connected: block.target !== null,
             accepts: isHttpRequestBlock,
-            onDrop: handleTargetDrop,
           }}
-        >
-          {block.target && <AnyBlock block={block.target} />}
-        </BlockInset>
+        />
       </Field>
       {block.checks.map((check) => {
         return (
