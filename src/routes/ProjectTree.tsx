@@ -27,6 +27,7 @@ function loadFile(path: string, content: string): VirtualFile | null {
         filePath: path,
         original: content,
       },
+      script: content,
     };
   }
 
@@ -155,7 +156,7 @@ function FileNode({ node, entry }: NodeRendererProps<TreeItem> & { entry: FileIt
     );
 
     if (existingFile !== undefined) {
-      setCurrentFile(existingFile);
+      setCurrentFile(existingFile.handle);
 
       return;
     }
@@ -175,7 +176,7 @@ function FileNode({ node, entry }: NodeRendererProps<TreeItem> & { entry: FileIt
         }
 
         setOpenFiles((files) => [...files, file]);
-        setCurrentFile(file);
+        setCurrentFile(file.handle);
       })
       .catch(console.error);
   }

@@ -228,6 +228,8 @@ const block = union([
 
 type Block = Output<typeof block>;
 
+type Chainable = Extract<Block, ChainableBlock>;
+
 const root = object({
   type: literal("root"),
   top: number(),
@@ -283,6 +285,7 @@ export {
   isTemplate,
   parse,
   type Block,
+  type Chainable,
   type ChainableBlock,
   type Check,
   type CheckBlock,

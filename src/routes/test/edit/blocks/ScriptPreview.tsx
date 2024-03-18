@@ -1,15 +1,17 @@
 import { convertToScript } from "@/lib/stores/blocks/convert";
+import type { Test } from "@/lib/stores/blocks/model/loose";
 import { EMPTY_ENVIRONMENT } from "@/lib/stores/projects";
-import { useTestValue } from "@/routes/test/edit/blocks/atoms";
 import { useEffect, useState } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneLight as theme } from "react-syntax-highlighter/dist/esm/styles/prism";
 
-function ScriptPreview() {
+interface ScriptPreviewProps {
+  test: Test;
+}
+
+function ScriptPreview({ test }: ScriptPreviewProps) {
   const [error, setError] = useState<unknown>(null);
   const [script, setScript] = useState<string>("");
-
-  const test = useTestValue();
 
   useEffect(() => {
     const env = EMPTY_ENVIRONMENT;

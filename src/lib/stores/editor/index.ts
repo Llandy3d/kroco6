@@ -26,6 +26,7 @@ interface BlockFile extends OpenFileBase {
 
 interface ScriptFile extends OpenFileBase {
   type: "script";
+  script: string;
 }
 
 type VirtualFile = BlockFile | ScriptFile;

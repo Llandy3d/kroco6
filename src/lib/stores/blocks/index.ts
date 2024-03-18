@@ -70,16 +70,17 @@ function updateBlock(test: Test, block: Block) {
   return { ...test, roots };
 }
 
-function insertStep(test: Test, block: ScenarioBlock | GroupBlock, step: StepBlock) {
+function insertChild(test: Test, block: ScenarioBlock | GroupBlock, step: StepBlock) {
   if (step.id === block.step?.id) {
     return test;
   }
 
   const newStep = instantiate(step);
+  const newBlock = detach(block, step);
 
   return updateBlock(detachBlock(test, step), {
-    ...detach(block, step),
-    step: block.step !== null ? concat(newStep, block.step) : newStep,
+    ...newBlock,
+    step: newBlock.step !== null ? concat(newStep, newBlock.step) : newStep,
   });
 }
 
@@ -89,10 +90,11 @@ function insertNext(test: Test, block: Chainable, next: StepBlock) {
   }
 
   const newNext = instantiate(next);
+  const newBlock = detach(block, next);
 
   return updateBlock(detachBlock(test, next), {
-    ...detach(block, next),
-    next: block.next !== null ? concat(newNext, block.next) : newNext,
+    ...newBlock,
+    next: newBlock.next !== null ? concat(newNext, newBlock.next) : newNext,
   });
 }
 
@@ -112,4 +114,4 @@ function snapStepToBottom(target: StepBlock, step: StepBlock) {
   };
 }
 
-export { detachBlock, dropOnCanvas, insertNext, insertStep, snapStepToBottom, updateBlock };
+export { detachBlock, dropOnCanvas, insertChild, insertNext, snapStepToBottom, updateBlock };

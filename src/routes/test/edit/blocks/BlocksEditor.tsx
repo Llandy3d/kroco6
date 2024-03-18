@@ -10,17 +10,16 @@ import {
   type ProjectConfig,
 } from "@/lib/backend-client";
 import { convertToScript } from "@/lib/stores/blocks/convert";
+import type { Test } from "@/lib/stores/blocks/model/loose";
 import type { BlockFile } from "@/lib/stores/editor";
 import { EMPTY_ENVIRONMENT } from "@/lib/stores/projects";
 import { useSetCurrentFile, useSetOpenFiles } from "@/routes/test/edit/atoms";
 import { Canvas } from "@/routes/test/edit/blocks/Canvas";
 import { ScriptPreview } from "@/routes/test/edit/blocks/ScriptPreview";
-import { useTest } from "@/routes/test/edit/blocks/atoms";
 import { Library } from "@/routes/test/edit/blocks/library/Library";
-import { Provider } from "jotai";
 import { Book, Code, Layers, ScrollText } from "lucide-react";
 import type { OpenAPIV3 } from "openapi-types";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { TestToolbar } from "../TestToolbar";
 import { TabButton } from "./TabButton";
 
@@ -28,12 +27,12 @@ interface BlocksEditorProps {
   file: BlockFile;
   project: Project;
   environment: Environment | null;
+  onChange: (file: BlockFile) => void;
 }
 
-function BlocksEditorContainer({ file, project, environment }: BlocksEditorProps) {
+function BlocksEditorContainer({ file, project, environment, onChange }: BlocksEditorProps) {
   const { toast } = useToast();
 
-  const [test, setTest] = useTest();
   const [tab, setTab] = useState("build");
   const [running, setRunning] = useState(false);
 
@@ -44,7 +43,7 @@ function BlocksEditorContainer({ file, project, environment }: BlocksEditorProps
     try {
       setRunning(true);
 
-      const script = await convertToScript(environment ?? EMPTY_ENVIRONMENT, test);
+      const script = await convertToScript(environment ?? EMPTY_ENVIRONMENT, file.blocks);
       const response = await runScriptLocally(script);
 
       console.log(response);
@@ -69,7 +68,7 @@ function BlocksEditorContainer({ file, project, environment }: BlocksEditorProps
     try {
       setRunning(true);
 
-      const script = await convertToScript(environment, test);
+      const script = await convertToScript(environment, file.blocks);
       const results = await runScriptInCloud({
         script,
         projectId: config.cloud_project_id,
@@ -103,7 +102,7 @@ function BlocksEditorContainer({ file, project, environment }: BlocksEditorProps
   }
 
   async function handleSaveTest() {
-    saveFile(file, JSON.stringify(test)).then((savedFile) => {
+    saveFile(file, JSON.stringify(file.blocks)).then((savedFile) => {
       setOpenFiles((files) =>
         files.map((file) => (file.handle === savedFile.handle ? savedFile : file)),
       );
@@ -112,16 +111,22 @@ function BlocksEditorContainer({ file, project, environment }: BlocksEditorProps
     });
   }
 
-  function handleLibraryChange(library: OpenAPIV3.Document) {
-    setTest({
-      ...test,
-      library,
+  function handleTestChange(test: Test) {
+    onChange({
+      ...file,
+      blocks: test,
     });
   }
 
-  useEffect(() => {
-    setTest(file.blocks);
-  }, [file]);
+  function handleLibraryChange(library: OpenAPIV3.Document) {
+    onChange({
+      ...file,
+      blocks: {
+        ...file.blocks,
+        library,
+      },
+    });
+  }
 
   // onMount(() => {
   //   let content = file.path.type === "new" ? file.path.initial : file.path.original;
@@ -178,25 +183,28 @@ function BlocksEditorContainer({ file, project, environment }: BlocksEditorProps
           onRunInCloud={runTestInCloud}
           onSave={handleSaveTest}
         />
-        <TabsContent value="build" className="flex-auto">
-          <Canvas />
+        <TabsContent value="build" className="mt-0 flex-auto">
+          <Canvas test={file.blocks} onChange={handleTestChange} />
         </TabsContent>
         <TabsContent value="library" className="mt-0 flex-auto">
-          <Library library={test.library} onChange={handleLibraryChange} />
+          <Library library={file.blocks.library} onChange={handleLibraryChange} />
         </TabsContent>
-        <TabsContent value="script" className="flex-auto">
-          <ScriptPreview />
+        <TabsContent value="script" className="mt-0 flex-auto">
+          <ScriptPreview test={file.blocks} />
         </TabsContent>
       </Tabs>
     </div>
   );
 }
 
-function BlocksEditor({ file, project, environment }: BlocksEditorProps) {
+function BlocksEditor({ file, project, environment, onChange }: BlocksEditorProps) {
   return (
-    <Provider>
-      <BlocksEditorContainer file={file} project={project} environment={environment} />
-    </Provider>
+    <BlocksEditorContainer
+      file={file}
+      project={project}
+      environment={environment}
+      onChange={onChange}
+    />
   );
 }
 

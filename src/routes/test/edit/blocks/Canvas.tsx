@@ -1,8 +1,8 @@
 import {
   detachBlock,
   dropOnCanvas,
+  insertChild,
   insertNext,
-  insertStep,
   updateBlock,
 } from "@/lib/stores/blocks";
 import { isExecutorBlock, isHttpRequestBlock, isStepBlock } from "@/lib/stores/blocks/utils";
@@ -10,7 +10,6 @@ import { cn } from "@/lib/utils";
 import { AnyBlock } from "@/routes/test/edit/blocks/AnyBlock";
 import { Root } from "@/routes/test/edit/blocks/Root";
 import { Toolbox } from "@/routes/test/edit/blocks/Toolbox";
-import { useSetTest, useTestValue } from "@/routes/test/edit/blocks/atoms";
 import type { DragData, DropData } from "@/routes/test/edit/blocks/dnd/types";
 import {
   DndContext,
@@ -28,7 +27,7 @@ import {
 } from "@dnd-kit/core";
 import { useState, type MouseEvent } from "react";
 
-import { instantiate, type Block } from "@/lib/stores/blocks/model/loose";
+import { instantiate, type Block, type Test } from "@/lib/stores/blocks/model/loose";
 import { detach } from "@/lib/stores/blocks/model/utils";
 import { exhaustive } from "@/lib/utils/typescript";
 import { DragEnabled } from "@/routes/test/edit/blocks/dnd/DragEnabled";
@@ -71,9 +70,11 @@ const styles = {
   `,
 };
 
-function CanvasRoot() {
-  const test = useTestValue();
+interface CanvasRootProps {
+  test: Test;
+}
 
+function CanvasRoot({ test }: CanvasRootProps) {
   const { setNodeRef } = useDroppable({
     id: "canvas",
     data: {
@@ -159,9 +160,12 @@ const collisionDetection: CollisionDetection = (args) => {
   return collisions;
 };
 
-function Canvas() {
-  const setTest = useSetTest();
+interface CanvasProps {
+  test: Test;
+  onChange: (test: Test) => void;
+}
 
+function Canvas({ test, onChange }: CanvasProps) {
   const [dragging, setDragging] = useState<Block | null>(null);
 
   const sensors = useSensors(
@@ -191,15 +195,15 @@ function Canvas() {
 
     switch (action.type) {
       case "drop-on-canvas": {
-        setTest((test) => {
-          const activeTop = active.rect.current.translated?.top ?? 0;
-          const activeLeft = active.rect.current.translated?.left ?? 0;
+        const activeTop = active.rect.current.translated?.top ?? 0;
+        const activeLeft = active.rect.current.translated?.left ?? 0;
 
-          return dropOnCanvas(test, dropped, {
+        onChange(
+          dropOnCanvas(test, dropped, {
             top: Math.round(activeTop - over.rect.top),
             left: Math.round(activeLeft - over.rect.left),
-          });
-        });
+          }),
+        );
 
         break;
       }
@@ -209,9 +213,7 @@ function Canvas() {
           return;
         }
 
-        setTest((test) => {
-          return insertNext(test, action.target, dropped);
-        });
+        onChange(insertNext(test, action.target, dropped));
 
         break;
       }
@@ -221,9 +223,7 @@ function Canvas() {
           return;
         }
 
-        setTest((test) => {
-          return insertStep(test, action.target, dropped);
-        });
+        onChange(insertChild(test, action.target, dropped));
 
         break;
       }
@@ -233,12 +233,12 @@ function Canvas() {
           return;
         }
 
-        setTest((test) => {
-          return updateBlock(detachBlock(test, dropped), {
+        onChange(
+          updateBlock(detachBlock(test, dropped), {
             ...detach(action.target, dropped),
             executor: instantiate(dropped),
-          });
-        });
+          }),
+        );
 
         break;
       }
@@ -248,12 +248,12 @@ function Canvas() {
           return;
         }
 
-        setTest((test) => {
-          return updateBlock(detachBlock(test, dropped), {
+        onChange(
+          updateBlock(detachBlock(test, dropped), {
             ...detach(action.target, dropped),
             target: instantiate(dropped),
-          });
-        });
+          }),
+        );
 
         break;
       }
@@ -271,7 +271,7 @@ function Canvas() {
       onDragEnd={handleDragEnd}
     >
       <DragEnabled>
-        <CanvasRoot />
+        <CanvasRoot test={test} />
       </DragEnabled>
       <DragOverlay dropAnimation={null}>
         <AnyBlock block={dragging} />

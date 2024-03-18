@@ -6,11 +6,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Project } from "@/lib/backend-client";
+import { NEW_SCRIPT } from "@/lib/files";
 import { EMPTY_BLOCK_TEST } from "@/lib/stores/blocks/constants";
 import type { BlockFile, VirtualFile } from "@/lib/stores/editor";
 import { exhaustive } from "@/lib/utils/typescript";
 import { useCurrentFile, useOpenFiles } from "@/routes/test/edit/atoms";
-import { PlusIcon, X } from "lucide-react";
+import { Box, FileCode, PlusIcon, X } from "lucide-react";
 import { nanoid } from "nanoid";
 import { forwardRef, type HTMLAttributes } from "react";
 import { EmptyEditor } from "./EmptyEditor";
@@ -46,15 +47,16 @@ const TabButton = forwardRef<HTMLDivElement, TabButtonProps>(function TabButton(
 interface TestEditorProps {
   file: VirtualFile;
   project: Project;
+  onChange: (file: VirtualFile) => void;
 }
 
-function TestEditor({ file, project }: TestEditorProps) {
+function TestEditor({ file, project, onChange }: TestEditorProps) {
   switch (file.type) {
     case "script":
-      return <ScriptEditor file={file} project={project} />;
+      return <ScriptEditor file={file} project={project} onChange={onChange} />;
 
     case "blocks":
-      return <BlocksEditor file={file} project={project} environment={null} />;
+      return <BlocksEditor file={file} project={project} environment={null} onChange={onChange} />;
 
     default:
       return exhaustive(file);
@@ -103,12 +105,17 @@ function Editor({ project }: EditorProps) {
       handle: nanoid(),
       path: {
         type: "new",
-        initial: "",
+        initial: NEW_SCRIPT,
       },
+      script: NEW_SCRIPT,
     };
 
     setOpenFiles([...openFiles, newFile]);
     setCurrentFile(newFile.handle);
+  }
+
+  function handleFileChange(file: VirtualFile) {
+    setOpenFiles(openFiles.map((current) => (current.handle === file.handle ? file : current)));
   }
 
   return (
@@ -122,6 +129,7 @@ function Editor({ project }: EditorProps) {
           return (
             <TabsTrigger asChild key={file.handle} value={file.handle}>
               <TabButton onClose={() => handleClose(file)}>
+                {file.type === "blocks" ? <Box size={14} /> : <FileCode size={14} />}
                 {file.name}
                 {file.path.type === "new" && "*"}
               </TabButton>
@@ -140,14 +148,14 @@ function Editor({ project }: EditorProps) {
       </TabsList>
       {openFiles.map((file) => {
         return (
-          <TabsContent key={file.handle} value={file.handle} className="flex-auto bg-white">
+          <TabsContent key={file.handle} value={file.handle} className="mt-0 flex-auto bg-white">
             <div className="border-[1px] border-[#F2F1F5] flex h-full flex-col">
-              <TestEditor file={file} project={project} />
+              <TestEditor file={file} project={project} onChange={handleFileChange} />
             </div>
           </TabsContent>
         );
       })}
-      <TabsContent value="empty" className="flex-auto bg-white">
+      <TabsContent value="empty" className="mt-0 flex-auto bg-white">
         <div className="border-[1px] border-[#F2F1F5] flex h-full flex-col">
           <EmptyEditor onNewBlocks={handleNewBlocksFile} onNewScript={handleNewScriptFile} />
         </div>

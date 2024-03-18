@@ -9,23 +9,21 @@ import {
 import type { ScriptFile, VirtualFile } from "@/lib/stores/editor";
 import { useSetCurrentFile, useSetOpenFiles } from "@/routes/test/edit/atoms";
 import * as monaco from "monaco-editor";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { TestToolbar } from "./TestToolbar";
 
 interface ScriptEditorProps {
   file: ScriptFile;
   project: Project;
+  onChange: (file: ScriptFile) => void;
 }
 
-function ScriptEditor({ file, project }: ScriptEditorProps) {
+function ScriptEditor({ file, project, onChange }: ScriptEditorProps) {
   const { toast } = useToast();
 
   const editor = useRef<monaco.editor.IStandaloneCodeEditor>();
 
   const [running, setRunning] = useState(false);
-  const [script, setScript] = useState(
-    file.path.type === "existing" ? file.path.original : file.path.initial,
-  );
 
   const setOpenFiles = useSetOpenFiles();
   const setCurrentFile = useSetCurrentFile();
@@ -34,7 +32,7 @@ function ScriptEditor({ file, project }: ScriptEditorProps) {
     try {
       setRunning(true);
 
-      const response = await runScriptLocally(script);
+      const response = await runScriptLocally(file.script);
 
       console.log(response);
     } catch (error) {
@@ -48,7 +46,10 @@ function ScriptEditor({ file, project }: ScriptEditorProps) {
     try {
       setRunning(true);
 
-      const results = await runScriptInCloud({ script, projectId: config.cloud_project_id });
+      const results = await runScriptInCloud({
+        script: file.script,
+        projectId: config.cloud_project_id,
+      });
 
       open(results);
     } catch (error) {
@@ -64,7 +65,7 @@ function ScriptEditor({ file, project }: ScriptEditorProps) {
   }
 
   async function handleSaveTest(file: VirtualFile) {
-    saveFile(file, script).then((savedFile) => {
+    saveFile(file, file.type === "script" ? file.script : "").then((savedFile) => {
       setOpenFiles((files) =>
         files.map((file) => (file.handle === savedFile.handle ? savedFile : file)),
       );
@@ -79,23 +80,18 @@ function ScriptEditor({ file, project }: ScriptEditorProps) {
     }
 
     editor.current = monaco.editor.create(container, {
-      value: script,
+      value: file.path.type === "existing" ? file.path.original : file.path.initial,
       language: "javascript",
       automaticLayout: true,
     });
 
     editor.current.onDidChangeModelContent(() => {
-      setScript(editor.current?.getValue() ?? "");
+      onChange({
+        ...file,
+        script: editor.current?.getValue() ?? "",
+      });
     });
   }
-
-  useEffect(() => {
-    if (editor.current === undefined) {
-      return;
-    }
-
-    editor.current.setValue(file.path.type === "existing" ? file.path.original : file.path.initial);
-  }, [file]);
 
   return (
     <div className="flex flex-auto flex-col bg-white">
