@@ -29,6 +29,7 @@ import {
 import { useState, type MouseEvent } from "react";
 
 import { instantiate, type Block } from "@/lib/stores/blocks/model/loose";
+import { detach } from "@/lib/stores/blocks/model/utils";
 import { exhaustive } from "@/lib/utils/typescript";
 import { DragEnabled } from "@/routes/test/edit/blocks/dnd/DragEnabled";
 import { css } from "@emotion/css";
@@ -234,7 +235,7 @@ function Canvas() {
 
         setTest((test) => {
           return updateBlock(detachBlock(test, dropped), {
-            ...action.target,
+            ...detach(action.target, dropped),
             executor: instantiate(dropped),
           });
         });
@@ -249,7 +250,7 @@ function Canvas() {
 
         setTest((test) => {
           return updateBlock(detachBlock(test, dropped), {
-            ...action.target,
+            ...detach(action.target, dropped),
             target: instantiate(dropped),
           });
         });
