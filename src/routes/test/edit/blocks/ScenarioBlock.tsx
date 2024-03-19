@@ -53,7 +53,7 @@ function ScenarioBlock({ block }: ScenarioBlockProps) {
               type: "assign-executor",
               target: block,
             },
-            connected: block.executor !== null,
+            connected: block.executor,
             accepts: isExecutorBlock,
           }}
         />
@@ -69,7 +69,7 @@ function ScenarioBlock({ block }: ScenarioBlockProps) {
             type: "attach-child",
             target: block,
           },
-          connected: block.step !== null,
+          connected: block.step,
           accepts: isStepBlock,
         }}
       />

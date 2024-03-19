@@ -55,7 +55,7 @@ function HttpRequestBlock({ block }: HttpRequestBlockProps) {
           type: "attach-step",
           target: block,
         },
-        connected: block.next !== null,
+        connected: block.next,
         accepts: isStepBlock,
       }}
       onDelete={handleDelete}

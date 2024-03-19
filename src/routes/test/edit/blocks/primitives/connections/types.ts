@@ -9,8 +9,8 @@ interface TopConnection {
 interface Connection {
   key: string;
   node: ReactNode;
-  connected: boolean;
   action: DropAction;
+  connected: Block | null;
   accepts: (value: unknown) => boolean;
 }
 

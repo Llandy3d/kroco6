@@ -44,7 +44,7 @@ function GroupBlock({ block }: GroupBlockProps) {
           type: "attach-step",
           target: block,
         },
-        connected: block.next !== null,
+        connected: block.next,
         accepts: isStepBlock,
       }}
       onDelete={handleDelete}
@@ -62,7 +62,7 @@ function GroupBlock({ block }: GroupBlockProps) {
             type: "attach-child",
             target: block,
           },
-          connected: block.step !== null,
+          connected: block.step,
           accepts: isStepBlock,
         }}
         color={STEP_COLOR}

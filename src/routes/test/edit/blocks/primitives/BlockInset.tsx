@@ -10,11 +10,14 @@ import { css } from "@emotion/css";
 const styles = {
   root: css`
     opacity: 0.5;
-    border-color: var(--block-bg-primary);
+    border: 2px solid var(--block-bg-primary);
   `,
   connected: css`
     border: none;
     opacity: 1;
+  `,
+  dragging: css`
+    border: 2px solid var(--block-bg-primary);
   `,
   dropping: css`
     opacity: 1;
@@ -45,14 +48,16 @@ function BlockInset({ owner, color, connection }: BlockInsetProps) {
     connection.accepts(block);
 
   const dropping = accepting && isOver;
+  const dragging = active?.id === connection.connected?.id;
 
   return (
     <div className="inline-block flex-auto" style={toBlockColorStyle(color)}>
       <div
         className={cn(
           styles.root,
-          "block-inset relative min-h-8 min-w-16 border-2 bg-white",
+          "block-inset relative min-h-8 min-w-16 bg-white",
           connection.connected && styles.connected,
+          dragging && styles.dragging,
           dropping && "bg-slate-400",
           dropping && styles.dropping,
         )}

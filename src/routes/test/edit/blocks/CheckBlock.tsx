@@ -67,7 +67,7 @@ function CheckBlock({ block }: CheckBlockProps) {
         key: `next`,
         node: <AnyBlock block={block.next} />,
         action: { type: "attach-step", target: block },
-        connected: block.next !== null,
+        connected: block.next,
         accepts: isStepBlock,
       }}
       onDelete={handleDelete}
@@ -84,7 +84,7 @@ function CheckBlock({ block }: CheckBlockProps) {
               type: "assign-check-target",
               target: block,
             },
-            connected: block.target !== null,
+            connected: block.target,
             accepts: isHttpRequestBlock,
           }}
         />
