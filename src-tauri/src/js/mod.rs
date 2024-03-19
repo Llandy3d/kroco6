@@ -162,7 +162,7 @@ pub async fn save_file<R: Runtime>(
     _window: tauri::Window<R>,
     params: SaveFileParams,
 ) -> Result<SaveResponse, String> {
-    std::fs::write(params.path.clone(), params.content)
+    fs::write(params.path.clone(), params.content)
         .map_err(|err| format!("Failed to save file: {}", err))?;
 
     Ok(SaveResponse::Saved { path: params.path })
@@ -193,7 +193,7 @@ pub async fn save_file_as<R: Runtime>(
 
     match path {
         Some(path) => {
-            std::fs::write(path.clone(), params.content)
+            fs::write(path.clone(), params.content)
                 .map_err(|err| format!("Failed to save file: {}", err))?;
 
             let _ = window.emit("files_changed", {});
@@ -219,9 +219,51 @@ pub async fn rename<R: Runtime>(
     from: String,
     to: String,
 ) -> Result<RenameResult, String> {
-    std::fs::rename(from, to.clone()).map_err(|err| format!("Failed to rename file: {}", err))?;
+    fs::rename(from, to.clone()).map_err(|err| format!("Failed to rename file: {}", err))?;
 
     let _ = window.emit("files_changed", {});
 
     Ok(RenameResult { path: to })
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CreateResult {
+    path: String,
+    project: Project,
+}
+
+#[tauri::command]
+pub async fn create_directory<R: Runtime>(
+    _app: tauri::AppHandle<R>,
+    window: tauri::Window<R>,
+    root: String,
+    path: String,
+) -> Result<CreateResult, String> {
+    fs::create_dir(path.clone()).map_err(|err| format!("Failed to create directory: {}", err))?;
+
+    let project = refresh_project(_app, window, root).await?;
+
+    Ok(CreateResult { path, project })
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DeleteDirectoryResult {
+    path: String,
+    project: Project,
+}
+
+#[tauri::command]
+pub async fn delete_directory<R: Runtime>(
+    _app: tauri::AppHandle<R>,
+    window: tauri::Window<R>,
+    root: String,
+    path: String,
+) -> Result<DeleteDirectoryResult, String> {
+    fs::remove_dir_all(path.clone()).map_err(|err| format!("Failed to create file: {}", err))?;
+
+    let project = refresh_project(_app, window, root).await?;
+
+    Ok(DeleteDirectoryResult { path, project })
 }

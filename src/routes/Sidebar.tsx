@@ -22,6 +22,10 @@ function Sidebar() {
     });
   }
 
+  function handleProjectChange(project: Project) {
+    setProject(project);
+  }
+
   useEffect(() => {
     const unlisten = listen("files_changed", () => {
       console.log("files changed", project?.root);
@@ -50,7 +54,7 @@ function Sidebar() {
       {project && (
         <>
           <h2 className="font-bold">Project</h2>
-          <ProjectTree project={project} />
+          <ProjectTree project={project} onChange={handleProjectChange} />
         </>
       )}
       {!project && (

@@ -61,6 +61,8 @@ fn main() {
             js::save_file_as,
             js::refresh_project,
             js::rename,
+            js::create_directory,
+            js::delete_directory
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

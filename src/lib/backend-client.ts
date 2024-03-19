@@ -192,7 +192,26 @@ function rename(from: string, to: string) {
   return invoke<RenameResult>("rename", { from, to });
 }
 
+interface CreateDirectoryResult {
+  path: string;
+  project: Project;
+}
+
+function createDirectory(root: string, path: string) {
+  return invoke<CreateDirectoryResult>("create_directory", { root, path });
+}
+
+interface DeleteDirectoryResult {
+  project: Project;
+}
+
+function deleteDirectory(root: string, path: string) {
+  return invoke<DeleteDirectoryResult>("delete_directory", { root, path });
+}
+
 export {
+  createDirectory,
+  deleteDirectory,
   getCloudTests,
   listProjects,
   loadProjectConfig,
@@ -211,7 +230,9 @@ export {
   type EnvironmentsData,
   type Project,
   type ProjectConfig,
+  type ProjectDirectory,
   type ProjectEntry,
+  type ProjectFile,
   type ProjectOpened,
   type Test,
   type TestKind,

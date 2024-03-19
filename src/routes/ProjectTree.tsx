@@ -1,20 +1,42 @@
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 import { useToast } from "@/components/ui/use-toast";
-import { openFile, rename, type Project, type ProjectEntry } from "@/lib/backend-client";
+import {
+  createDirectory,
+  deleteDirectory,
+  openFile,
+  rename,
+  type Project,
+  type ProjectDirectory,
+  type ProjectEntry,
+} from "@/lib/backend-client";
 import { parse } from "@/lib/stores/blocks/model/loose";
 import type { VirtualFile } from "@/lib/stores/editor";
 import { cn } from "@/lib/utils";
 import { tryParseJSON } from "@/lib/utils/json";
-import { getExtension, getFileName } from "@/lib/utils/path";
+import { getExtension, getPathName } from "@/lib/utils/path";
 import { exhaustive } from "@/lib/utils/typescript";
+import { ProjectIcon } from "@/routes/ProjectIcon";
 import { useCurrentFile, useOpenFiles } from "@/routes/test/edit/atoms";
-import { Box, ChevronDown, ChevronRight, FileCode, type LucideIcon } from "lucide-react";
+import { Box, ChevronDown, ChevronRight, FileCode } from "lucide-react";
 import { nanoid } from "nanoid";
-import { useRef, type FocusEvent, type KeyboardEvent } from "react";
-import { NodeApi, Tree, type NodeRendererProps, type RenameHandler } from "react-arborist";
+import { useRef, type ComponentType, type FocusEvent, type KeyboardEvent } from "react";
+import {
+  NodeApi,
+  Tree,
+  type CreateHandler,
+  type DeleteHandler,
+  type NodeRendererProps,
+  type RenameHandler,
+} from "react-arborist";
 import { useResizeObserver } from "usehooks-ts";
 
 function loadFile(path: string, content: string): VirtualFile | null {
-  const fileName = getFileName(path);
+  const fileName = getPathName(path);
   const extension = getExtension(path);
 
   if (extension === "js") {
@@ -63,23 +85,26 @@ interface ProjectEntryBase {
 
 interface FileItem extends ProjectEntryBase {
   type: "file";
-  path: string;
   kind: "js" | "blocks";
 }
 
 interface DirectoryItem extends ProjectEntryBase {
   type: "directory";
-  path: string;
   children: TreeItem[];
 }
 
-type TreeItem = FileItem | DirectoryItem;
+interface ProjectItem extends ProjectEntryBase {
+  type: "project";
+  children: TreeItem[];
+}
+
+type TreeItem = FileItem | DirectoryItem | ProjectItem;
 
 interface NodeProps {
   node: NodeApi<TreeItem>;
   name: string;
   selected?: boolean;
-  icon: LucideIcon;
+  icon: ComponentType<{ size?: number | string }>;
   onClick: () => void;
 }
 
@@ -109,10 +134,10 @@ function Node({ node, name, selected, icon: Icon, onClick }: NodeProps) {
   return (
     <div
       className={cn("flex cursor-pointer items-center gap-1 text-xs", selected && "font-bold")}
-      onClick={onClick}
       style={{ marginLeft: node.level * 16 }}
+      onClick={onClick}
     >
-      <Icon size={14} />{" "}
+      <Icon size={16} />{" "}
       {!node.isEditing ? (
         <span>{name}</span>
       ) : (
@@ -129,18 +154,74 @@ function Node({ node, name, selected, icon: Icon, onClick }: NodeProps) {
   );
 }
 
-function DirectoryNode({ node, entry }: NodeRendererProps<TreeItem> & { entry: DirectoryItem }) {
+function ProjectNode({ tree, node, entry }: NodeRendererProps<TreeItem> & { entry: ProjectItem }) {
   function handleClick() {
     node.toggle();
   }
 
+  function handleNewDirectory() {
+    tree.create({
+      type: "internal",
+      parentId: node.id,
+    });
+  }
+
   return (
-    <Node
-      node={node}
-      name={entry.name}
-      icon={node.isOpen ? ChevronDown : ChevronRight}
-      onClick={handleClick}
-    />
+    <ContextMenu>
+      <ContextMenuTrigger>
+        <Node node={node} name={entry.name} icon={ProjectIcon} onClick={handleClick} />
+      </ContextMenuTrigger>
+      <ContextMenuContent>
+        <ContextMenuItem onClick={handleNewDirectory}>New directory</ContextMenuItem>
+      </ContextMenuContent>
+    </ContextMenu>
+  );
+}
+
+function DirectoryNode({
+  tree,
+  node,
+  entry,
+}: NodeRendererProps<TreeItem> & { entry: DirectoryItem }) {
+  function handleClick() {
+    node.toggle();
+  }
+
+  function handleNewDirectory() {
+    tree.create({
+      type: "internal",
+      parentId: node.id,
+    });
+  }
+
+  function handleRename() {
+    node.edit();
+  }
+
+  function handleDelete() {
+    tree.delete(node.id);
+  }
+
+  return (
+    <ContextMenu>
+      <ContextMenuTrigger>
+        <Node
+          node={node}
+          name={entry.name}
+          icon={node.isOpen ? ChevronDown : ChevronRight}
+          onClick={handleClick}
+        />
+      </ContextMenuTrigger>
+      <ContextMenuContent>
+        <ContextMenuItem onClick={handleNewDirectory}>New directory</ContextMenuItem>
+        <ContextMenuItem disabled={node.isRoot} onClick={handleRename}>
+          Rename
+        </ContextMenuItem>
+        <ContextMenuItem disabled={node.isRoot} onClick={handleDelete}>
+          Delete
+        </ContextMenuItem>
+      </ContextMenuContent>
+    </ContextMenu>
   );
 }
 
@@ -200,24 +281,23 @@ function ProjectEntryNode(props: NodeRendererProps<TreeItem>) {
     case "directory":
       return <DirectoryNode {...props} entry={props.node.data} />;
 
+    case "project":
+      return <ProjectNode {...props} entry={props.node.data} />;
+
     default:
       return exhaustive(props.node.data);
   }
 }
 
-function getFileExtension(path: string): string {
-  return path.slice(path.lastIndexOf(".") + 1);
-}
-
 function toTreeItem(file: ProjectEntry): TreeItem {
-  const name = file.path.slice(file.path.lastIndexOf("/") + 1);
+  const name = getPathName(file.path) ?? "<unknown>";
 
   if (file.type === "file") {
     return {
       type: "file",
       path: file.path,
       name,
-      kind: getFileExtension(file.path) === "js" ? "js" : "blocks",
+      kind: getExtension(file.path) === "js" ? "js" : "blocks",
     };
   }
 
@@ -229,12 +309,22 @@ function toTreeItem(file: ProjectEntry): TreeItem {
   };
 }
 
-interface ProjectTreeProps {
-  project: Project;
+function toProjectItem(file: ProjectDirectory): TreeItem {
+  return {
+    type: "project",
+    path: file.path,
+    name: getPathName(file.path) ?? "<unknown>",
+    children: file.entries.map(toTreeItem),
+  };
 }
 
-function ProjectTree({ project }: ProjectTreeProps) {
-  const items: TreeItem[] = [toTreeItem(project.directory)];
+interface ProjectTreeProps {
+  project: Project;
+  onChange: (project: Project) => void;
+}
+
+function ProjectTree({ project, onChange }: ProjectTreeProps) {
+  const items: TreeItem[] = [toProjectItem(project.directory)];
 
   const container = useRef<HTMLDivElement | null>(null);
 
@@ -242,16 +332,47 @@ function ProjectTree({ project }: ProjectTreeProps) {
     ref: container,
   });
 
-  function handleRename({ name, node }: Parameters<RenameHandler<TreeItem>>[0]) {
+  const handleCreate: CreateHandler<TreeItem> = ({ parentNode }) => {
+    if (parentNode === null || parentNode.data.type === "file") {
+      return null;
+    }
+
+    const conflicts =
+      parentNode.children?.filter((node) => node.data.name.startsWith("New Folder")) ?? [];
+
+    const path = `${parentNode.data.path}/New Folder${conflicts.length > 0 ? ` (${conflicts.length})` : ""}`;
+
+    return createDirectory(project.root, path).then(({ path, project }) => {
+      onChange(project);
+
+      return { id: path };
+    });
+  };
+
+  const handleDelete: DeleteHandler<TreeItem> = ({ nodes }) => {
+    const target = nodes[0];
+
+    if (target === undefined) {
+      return;
+    }
+
+    if (target.data.type === "file") {
+      return;
+    }
+
+    return deleteDirectory(project.root, target.data.path).then(({ project }) => {
+      onChange(project);
+    });
+  };
+
+  const handleRename: RenameHandler<TreeItem> = ({ name, node }) => {
     const basePath = node.data.path.slice(0, node.data.path.lastIndexOf("/"));
 
     const from = node.data.path;
     const to = `${basePath}/${name}`;
 
-    rename(from, to)
-      .then(() => {})
-      .catch(console.error);
-  }
+    return rename(from, to).then(() => {});
+  };
 
   return (
     <div ref={container} className="relative flex-auto overflow-hidden border-y py-4">
@@ -264,6 +385,9 @@ function ProjectTree({ project }: ProjectTreeProps) {
         width={width}
         height={height}
         openByDefault={false}
+        disableEdit={(item) => item.type === "project"}
+        onCreate={handleCreate}
+        onDelete={handleDelete}
         onRename={handleRename}
       >
         {ProjectEntryNode}
