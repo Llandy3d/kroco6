@@ -16,10 +16,13 @@ import { EMPTY_ENVIRONMENT } from "@/lib/stores/projects";
 import { useSetCurrentFile, useSetOpenFiles } from "@/routes/test/edit/atoms";
 import { Canvas } from "@/routes/test/edit/blocks/Canvas";
 import { ScriptPreview } from "@/routes/test/edit/blocks/ScriptPreview";
+import { testAtom, useTest } from "@/routes/test/edit/blocks/atoms";
 import { Library } from "@/routes/test/edit/blocks/library/Library";
+import { Provider, createStore } from "jotai";
 import { Book, Code, Layers, ScrollText } from "lucide-react";
 import type { OpenAPIV3 } from "openapi-types";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useMemoOne } from "use-memo-one";
 import { TestToolbar } from "../TestToolbar";
 import { TabButton } from "./TabButton";
 
@@ -30,9 +33,10 @@ interface BlocksEditorProps {
   onChange: (file: BlockFile) => void;
 }
 
-function BlocksEditorContainer({ file, project, environment, onChange }: BlocksEditorProps) {
+function BlocksEditorContainer({ file, project, environment }: BlocksEditorProps) {
   const { toast } = useToast();
 
+  const [test, setTest] = useTest();
   const [tab, setTab] = useState("build");
   const [running, setRunning] = useState(false);
 
@@ -43,7 +47,7 @@ function BlocksEditorContainer({ file, project, environment, onChange }: BlocksE
     try {
       setRunning(true);
 
-      const script = await convertToScript(environment ?? EMPTY_ENVIRONMENT, file.blocks);
+      const script = await convertToScript(environment ?? EMPTY_ENVIRONMENT, test);
       const response = await runScriptLocally(script);
 
       console.log(response);
@@ -68,7 +72,7 @@ function BlocksEditorContainer({ file, project, environment, onChange }: BlocksE
     try {
       setRunning(true);
 
-      const script = await convertToScript(environment, file.blocks);
+      const script = await convertToScript(environment, test);
       const results = await runScriptInCloud({
         script,
         projectId: config.cloud_project_id,
@@ -102,7 +106,7 @@ function BlocksEditorContainer({ file, project, environment, onChange }: BlocksE
   }
 
   async function handleSaveTest() {
-    saveFile(file, JSON.stringify(file.blocks)).then((savedFile) => {
+    saveFile(file, JSON.stringify(test)).then((savedFile) => {
       setOpenFiles((files) =>
         files.map((file) => (file.handle === savedFile.handle ? savedFile : file)),
       );
@@ -112,43 +116,18 @@ function BlocksEditorContainer({ file, project, environment, onChange }: BlocksE
   }
 
   function handleTestChange(test: Test) {
-    onChange({
-      ...file,
-      blocks: test,
-    });
+    setTest(test);
   }
 
   function handleLibraryChange(library: OpenAPIV3.Document) {
-    onChange({
-      ...file,
-      blocks: {
-        ...file.blocks,
+    setTest((test) => {
+      return {
+        ...test,
         library,
-      },
+      };
     });
   }
 
-  // onMount(() => {
-  //   let content = file.path.type === "new" ? file.path.initial : file.path.original;
-
-  //   try {
-  //     const parsed = parse(JSON.parse(content));
-
-  //     if (!parsed.success) {
-  //       console.log("Failed to parse block test", parsed.issues);
-
-  //       test.set(EMPTY_BLOCK_TEST);
-
-  //       return;
-  //     }
-
-  //     test.set(parsed.output);
-  //   } catch (e) {
-  //     test.set(EMPTY_BLOCK_TEST);
-
-  //     console.error(e);
-  //   }
-  // });
   return (
     <div className="flex flex-auto">
       <Tabs className="flex flex-auto flex-col" value={tab} onValueChange={setTab}>
@@ -184,13 +163,13 @@ function BlocksEditorContainer({ file, project, environment, onChange }: BlocksE
           onSave={handleSaveTest}
         />
         <TabsContent value="build" className="mt-0 flex-auto">
-          <Canvas test={file.blocks} onChange={handleTestChange} />
+          <Canvas test={test} onChange={handleTestChange} />
         </TabsContent>
         <TabsContent value="library" className="mt-0 flex-auto">
-          <Library library={file.blocks.library} onChange={handleLibraryChange} />
+          <Library library={test.library} onChange={handleLibraryChange} />
         </TabsContent>
         <TabsContent value="script" className="mt-0 flex-auto">
-          <ScriptPreview test={file.blocks} />
+          <ScriptPreview test={test} />
         </TabsContent>
       </Tabs>
     </div>
@@ -198,13 +177,36 @@ function BlocksEditorContainer({ file, project, environment, onChange }: BlocksE
 }
 
 function BlocksEditor({ file, project, environment, onChange }: BlocksEditorProps) {
+  const store = useMemoOne(() => {
+    return createStore();
+  }, []);
+
+  useEffect(() => {
+    store.set(testAtom, file.blocks);
+
+    const unsub = store.sub(testAtom, () => {
+      const test = store.get(testAtom);
+
+      onChange({
+        ...file,
+        blocks: test,
+      });
+    });
+
+    return () => {
+      unsub();
+    };
+  }, [file, store]);
+
   return (
-    <BlocksEditorContainer
-      file={file}
-      project={project}
-      environment={environment}
-      onChange={onChange}
-    />
+    <Provider store={store}>
+      <BlocksEditorContainer
+        file={file}
+        project={project}
+        environment={environment}
+        onChange={onChange}
+      />
+    </Provider>
   );
 }
 

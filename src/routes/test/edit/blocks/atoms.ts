@@ -2,18 +2,18 @@ import { EMPTY_BLOCK_TEST } from "@/lib/stores/blocks/constants";
 import type { Test } from "@/lib/stores/blocks/model/loose";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 
-const test = atom<Test>(EMPTY_BLOCK_TEST);
+const testAtom = atom<Test>(EMPTY_BLOCK_TEST);
 
 function useTest() {
-  return useAtom(test);
+  return useAtom(testAtom);
 }
 
 function useTestValue() {
-  return useAtomValue(test);
+  return useAtomValue(testAtom);
 }
 
 function useSetTest() {
-  return useSetAtom(test);
+  return useSetAtom(testAtom);
 }
 
-export { useSetTest, useTest, useTestValue };
+export { testAtom, useSetTest, useTest, useTestValue };

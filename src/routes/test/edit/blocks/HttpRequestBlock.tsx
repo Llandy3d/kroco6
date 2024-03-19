@@ -62,7 +62,14 @@ function HttpRequestBlock({ block }: HttpRequestBlockProps) {
     >
       <Field>
         <SelectInput value={block.method} items={methods} onChange={handleMethodChange} />
-        <StringInput placeholder="Url" value={block.url} onChange={handleUrlChange} />
+        <StringInput
+          placeholder="Url"
+          autoCapitalize="off"
+          autoComplete="off"
+          autoCorrect="off"
+          value={block.url}
+          onChange={handleUrlChange}
+        />
       </Field>
     </Block>
   );
