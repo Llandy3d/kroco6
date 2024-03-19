@@ -205,13 +205,21 @@ interface DeleteDirectoryResult {
   project: Project;
 }
 
+function deleteEntry(root: string, type: "file" | "directory", path: string) {
+  return type === "file" ? deleteFile(root, path) : deleteDirectory(root, path);
+}
+
+function deleteFile(root: string, path: string) {
+  return invoke<DeleteDirectoryResult>("delete_file", { root, path });
+}
+
 function deleteDirectory(root: string, path: string) {
   return invoke<DeleteDirectoryResult>("delete_directory", { root, path });
 }
 
 export {
   createDirectory,
-  deleteDirectory,
+  deleteEntry,
   getCloudTests,
   listProjects,
   loadProjectConfig,

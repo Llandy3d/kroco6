@@ -7,7 +7,7 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import {
   createDirectory,
-  deleteDirectory,
+  deleteEntry,
   openFile,
   rename,
   type Project,
@@ -20,11 +20,12 @@ import { cn } from "@/lib/utils";
 import { tryParseJSON } from "@/lib/utils/json";
 import { getExtension, getPathName } from "@/lib/utils/path";
 import { exhaustive } from "@/lib/utils/typescript";
+import { PlaceholderIcon } from "@/routes/PlaceholderIcon";
 import { ProjectIcon } from "@/routes/ProjectIcon";
 import { useCurrentFile, useOpenFiles } from "@/routes/test/edit/atoms";
-import { Box, ChevronDown, ChevronRight, FileCode } from "lucide-react";
+import { Box, ChevronDown, ChevronRight, FileCode, FolderClosed, FolderOpen } from "lucide-react";
 import { nanoid } from "nanoid";
-import { useRef, type ComponentType, type FocusEvent, type KeyboardEvent } from "react";
+import { useRef, type FocusEvent, type KeyboardEvent, type ReactNode } from "react";
 import {
   NodeApi,
   Tree,
@@ -104,11 +105,11 @@ interface NodeProps {
   node: NodeApi<TreeItem>;
   name: string;
   selected?: boolean;
-  icon: ComponentType<{ size?: number | string }>;
+  icon: ReactNode;
   onClick: () => void;
 }
 
-function Node({ node, name, selected, icon: Icon, onClick }: NodeProps) {
+function Node({ node, name, selected, icon, onClick }: NodeProps) {
   function handleFocus(ev: FocusEvent<HTMLInputElement>) {
     const index = ev.currentTarget.value.lastIndexOf(".");
 
@@ -131,13 +132,17 @@ function Node({ node, name, selected, icon: Icon, onClick }: NodeProps) {
     }
   }
 
+  // We want the project level to be indented the same as the root level
+  // directories, so we remove one level of indentation.
+  const indent = Math.max(0, node.level - 1);
+
   return (
     <div
       className={cn("flex cursor-pointer items-center gap-1 text-xs", selected && "font-bold")}
-      style={{ marginLeft: node.level * 16 }}
+      style={{ marginLeft: indent * 16 }}
       onClick={onClick}
     >
-      <Icon size={16} />{" "}
+      {icon}
       {!node.isEditing ? (
         <span>{name}</span>
       ) : (
@@ -155,24 +160,41 @@ function Node({ node, name, selected, icon: Icon, onClick }: NodeProps) {
 }
 
 function ProjectNode({ tree, node, entry }: NodeRendererProps<TreeItem> & { entry: ProjectItem }) {
+  const autoFocus = useRef(true);
+
   function handleClick() {
     node.toggle();
   }
 
-  function handleNewDirectory() {
+  function handleNewFolder() {
+    autoFocus.current = false;
+
     tree.create({
       type: "internal",
       parentId: node.id,
     });
   }
 
+  function handleCloseAutoFocus(ev: Event) {
+    if (!autoFocus.current) {
+      ev.preventDefault();
+    }
+
+    autoFocus.current = true;
+  }
+
   return (
     <ContextMenu>
       <ContextMenuTrigger>
-        <Node node={node} name={entry.name} icon={ProjectIcon} onClick={handleClick} />
+        <Node
+          node={node}
+          name={entry.name}
+          icon={<ProjectIcon size={14} />}
+          onClick={handleClick}
+        />
       </ContextMenuTrigger>
-      <ContextMenuContent>
-        <ContextMenuItem onClick={handleNewDirectory}>New directory</ContextMenuItem>
+      <ContextMenuContent onCloseAutoFocus={handleCloseAutoFocus}>
+        <ContextMenuItem onClick={handleNewFolder}>New Folder</ContextMenuItem>
       </ContextMenuContent>
     </ContextMenu>
   );
@@ -183,11 +205,15 @@ function DirectoryNode({
   node,
   entry,
 }: NodeRendererProps<TreeItem> & { entry: DirectoryItem }) {
+  const autoFocus = useRef(true);
+
   function handleClick() {
     node.toggle();
   }
 
-  function handleNewDirectory() {
+  function handleNewFolder() {
+    autoFocus.current = false;
+
     tree.create({
       type: "internal",
       parentId: node.id,
@@ -195,11 +221,21 @@ function DirectoryNode({
   }
 
   function handleRename() {
+    autoFocus.current = false;
+
     node.edit();
   }
 
   function handleDelete() {
     tree.delete(node.id);
+  }
+
+  function handleCloseAutoFocus(ev: Event) {
+    if (!autoFocus.current) {
+      ev.preventDefault();
+    }
+
+    autoFocus.current = true;
   }
 
   return (
@@ -208,16 +244,28 @@ function DirectoryNode({
         <Node
           node={node}
           name={entry.name}
-          icon={node.isOpen ? ChevronDown : ChevronRight}
+          icon={
+            <>
+              {node.isOpen ? (
+                <>
+                  <ChevronDown size={14} /> <FolderOpen size={14} />
+                </>
+              ) : (
+                <>
+                  <ChevronRight size={14} /> <FolderClosed size={14} />
+                </>
+              )}{" "}
+            </>
+          }
           onClick={handleClick}
         />
       </ContextMenuTrigger>
-      <ContextMenuContent>
-        <ContextMenuItem onClick={handleNewDirectory}>New directory</ContextMenuItem>
-        <ContextMenuItem disabled={node.isRoot} onClick={handleRename}>
+      <ContextMenuContent onCloseAutoFocus={handleCloseAutoFocus}>
+        <ContextMenuItem onSelect={handleNewFolder}>New Folder</ContextMenuItem>
+        <ContextMenuItem disabled={node.isRoot} onSelect={handleRename}>
           Rename
         </ContextMenuItem>
-        <ContextMenuItem disabled={node.isRoot} onClick={handleDelete}>
+        <ContextMenuItem disabled={node.isRoot} onSelect={handleDelete}>
           Delete
         </ContextMenuItem>
       </ContextMenuContent>
@@ -225,8 +273,10 @@ function DirectoryNode({
   );
 }
 
-function FileNode({ node, entry }: NodeRendererProps<TreeItem> & { entry: FileItem }) {
+function FileNode({ tree, node, entry }: NodeRendererProps<TreeItem> & { entry: FileItem }) {
   const { toast } = useToast();
+
+  const autoFocus = useRef(true);
 
   const [openFiles, setOpenFiles] = useOpenFiles();
   const [currentFile, setCurrentFile] = useCurrentFile();
@@ -262,14 +312,47 @@ function FileNode({ node, entry }: NodeRendererProps<TreeItem> & { entry: FileIt
       .catch(console.error);
   }
 
+  function handleRename() {
+    autoFocus.current = false;
+
+    node.edit();
+  }
+
+  function handleDelete() {
+    tree.delete(node.id);
+  }
+
+  function handleCloseAutoFocus(ev: Event) {
+    if (!autoFocus.current) {
+      ev.preventDefault();
+    }
+
+    autoFocus.current = true;
+  }
+
   return (
-    <Node
-      node={node}
-      name={entry.name}
-      selected={currentFile?.path.type === "existing" && currentFile.path.filePath === entry.path}
-      icon={entry.kind === "js" ? FileCode : Box}
-      onClick={handleClick}
-    />
+    <ContextMenu>
+      <ContextMenuTrigger>
+        <Node
+          node={node}
+          name={entry.name}
+          selected={
+            currentFile?.path.type === "existing" && currentFile.path.filePath === entry.path
+          }
+          icon={
+            <>
+              <PlaceholderIcon size={14} />{" "}
+              {entry.kind === "js" ? <FileCode size={14} /> : <Box size={14} />}
+            </>
+          }
+          onClick={handleClick}
+        />
+      </ContextMenuTrigger>
+      <ContextMenuContent onCloseAutoFocus={handleCloseAutoFocus}>
+        <ContextMenuItem onSelect={handleRename}>Rename</ContextMenuItem>
+        <ContextMenuItem onSelect={handleDelete}>Delete</ContextMenuItem>
+      </ContextMenuContent>
+    </ContextMenu>
   );
 }
 
@@ -352,15 +435,11 @@ function ProjectTree({ project, onChange }: ProjectTreeProps) {
   const handleDelete: DeleteHandler<TreeItem> = ({ nodes }) => {
     const target = nodes[0];
 
-    if (target === undefined) {
+    if (target === undefined || target.data.type === "project") {
       return;
     }
 
-    if (target.data.type === "file") {
-      return;
-    }
-
-    return deleteDirectory(project.root, target.data.path).then(({ project }) => {
+    return deleteEntry(project.root, target.data.type, target.data.path).then(({ project }) => {
       onChange(project);
     });
   };

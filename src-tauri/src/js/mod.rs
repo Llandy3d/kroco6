@@ -208,6 +208,26 @@ pub async fn save_file_as<R: Runtime>(
 
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub struct DeleteFileResult {
+    project: Project,
+}
+
+#[tauri::command]
+pub async fn delete_file<R: Runtime>(
+    _app: tauri::AppHandle<R>,
+    window: tauri::Window<R>,
+    root: String,
+    path: String,
+) -> Result<DeleteFileResult, String> {
+    fs::remove_file(path.clone()).map_err(|err| format!("Failed to create file: {}", err))?;
+
+    let project = refresh_project(_app, window, root).await?;
+
+    Ok(DeleteFileResult { project })
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct RenameResult {
     path: String,
 }

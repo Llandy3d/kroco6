@@ -59,6 +59,7 @@ fn main() {
             js::open_file,
             js::save_file,
             js::save_file_as,
+            js::delete_file,
             js::refresh_project,
             js::rename,
             js::create_directory,
