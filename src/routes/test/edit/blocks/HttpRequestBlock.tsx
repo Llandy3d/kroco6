@@ -27,11 +27,10 @@ function HttpRequestBlock({ block }: HttpRequestBlockProps) {
   }
 
   function handleMethodChange(method: string) {
+    const newBlock = { ...block, method };
+
     setTest((test) => {
-      return updateBlock(test, {
-        ...block,
-        method,
-      });
+      return updateBlock(test, newBlock);
     });
   }
 

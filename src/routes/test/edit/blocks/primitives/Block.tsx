@@ -1,12 +1,13 @@
 import { isTemplate, type Block as BlockType } from "@/lib/stores/blocks/model/loose";
 import { cn } from "@/lib/utils";
+import { useSetSelectedBlock } from "@/routes/test/edit/blocks/atoms";
 import { useDragging } from "@/routes/test/edit/blocks/dnd/Draggable";
 import { Bottom } from "@/routes/test/edit/blocks/primitives/connections/Bottom";
 import { Top } from "@/routes/test/edit/blocks/primitives/connections/Top";
 import type { Connection } from "@/routes/test/edit/blocks/primitives/connections/types";
 import { toBlockColorStyle, type BlockColor } from "@/routes/test/edit/blocks/primitives/types";
 import { css } from "@emotion/css";
-import type { KeyboardEvent } from "react";
+import type { KeyboardEvent, MouseEvent } from "react";
 
 const styles = {
   root: css``,
@@ -49,6 +50,8 @@ function Block<TBlock extends BlockType>({
   children,
   onDelete,
 }: BlockProps<TBlock>) {
+  const setSelectedBlock = useSetSelectedBlock();
+
   const { isDragging, listeners, attributes, setNodeRef } = useDragging();
 
   function handleKeyPress(ev: KeyboardEvent<HTMLDivElement>) {
@@ -58,6 +61,17 @@ function Block<TBlock extends BlockType>({
 
       onDelete(block);
     }
+  }
+
+  function handleClick(ev: MouseEvent<HTMLDivElement>) {
+    if (isTemplate(block)) {
+      return;
+    }
+
+    setSelectedBlock(block);
+
+    ev.preventDefault();
+    ev.stopPropagation();
   }
 
   return (
@@ -76,6 +90,7 @@ function Block<TBlock extends BlockType>({
           ...toBlockColorStyle(color),
         }}
         onKeyUp={handleKeyPress}
+        onClick={handleClick}
         {...listeners}
         {...attributes}
       >

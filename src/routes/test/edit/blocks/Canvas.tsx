@@ -15,7 +15,7 @@ import {
   DndContext,
   DragOverlay,
   KeyboardSensor,
-  MouseSensor,
+  PointerSensor,
   pointerWithin,
   useDroppable,
   useSensor,
@@ -30,15 +30,17 @@ import { useState, type MouseEvent } from "react";
 import { instantiate, type Block, type Test } from "@/lib/stores/blocks/model/loose";
 import { detach } from "@/lib/stores/blocks/model/utils";
 import { exhaustive } from "@/lib/utils/typescript";
+import { BlockSidebar } from "@/routes/test/edit/blocks/BlockSidebar";
+import { useSetSelectedBlock } from "@/routes/test/edit/blocks/atoms";
 import { DragEnabled } from "@/routes/test/edit/blocks/dnd/DragEnabled";
 import { css } from "@emotion/css";
 
 const interactiveElements = ["input", "button", "textarea", "select"];
 
-class NonInteractiveMouseSensor extends MouseSensor {
+class NonInteractiveMouseSensor extends PointerSensor {
   static activators = [
     {
-      eventName: "onMouseDown" as const,
+      eventName: "onPointerDown" as const,
       handler({ nativeEvent: event }: MouseEvent) {
         if (event.target instanceof HTMLElement) {
           return (
@@ -75,6 +77,8 @@ interface CanvasRootProps {
 }
 
 function CanvasRoot({ test }: CanvasRootProps) {
+  const setSelectedBlock = useSetSelectedBlock();
+
   const { setNodeRef } = useDroppable({
     id: "canvas",
     data: {
@@ -85,7 +89,9 @@ function CanvasRoot({ test }: CanvasRootProps) {
     } satisfies DropData,
   });
 
-  function handleClick() {}
+  function handleClick() {
+    setSelectedBlock(null);
+  }
 
   return (
     <div className="relative flex h-full w-full items-stretch overflow-hidden">
@@ -103,6 +109,7 @@ function CanvasRoot({ test }: CanvasRootProps) {
           );
         })}
       </div>
+      <BlockSidebar />
     </div>
   );
 }
@@ -169,7 +176,7 @@ function Canvas({ test, onChange }: CanvasProps) {
   const [dragging, setDragging] = useState<Block | null>(null);
 
   const sensors = useSensors(
-    useSensor(NonInteractiveMouseSensor, {}),
+    useSensor(NonInteractiveMouseSensor, { activationConstraint: { distance: 1 } }),
     useSensor(KeyboardSensor, {}),
   );
 

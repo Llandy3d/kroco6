@@ -9,7 +9,7 @@ import {
   type Test,
 } from "./model/loose";
 import type { StepBlock } from "./model/strict";
-import { concat, detach, replace } from "./model/utils";
+import { concat, detach, findBlockById, replace } from "./model/utils";
 
 function dropOnCanvas(test: Test, target: Block, position: { top: number; left: number }): Test {
   const instance = instantiate(target);
@@ -114,4 +114,24 @@ function snapStepToBottom(target: StepBlock, step: StepBlock) {
   };
 }
 
-export { detachBlock, dropOnCanvas, insertChild, insertNext, snapStepToBottom, updateBlock };
+function findBlock(test: Test, id: string): Block | null {
+  for (const root of test.roots) {
+    const block = findBlockById(root.block, id);
+
+    if (block !== null) {
+      return block;
+    }
+  }
+
+  return null;
+}
+
+export {
+  detachBlock,
+  dropOnCanvas,
+  findBlock,
+  insertChild,
+  insertNext,
+  snapStepToBottom,
+  updateBlock,
+};

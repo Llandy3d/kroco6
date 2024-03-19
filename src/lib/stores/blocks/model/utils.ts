@@ -221,6 +221,34 @@ function concat<T extends ChainableBlock>(left: T, right: Block): T {
   };
 }
 
+function findBlockById(current: Block | null, id: string): Block | null {
+  if (current === null || current.id === id) {
+    return current;
+  }
+
+  switch (current.type) {
+    case "scenario":
+      return findBlockById(current.executor, id) ?? findBlockById(current.step, id);
+
+    case "group":
+      return findBlockById(current.step, id) ?? findBlockById(current.next, id);
+
+    case "check":
+      return findBlockById(current.next, id) ?? findBlockById(current.target, id);
+
+    case "sleep":
+    case "http-request":
+    case "library":
+      return findBlockById(current.next, id);
+
+    case "executor":
+      return current.id === id ? current : null;
+
+    default:
+      return exhaustive(current);
+  }
+}
+
 function isDescendantOf(current: Block | null, target: Block): boolean {
   if (current === null) {
     return false;
@@ -253,4 +281,4 @@ function isDescendantOf(current: Block | null, target: Block): boolean {
   }
 }
 
-export { concat, detach, isDescendantOf, replace };
+export { concat, detach, findBlockById, isDescendantOf, replace };

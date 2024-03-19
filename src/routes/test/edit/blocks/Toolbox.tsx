@@ -6,7 +6,11 @@ import {
 } from "@/lib/stores/blocks/model/loose";
 import { exhaustive, isTruthy, type Falsy } from "@/lib/utils/typescript";
 import { AnyBlock } from "@/routes/test/edit/blocks/AnyBlock";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
+import {
+  VerticalTabs,
+  VerticalTabsContent,
+  type Tab,
+} from "@/routes/test/edit/blocks/VerticalTabs";
 import { CloudCog, FileSliders, Layers } from "lucide-react";
 import { nanoid } from "nanoid";
 import { useMemo, useState } from "react";
@@ -108,12 +112,20 @@ function CategoryIcon({ category }: CategoryHeadingProps) {
   }
 }
 
+function toTab(category: ToolboxCategory): Tab {
+  return {
+    value: category.id,
+    icon: <CategoryIcon category={category} />,
+    label: category.name,
+  };
+}
+
 interface ToolboxProps {
   test: Test;
 }
 
 function Toolbox({ test }: ToolboxProps) {
-  const [current, setCurrent] = useState(DEFAULT_CATEGORY);
+  const [current, setCurrent] = useState<Tab>(() => toTab(DEFAULT_CATEGORY));
 
   const categories: ToolboxCategory[] = useMemo(() => {
     const baseUrl = test.library.servers?.[0]?.url ?? "";
@@ -157,50 +169,26 @@ function Toolbox({ test }: ToolboxProps) {
     return [...CATEGORIES, category];
   }, [test.library]);
 
-  function handleCategorySelect(id: string) {
-    setCurrent(categories.find((category) => category.id === id) ?? DEFAULT_CATEGORY);
-  }
+  const tabs = useMemo<Tab[]>(() => categories.map(toTab), [categories]);
 
   return (
-    <div className="flex">
-      <Tabs className="flex" value={current.id} onValueChange={handleCategorySelect}>
-        <TabsList className="border-r-[1px]">
-          {categories.map((category) => {
-            return (
-              <TabsTrigger
-                key={category.id}
-                className="flex flex-col items-center gap-2 p-4 hover:bg-slate-100 data-[state=active]:text-primary"
-                value={category.id}
-              >
-                <span className="text-slate-400">
-                  <CategoryIcon category={category} />
-                </span>
-                <span className="uppercase [writing-mode:vertical-lr]">{category.name}</span>
-              </TabsTrigger>
-            );
-          })}
-        </TabsList>
-        {categories.map((category) => {
-          return (
-            <TabsContent
-              key={category.id}
-              value={category.id}
-              className="min-w-80 border-r-[1px] p-2"
-            >
-              <ul className="">
-                {category.blocks.map((template) => {
-                  return (
-                    <li key={template.id} className="p-2">
-                      <AnyBlock block={template} />
-                    </li>
-                  );
-                })}
-              </ul>
-            </TabsContent>
-          );
-        })}
-      </Tabs>
-    </div>
+    <VerticalTabs current={current} tabs={tabs} align="left" onChange={setCurrent}>
+      {categories.map((category) => {
+        return (
+          <VerticalTabsContent key={category.id} value={category.id}>
+            <ul className="">
+              {category.blocks.map((template) => {
+                return (
+                  <li key={template.id} className="p-2">
+                    <AnyBlock block={template} />
+                  </li>
+                );
+              })}
+            </ul>
+          </VerticalTabsContent>
+        );
+      })}
+    </VerticalTabs>
   );
 }
 
