@@ -18,10 +18,19 @@ function* enumerate(start: model.StepBlock | null): Generator<model.StepBlock> {
 }
 
 function toHttpRequestStep(model: model.LibraryBlock | model.HttpRequestBlock): HttpRequestStep {
+  const parameters =
+    model.type === "http-request"
+      ? model.parameters.map((parameter) => ({
+          name: parameter.name,
+          value: parameter.value,
+        }))
+      : [];
+
   return {
     type: "http-request",
     name: model.name,
     method: model.method,
+    parameters,
     url: model.url,
   };
 }

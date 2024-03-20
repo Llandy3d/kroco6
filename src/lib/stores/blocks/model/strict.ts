@@ -1,3 +1,4 @@
+import { nameValuePair, type NameValuePair } from "@/lib/stores/blocks/model/generic";
 import {
   array,
   boolean,
@@ -90,7 +91,7 @@ interface HttpRequestBlock extends ChainableBlock {
   name: string;
   url: string;
   method: string;
-  parameters: Record<string, Parameter>;
+  parameters: NameValuePair[];
   next: StepBlock | null;
 }
 
@@ -101,7 +102,7 @@ const httpRequestBlock: BaseSchema<HttpRequestBlock> = merge([
     name: string(),
     method: string(),
     url: string(),
-    parameters: record(parameter),
+    parameters: array(nameValuePair),
     next: nullable(lazy(() => stepBlock)),
   }),
 ]);

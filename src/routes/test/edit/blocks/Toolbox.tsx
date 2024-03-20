@@ -66,7 +66,7 @@ const CATEGORIES: ToolboxCategory[] = [
         method: "get",
         url: "",
         name: "",
-        parameters: {},
+        parameters: [],
         next: null,
       }),
       defineTemplate({

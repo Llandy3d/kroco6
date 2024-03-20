@@ -71,7 +71,12 @@ function VerticalTabs({
 
   return (
     <div className="flex">
-      <Tabs className="flex" value={current?.value ?? ""} onValueChange={handleValueChange}>
+      <Tabs
+        className="flex"
+        value={current?.value ?? ""}
+        onValueChange={handleValueChange}
+        orientation="vertical"
+      >
         {align === "right" && <TabsBody expanded={expandedState.expanded}>{children}</TabsBody>}
         <TabsList className="border-r-[1px]">
           {tabs.map((tab) => {

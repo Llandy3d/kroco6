@@ -1,3 +1,4 @@
+import { nameValuePair, type NameValuePair } from "@/lib/stores/blocks/model/generic";
 import { nanoid } from "nanoid";
 import {
   array,
@@ -100,7 +101,7 @@ interface HttpRequestBlock extends ChainableBlock {
   name: string;
   url: string;
   method: string;
-  parameters: Record<string, Parameter>;
+  parameters: NameValuePair[];
   next: Block | null;
 }
 
@@ -111,7 +112,7 @@ const httpRequestBlock: BaseSchema<HttpRequestBlock> = merge([
     name: string(),
     method: string(),
     url: string(),
-    parameters: record(parameter),
+    parameters: array(nameValuePair),
     next: nullable(lazy(() => block)),
   }),
 ]);
@@ -293,6 +294,7 @@ export {
   type GroupBlock,
   type HttpRequestBlock,
   type LibraryBlock,
+  type NameValuePair,
   type Root,
   type ScenarioBlock,
   type SleepBlock,

@@ -1,6 +1,6 @@
 import { isTemplate, type Block as BlockType } from "@/lib/stores/blocks/model/loose";
 import { cn } from "@/lib/utils";
-import { useSetSelectedBlock } from "@/routes/test/edit/blocks/atoms";
+import { useSelectedBlock } from "@/routes/test/edit/blocks/atoms";
 import { useDragging } from "@/routes/test/edit/blocks/dnd/Draggable";
 import { Bottom } from "@/routes/test/edit/blocks/primitives/connections/Bottom";
 import { Top } from "@/routes/test/edit/blocks/primitives/connections/Top";
@@ -50,7 +50,7 @@ function Block<TBlock extends BlockType>({
   children,
   onDelete,
 }: BlockProps<TBlock>) {
-  const setSelectedBlock = useSetSelectedBlock();
+  const [selectedBlock, setSelectedBlock] = useSelectedBlock();
 
   const { isDragging, listeners, attributes, setNodeRef } = useDragging();
 
@@ -68,7 +68,7 @@ function Block<TBlock extends BlockType>({
       return;
     }
 
-    setSelectedBlock(block);
+    setSelectedBlock(selectedBlock?.id !== block.id ? block : null);
 
     ev.preventDefault();
     ev.stopPropagation();

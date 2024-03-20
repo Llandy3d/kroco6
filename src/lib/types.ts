@@ -31,6 +31,10 @@ interface HttpRequestStep {
   type: "http-request";
   name: string;
   method: string;
+  parameters: Array<{
+    name: string;
+    value: string;
+  }>;
   url: string;
 }
 

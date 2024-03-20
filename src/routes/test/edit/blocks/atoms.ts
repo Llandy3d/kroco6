@@ -43,4 +43,16 @@ function useSetSelectedBlock() {
   return useSetAtom(selectedBlockAtom);
 }
 
-export { testAtom, useSelectedBlockValue, useSetSelectedBlock, useSetTest, useTest, useTestValue };
+function useSelectedBlock() {
+  return useAtom(selectedBlockAtom);
+}
+
+export {
+  testAtom,
+  useSelectedBlock,
+  useSelectedBlockValue,
+  useSetSelectedBlock,
+  useSetTest,
+  useTest,
+  useTestValue,
+};

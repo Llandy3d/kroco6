@@ -2,7 +2,7 @@ import type { Environment } from "@/lib/backend-client";
 import * as prettier from "prettier";
 import * as babelParser from "prettier/parser-babel";
 import * as estreePlugin from "prettier/plugins/estree";
-import type { Executor, Scenario, Step, Test } from "../../types";
+import type { Executor, HttpRequestStep, Scenario, Step, Test } from "../../types";
 import { exhaustive } from "../../utils/typescript";
 
 type Substitution = [name: string, value: string];
@@ -29,10 +29,20 @@ function substitute(target: string, substitutions: Substitution[]) {
   return substitutions.reduce((acc, [name, value]) => acc.replaceAll(`{{${name}}}`, value), target);
 }
 
+function emitHttpRequestStep(step: HttpRequestStep, substitutions: Substitution[]): string {
+  const params = new URLSearchParams(
+    step.parameters.map((param) => [param.name, param.value]),
+  ).toString();
+
+  const url = substitute(step.url, substitutions) + (params ? `?${params}` : "");
+
+  return `http.${step.method.toLowerCase()}(${JSON.stringify(url)});`;
+}
+
 function emitStep(step: Step, substitutions: Substitution[]): string {
   switch (step.type) {
     case "http-request":
-      return `http.${step.method.toLowerCase()}(${substitute(JSON.stringify(step.url), substitutions)});`;
+      return emitHttpRequestStep(step, substitutions);
 
     case "group":
       return `
