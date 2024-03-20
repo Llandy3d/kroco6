@@ -1,14 +1,14 @@
 import type { EditorTab } from "@/lib/stores/editor";
 import { atom, useAtom, useSetAtom } from "jotai";
 
-const openFiles = atom<EditorTab[]>([]);
+const openTabs = atom<EditorTab[]>([]);
 
 const currentHandle = atom<string | null>(null);
 
-const currentFile = atom(
+const currentTab = atom(
   (get) => {
     const handle = get(currentHandle);
-    const files = get(openFiles);
+    const files = get(openTabs);
 
     return files.find((file) => file.handle === handle) ?? null;
   },
@@ -17,20 +17,20 @@ const currentFile = atom(
   },
 );
 
-function useOpenFiles() {
-  return useAtom(openFiles);
+function useOpenTabs() {
+  return useAtom(openTabs);
 }
 
-function useSetOpenFiles() {
-  return useSetAtom(openFiles);
+function useSetOpenTabs() {
+  return useSetAtom(openTabs);
 }
 
-function useCurrentFile() {
-  return useAtom(currentFile);
+function useCurrentTab() {
+  return useAtom(currentTab);
 }
 
-function useSetCurrentFile() {
-  return useSetAtom(currentFile);
+function useSetCurrentTab() {
+  return useSetAtom(currentTab);
 }
 
-export { useCurrentFile, useOpenFiles, useSetCurrentFile, useSetOpenFiles };
+export { useCurrentTab, useOpenTabs, useSetCurrentTab, useSetOpenTabs };

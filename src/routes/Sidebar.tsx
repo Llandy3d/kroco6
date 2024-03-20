@@ -12,16 +12,20 @@ import { ExternalLink, Settings } from "lucide-react";
 import { useEffect, useState } from "react";
 import { SidebarSection } from "./SidebarSection";
 
+import { useToast } from "@/components/ui/use-toast";
 import type { ProjectSettingsTab } from "@/lib/stores/editor";
-import { useOpenFiles, useSetCurrentFile } from "@/routes/test/edit/atoms";
+import { useOpenTabs, useSetCurrentTab } from "@/routes/test/edit/atoms";
+import { parseProjectSettings } from "@/schemas/project";
 import { listen } from "@tauri-apps/api/event";
 import { nanoid } from "nanoid";
 
 function Sidebar() {
-  const setCurrentFile = useSetCurrentFile();
-  const [openFiles, setOpenFiles] = useOpenFiles();
+  const setCurrentFile = useSetCurrentTab();
+  const [openFiles, setOpenFiles] = useOpenTabs();
 
   const [project, setProject] = useState<Project>();
+
+  const { toast } = useToast();
 
   function handleOpenProject() {
     openProject().then((result) => {
@@ -51,7 +55,19 @@ function Sidebar() {
     }
 
     loadProjectSettings(project).then((result) => {
-      const settings = result.type === "default" ? {} : JSON.parse(result.settings);
+      const settings =
+        result.type === "custom"
+          ? parseProjectSettings(JSON.parse(result.settings))
+          : parseProjectSettings({});
+
+      if (!settings.success) {
+        toast({
+          title: "Error",
+          description: "Failed to parse project settings.",
+        });
+
+        return;
+      }
 
       const tab: ProjectSettingsTab = {
         type: "project-settings",
@@ -61,7 +77,8 @@ function Sidebar() {
           result.type === "custom"
             ? { type: "existing", filePath: `${project.root}/k6.json`, original: result.settings }
             : { type: "new", initial: "{}" },
-        settings,
+        rootPath: project.root,
+        settings: settings.output,
       };
 
       setOpenFiles((tabs) => [...tabs, tab]);

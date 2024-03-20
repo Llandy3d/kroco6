@@ -1,4 +1,4 @@
-import { TabsTrigger } from "@/components/ui/tabs";
+import { TabsTrigger } from "@radix-ui/react-tabs";
 import type { ReactNode } from "react";
 
 interface TabButtonProps {

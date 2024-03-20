@@ -1,19 +1,18 @@
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList } from "@/components/ui/tabs";
+import { TabsContent } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import {
   runScriptInCloud,
   runScriptLocally,
-  saveFile,
   type Environment,
   type Project,
   type ProjectConfig,
 } from "@/lib/backend-client";
 import { convertToScript } from "@/lib/stores/blocks/convert";
 import type { Test } from "@/lib/stores/blocks/model/loose";
-import type { BlockTab } from "@/lib/stores/editor";
+import type { BlockTab, EditorTab } from "@/lib/stores/editor";
 import { EMPTY_ENVIRONMENT } from "@/lib/stores/projects";
-import { useSetCurrentFile, useSetOpenFiles } from "@/routes/test/edit/atoms";
+import { EditorTabs, EditorTabsList, EditorTabsTrigger } from "@/views/EditorTabs";
 import { Canvas } from "@/views/blocks-editor/Canvas";
 import { ScriptPreview } from "@/views/blocks-editor/ScriptPreview";
 import { testAtom, useTest } from "@/views/blocks-editor/atoms";
@@ -24,24 +23,21 @@ import type { OpenAPIV3 } from "openapi-types";
 import { useEffect, useState } from "react";
 import { useMemoOne } from "use-memo-one";
 import { TestToolbar } from "../../routes/test/edit/TestToolbar";
-import { TabButton } from "./TabButton";
 
 interface BlocksEditorProps {
-  file: BlockTab;
+  tab: BlockTab;
   project: Project;
   environment: Environment | null;
   onChange: (file: BlockTab) => void;
+  onSave: (file: EditorTab) => void;
 }
 
-function BlocksEditorContainer({ file, project, environment }: BlocksEditorProps) {
+function BlocksEditorContainer({ tab: file, project, environment, onSave }: BlocksEditorProps) {
   const { toast } = useToast();
 
   const [test, setTest] = useTest();
   const [tab, setTab] = useState("build");
   const [running, setRunning] = useState(false);
-
-  const setOpenFiles = useSetOpenFiles();
-  const setCurrentFile = useSetCurrentFile();
 
   async function runTestLocally() {
     try {
@@ -105,16 +101,6 @@ function BlocksEditorContainer({ file, project, environment }: BlocksEditorProps
     }
   }
 
-  async function handleSaveTest() {
-    saveFile(file, JSON.stringify(test)).then((savedFile) => {
-      setOpenFiles((files) =>
-        files.map((file) => (file.handle === savedFile.handle ? savedFile : file)),
-      );
-
-      setCurrentFile(file.handle);
-    });
-  }
-
   function handleTestChange(test: Test) {
     setTest(test);
   }
@@ -130,25 +116,20 @@ function BlocksEditorContainer({ file, project, environment }: BlocksEditorProps
 
   return (
     <div className="flex flex-auto">
-      <Tabs className="flex flex-auto flex-col" value={tab} onValueChange={setTab}>
-        <TestToolbar
-          project={project}
-          file={file}
-          running={running}
-          leftItems={
-            <TabsList className="bg-default flex rounded-none shadow-none">
-              <TabButton value="build">
-                <Layers size={14} /> Build
-              </TabButton>
-              <TabButton value="library">
-                <Book size={14} /> Library
-              </TabButton>
-              <TabButton value="script">
-                <Code size={14} /> Script
-              </TabButton>
-            </TabsList>
-          }
-          rightItems={
+      <EditorTabs value={tab} onValueChange={setTab}>
+        <EditorTabsList className="justify-between">
+          <div className="flex">
+            <EditorTabsTrigger value="build">
+              <Layers size={14} /> Build
+            </EditorTabsTrigger>
+            <EditorTabsTrigger value="library">
+              <Book size={14} /> Library
+            </EditorTabsTrigger>
+            <EditorTabsTrigger value="script">
+              <Code size={14} /> Script
+            </EditorTabsTrigger>
+          </div>
+          <div className="flex items-center">
             <Button
               size="icon"
               className="rounded-full"
@@ -157,11 +138,17 @@ function BlocksEditorContainer({ file, project, environment }: BlocksEditorProps
             >
               <ScrollText size={14} />
             </Button>
-          }
-          onRunLocally={runTestLocally}
-          onRunInCloud={runTestInCloud}
-          onSave={handleSaveTest}
-        />
+            <TestToolbar
+              project={project}
+              file={file}
+              running={running}
+              onRunLocally={runTestLocally}
+              onRunInCloud={runTestInCloud}
+              onSave={onSave}
+            />
+          </div>
+        </EditorTabsList>
+
         <TabsContent value="build" className="mt-0 flex-auto">
           <Canvas test={test} onChange={handleTestChange} />
         </TabsContent>
@@ -171,12 +158,12 @@ function BlocksEditorContainer({ file, project, environment }: BlocksEditorProps
         <TabsContent value="script" className="mt-0 flex-auto">
           <ScriptPreview test={test} />
         </TabsContent>
-      </Tabs>
+      </EditorTabs>
     </div>
   );
 }
 
-function BlocksEditor({ file, project, environment, onChange }: BlocksEditorProps) {
+function BlocksEditor({ tab: file, project, environment, onChange, onSave }: BlocksEditorProps) {
   const store = useMemoOne(() => {
     return createStore();
   }, []);
@@ -201,10 +188,11 @@ function BlocksEditor({ file, project, environment, onChange }: BlocksEditorProp
   return (
     <Provider store={store}>
       <BlocksEditorContainer
-        file={file}
+        tab={file}
         project={project}
         environment={environment}
         onChange={onChange}
+        onSave={onSave}
       />
     </Provider>
   );

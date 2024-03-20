@@ -6,4 +6,8 @@ function getPathName(path: string) {
   return path.split("/").pop();
 }
 
-export { getExtension, getPathName };
+function join(...parts: string[]) {
+  return parts.map((part) => part.replace(/^\/$/g, "")).join("/");
+}
+
+export { getExtension, getPathName, join };

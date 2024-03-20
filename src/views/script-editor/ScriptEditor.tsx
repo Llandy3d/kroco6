@@ -2,31 +2,27 @@ import { useToast } from "@/components/ui/use-toast";
 import {
   runScriptInCloud,
   runScriptLocally,
-  saveFile,
   type Project,
   type ProjectConfig,
 } from "@/lib/backend-client";
 import type { EditorTab, ScriptTab } from "@/lib/stores/editor";
-import { useSetCurrentFile, useSetOpenFiles } from "@/routes/test/edit/atoms";
 import * as monaco from "monaco-editor";
 import { useRef, useState } from "react";
 import { TestToolbar } from "../../routes/test/edit/TestToolbar";
 
 interface ScriptEditorProps {
-  file: ScriptTab;
+  tab: ScriptTab;
   project: Project;
   onChange: (file: ScriptTab) => void;
+  onSave: (file: EditorTab) => void;
 }
 
-function ScriptEditor({ file, project, onChange }: ScriptEditorProps) {
+function ScriptEditor({ tab: file, project, onChange, onSave }: ScriptEditorProps) {
   const { toast } = useToast();
 
   const editor = useRef<monaco.editor.IStandaloneCodeEditor>();
 
   const [running, setRunning] = useState(false);
-
-  const setOpenFiles = useSetOpenFiles();
-  const setCurrentFile = useSetCurrentFile();
 
   async function handleRunLocally() {
     try {
@@ -64,16 +60,6 @@ function ScriptEditor({ file, project, onChange }: ScriptEditorProps) {
     }
   }
 
-  async function handleSaveTest(file: EditorTab) {
-    saveFile(file, file.type === "script" ? file.script : "").then((savedFile) => {
-      setOpenFiles((files) =>
-        files.map((file) => (file.handle === savedFile.handle ? savedFile : file)),
-      );
-
-      setCurrentFile(file.handle);
-    });
-  }
-
   function handleContainerMount(container: HTMLDivElement | null) {
     if (container === null || editor.current !== undefined) {
       return;
@@ -101,7 +87,7 @@ function ScriptEditor({ file, project, onChange }: ScriptEditorProps) {
         running={running}
         onRunLocally={handleRunLocally}
         onRunInCloud={handleRunInCloud}
-        onSave={handleSaveTest}
+        onSave={onSave}
       />
 
       <div ref={handleContainerMount} className="full-w full-h flex-auto"></div>

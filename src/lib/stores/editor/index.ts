@@ -1,4 +1,5 @@
 import type { Test } from "@/lib/stores/blocks/model/loose";
+import type { ProjectSettings } from "@/schemas/project";
 
 interface NewPath {
   type: "new";
@@ -31,7 +32,8 @@ interface ScriptTab extends TabBase {
 
 interface ProjectSettingsTab extends TabBase {
   type: "project-settings";
-  settings: unknown;
+  rootPath: string;
+  settings: ProjectSettings;
 }
 
 type EditorTab = BlockTab | ScriptTab | ProjectSettingsTab;

@@ -1,13 +1,18 @@
 import "./globals.css";
 
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { Page } from "./routes/Page";
 
+const client = new QueryClient();
+
 function App() {
   return (
     <StrictMode>
-      <Page />
+      <QueryClientProvider client={client}>
+        <Page />
+      </QueryClientProvider>
     </StrictMode>
   );
 }

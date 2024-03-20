@@ -89,7 +89,7 @@ function TestToolbar({
   }
 
   return (
-    <div className="flex justify-between rounded-none border-b-[1px] p-4">
+    <div className="flex justify-between rounded-none">
       <div>{leftItems}</div>
       <div className="flex items-center gap-2">
         {rightItems}

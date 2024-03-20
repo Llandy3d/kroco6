@@ -19,7 +19,7 @@ import { exhaustive } from "@/lib/utils/typescript";
 import { PlaceholderIcon } from "@/routes/PlaceholderIcon";
 import { ProjectIcon } from "@/routes/ProjectIcon";
 import { loadFile } from "@/routes/actions";
-import { useCurrentFile, useOpenFiles, useSetOpenFiles } from "@/routes/test/edit/atoms";
+import { useCurrentTab, useOpenTabs, useSetOpenTabs } from "@/routes/test/edit/atoms";
 import { Box, ChevronDown, ChevronRight, FileCode, FolderClosed, FolderOpen } from "lucide-react";
 import { useRef, type FocusEvent, type KeyboardEvent, type ReactNode } from "react";
 import {
@@ -231,8 +231,8 @@ function FileNode({ tree, node, entry }: NodeRendererProps<TreeItem> & { entry: 
 
   const autoFocus = useRef(true);
 
-  const [openFiles, setOpenFiles] = useOpenFiles();
-  const [currentFile, setCurrentFile] = useCurrentFile();
+  const [openFiles, setOpenFiles] = useOpenTabs();
+  const [currentFile, setCurrentFile] = useCurrentTab();
 
   function handleClick() {
     const existingFile = openFiles.find(
@@ -375,7 +375,7 @@ interface ProjectTreeProps {
 function ProjectTree({ project, onChange }: ProjectTreeProps) {
   const items: TreeItem[] = [toProjectItem(project.directory)];
 
-  const setOpenFiles = useSetOpenFiles();
+  const setOpenFiles = useSetOpenTabs();
 
   const container = useRef<HTMLDivElement | null>(null);
 
