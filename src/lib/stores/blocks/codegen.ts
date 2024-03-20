@@ -29,14 +29,31 @@ function substitute(target: string, substitutions: Substitution[]) {
   return substitutions.reduce((acc, [name, value]) => acc.replaceAll(`{{${name}}}`, value), target);
 }
 
+function emitHttpOptionsObject(headers: [string, string][]) {
+  const headersObject = headers
+    .map(([name, value]) => `${JSON.stringify(name)}: ${JSON.stringify(value)}`)
+    .join(",\n");
+
+  return `{
+    headers: {
+      ${headersObject}
+    }
+  }`;
+}
+
 function emitHttpRequestStep(step: HttpRequestStep, substitutions: Substitution[]): string {
+  const headers = Object.entries(step.headers);
+  const optionsObject = headers.length > 0 ? emitHttpOptionsObject(headers) : null;
+
   const params = new URLSearchParams(
     step.parameters.map((param) => [param.name, param.value]),
   ).toString();
 
   const url = substitute(step.url, substitutions) + (params ? `?${params}` : "");
 
-  return `http.${step.method.toLowerCase()}(${JSON.stringify(url)});`;
+  const args = [JSON.stringify(url), optionsObject].filter(Boolean).join(", ");
+
+  return `http.${step.method.toLowerCase()}(${args});`;
 }
 
 function emitStep(step: Step, substitutions: Substitution[]): string {

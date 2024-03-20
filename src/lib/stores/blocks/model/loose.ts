@@ -102,6 +102,7 @@ interface HttpRequestBlock extends ChainableBlock {
   url: string;
   method: string;
   parameters: NameValuePair[];
+  headers: NameValuePair[];
   next: Block | null;
 }
 
@@ -113,6 +114,7 @@ const httpRequestBlock: BaseSchema<HttpRequestBlock> = merge([
     method: string(),
     url: string(),
     parameters: array(nameValuePair),
+    headers: array(nameValuePair),
     next: nullable(lazy(() => block)),
   }),
 ]);

@@ -18,21 +18,33 @@ function* enumerate(start: model.StepBlock | null): Generator<model.StepBlock> {
 }
 
 function toHttpRequestStep(model: model.LibraryBlock | model.HttpRequestBlock): HttpRequestStep {
-  const parameters =
-    model.type === "http-request"
-      ? model.parameters.map((parameter) => ({
+  switch (model.type) {
+    case "http-request":
+      return {
+        type: "http-request",
+        name: model.name,
+        method: model.method,
+        parameters: model.parameters.map((parameter) => ({
           name: parameter.name,
           value: parameter.value,
-        }))
-      : [];
+        })),
+        headers: Object.fromEntries(model.headers.map((header) => [header.name, header.value])),
+        url: model.url,
+      };
 
-  return {
-    type: "http-request",
-    name: model.name,
-    method: model.method,
-    parameters,
-    url: model.url,
-  };
+    case "library":
+      return {
+        type: "http-request",
+        name: model.name,
+        method: model.method,
+        parameters: [],
+        headers: {},
+        url: model.url,
+      };
+
+    default:
+      return exhaustive(model);
+  }
 }
 
 function toCheck(model: model.Check): Check {

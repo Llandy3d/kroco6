@@ -25,7 +25,7 @@ import {
   type CollisionDetection,
   type DragEndEvent,
 } from "@dnd-kit/core";
-import { useState, type MouseEvent } from "react";
+import { useState, type MouseEvent, type ReactNode } from "react";
 
 import { instantiate, type Block, type Test } from "@/lib/stores/blocks/model/loose";
 import { detach } from "@/lib/stores/blocks/model/utils";
@@ -72,6 +72,19 @@ const styles = {
   `,
 };
 
+interface SidebarProps {
+  align: "left" | "right";
+  children: ReactNode;
+}
+
+function Sidebar({ align, children }: SidebarProps) {
+  return (
+    <div className={cn("absolute bottom-0 top-0 z-10 bg-white", align === "right" && "right-0")}>
+      {children}
+    </div>
+  );
+}
+
 interface CanvasRootProps {
   test: Test;
 }
@@ -94,11 +107,13 @@ function CanvasRoot({ test }: CanvasRootProps) {
   }
 
   return (
-    <div className="relative flex h-full w-full items-stretch overflow-hidden">
-      <Toolbox test={test} />
+    <div className="relative h-full w-full">
+      <Sidebar align="left">
+        <Toolbox test={test} />
+      </Sidebar>
       <div
         ref={setNodeRef}
-        className={cn(styles.grid, "relative flex-auto bg-[#F9F8FC]")}
+        className={cn(styles.grid, "relative z-0 h-full w-full bg-[#F9F8FC]")}
         onClick={handleClick}
       >
         {test.roots.map((root) => {
@@ -109,7 +124,9 @@ function CanvasRoot({ test }: CanvasRootProps) {
           );
         })}
       </div>
-      <BlockSidebar />
+      <Sidebar align="right">
+        <BlockSidebar />
+      </Sidebar>
     </div>
   );
 }

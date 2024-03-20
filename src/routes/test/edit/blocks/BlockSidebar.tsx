@@ -34,45 +34,57 @@ interface NameValuePair {
   value: string;
 }
 
-interface QueryParameterInputProps {
-  parameter: NameValuePair;
+interface NameValueInputProps {
+  entry: NameValuePair;
   onChange: (value: NameValuePair) => void;
   onCommit?: (value: NameValuePair) => void;
   onDelete?: (value: NameValuePair) => void;
 }
 
-function QueryParameterInput({
-  parameter,
-  onChange,
-  onCommit,
-  onDelete,
-}: QueryParameterInputProps) {
+function NameValueInput({ entry, onChange, onCommit, onDelete }: NameValueInputProps) {
   function handleNameChange(event: ChangeEvent<HTMLInputElement>) {
     onChange({
-      ...parameter,
+      ...entry,
       name: event.target.value,
     });
   }
 
   function handleValueChange(event: ChangeEvent<HTMLInputElement>) {
     onChange({
-      ...parameter,
+      ...entry,
       value: event.target.value,
     });
   }
 
   function handleBlur() {
-    onCommit?.(parameter);
+    onCommit?.(entry);
   }
 
   function handleDeleteClick() {
-    onDelete?.(parameter);
+    onDelete?.(entry);
   }
 
   return (
     <div className="mb-2 flex items-center gap-2">
-      <Input value={parameter.name} onBlur={handleBlur} onChange={handleNameChange} /> ={" "}
-      <Input value={parameter.value} onBlur={handleBlur} onChange={handleValueChange} />
+      <Input
+        value={entry.name}
+        placeholder="Name"
+        autoCapitalize="off"
+        autoCorrect="off"
+        autoComplete="off"
+        onBlur={handleBlur}
+        onChange={handleNameChange}
+      />{" "}
+      ={" "}
+      <Input
+        value={entry.value}
+        placeholder="Value"
+        autoCapitalize="off"
+        autoCorrect="off"
+        autoComplete="off"
+        onBlur={handleBlur}
+        onChange={handleValueChange}
+      />
       <button className="disabled:invisible" disabled={onDelete === undefined}>
         <Trash2 size={16} onClick={handleDeleteClick} />
       </button>
@@ -80,38 +92,38 @@ function QueryParameterInput({
   );
 }
 
-interface QueryParameterEditorProps {
-  parameters: NameValuePair[];
-  onChange: (parameters: NameValuePair[]) => void;
+interface NameValueEditorProps {
+  entries: NameValuePair[];
+  onChange: (entry: NameValuePair[]) => void;
 }
 
-function QueryParameterEditor({ parameters, onChange }: QueryParameterEditorProps) {
-  const [newParameter, setNewParameter] = useState<NameValuePair>(() => ({
+function NameValueEditor({ entries, onChange }: NameValueEditorProps) {
+  const [newEntry, setNewEntry] = useState<NameValuePair>(() => ({
     id: nanoid(),
     name: "",
     value: "",
   }));
 
-  function handleParameterChange(value: NameValuePair) {
-    onChange(parameters.map((param) => (param.id === value.id ? value : param)));
+  function handleEntryChange(value: NameValuePair) {
+    onChange(entries.map((param) => (param.id === value.id ? value : param)));
   }
 
-  function handleParameterDelete(value: NameValuePair) {
-    onChange(parameters.filter((param) => param.id !== value.id));
+  function handleEntryDelete(value: NameValuePair) {
+    onChange(entries.filter((param) => param.id !== value.id));
   }
 
-  function handleNewParameterChange(value: NameValuePair) {
-    setNewParameter(value);
+  function handleNewEntryChange(value: NameValuePair) {
+    setNewEntry(value);
   }
 
-  function handleNewParameterCommit(parameter: NameValuePair) {
+  function handleEntryCommit(parameter: NameValuePair) {
     if (parameter.name === "") {
       return;
     }
 
-    onChange([...parameters, parameter]);
+    onChange([...entries, parameter]);
 
-    setNewParameter({
+    setNewEntry({
       id: nanoid(),
       name: "",
       value: "",
@@ -120,18 +132,18 @@ function QueryParameterEditor({ parameters, onChange }: QueryParameterEditorProp
 
   return (
     <div>
-      {[...parameters, newParameter].map((param, index) => {
+      {[...entries, newEntry].map((entry, index) => {
         // This is a roundabout way of doing things, but it makes sure that
         // focus is kept when tabbing to the value input.
-        const isNewParameter = index === parameters.length;
+        const isNewEntry = index === entries.length;
 
         return (
-          <QueryParameterInput
-            key={param.id}
-            parameter={param}
-            onChange={isNewParameter ? handleNewParameterChange : handleParameterChange}
-            onCommit={isNewParameter ? handleNewParameterCommit : undefined}
-            onDelete={isNewParameter ? undefined : handleParameterDelete}
+          <NameValueInput
+            key={entry.id}
+            entry={entry}
+            onChange={isNewEntry ? handleNewEntryChange : handleEntryChange}
+            onCommit={isNewEntry ? handleEntryCommit : undefined}
+            onDelete={isNewEntry ? undefined : handleEntryDelete}
           />
         );
       })}
@@ -169,13 +181,32 @@ function HttpRequestSidebar({ block }: HttpRequestSidebarProps) {
     );
   }
 
+  function handleHeadersChange(headers: NameValuePair[]) {
+    setTest((test) =>
+      updateBlock(test, {
+        ...block,
+        headers,
+      }),
+    );
+  }
+
   return (
     <VerticalTabs current={current} align="right" tabs={tabs} onChange={setCurrent}>
-      <VerticalTabsContent value="parameters">
-        <QueryParameterEditor parameters={block.parameters} onChange={handleParametersChange} />
+      <VerticalTabsContent className="min-w-[32rem]" value="parameters">
+        <div className="p-2">
+          <h2 className="text-l mb-4 font-semibold uppercase">Query parameters</h2>
+          <NameValueEditor entries={block.parameters} onChange={handleParametersChange} />
+        </div>
       </VerticalTabsContent>
-      <VerticalTabsContent value="headers">Hello headers!</VerticalTabsContent>
-      <VerticalTabsContent value="body">Hello body!</VerticalTabsContent>
+      <VerticalTabsContent className="min-w-[32rem]" value="headers">
+        <div className="p-2">
+          <h2 className="text-l mb-4 font-semibold uppercase">Headers</h2>
+          <NameValueEditor entries={block.headers} onChange={handleHeadersChange} />
+        </div>
+      </VerticalTabsContent>
+      <VerticalTabsContent className="min-w-[32rem]" value="body">
+        Hello body!
+      </VerticalTabsContent>
     </VerticalTabs>
   );
 }
@@ -202,7 +233,7 @@ function BlockSidebar() {
   }
 
   return (
-    <div className="absolute bottom-0 right-0 top-0 flex bg-white">
+    <div className="absolute bottom-0 right-0 top-0 flex  bg-white">
       <SidebarEditor block={selectedBlock} />
     </div>
   );

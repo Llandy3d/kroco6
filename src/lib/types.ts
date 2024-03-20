@@ -35,6 +35,7 @@ interface HttpRequestStep {
     name: string;
     value: string;
   }>;
+  headers: Record<string, string>;
   url: string;
 }
 

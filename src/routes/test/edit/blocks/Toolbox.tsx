@@ -67,6 +67,7 @@ const CATEGORIES: ToolboxCategory[] = [
         url: "",
         name: "",
         parameters: [],
+        headers: [],
         next: null,
       }),
       defineTemplate({
@@ -176,7 +177,7 @@ function Toolbox({ test }: ToolboxProps) {
       {categories.map((category) => {
         return (
           <VerticalTabsContent key={category.id} value={category.id}>
-            <ul className="">
+            <ul>
               {category.blocks.map((template) => {
                 return (
                   <li key={template.id} className="p-2">
