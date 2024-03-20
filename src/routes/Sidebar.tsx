@@ -1,15 +1,26 @@
 import { Logo } from "@/components/illustrations/Logo";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { openProject, refreshProject, type Project } from "@/lib/backend-client";
+import {
+  loadProjectSettings,
+  openProject,
+  refreshProject,
+  type Project,
+} from "@/lib/backend-client";
 import { ProjectTree } from "@/routes/ProjectTree";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Settings } from "lucide-react";
 import { useEffect, useState } from "react";
 import { SidebarSection } from "./SidebarSection";
 
+import type { ProjectSettingsTab } from "@/lib/stores/editor";
+import { useOpenFiles, useSetCurrentFile } from "@/routes/test/edit/atoms";
 import { listen } from "@tauri-apps/api/event";
+import { nanoid } from "nanoid";
 
 function Sidebar() {
+  const setCurrentFile = useSetCurrentFile();
+  const [openFiles, setOpenFiles] = useOpenFiles();
+
   const [project, setProject] = useState<Project>();
 
   function handleOpenProject() {
@@ -24,6 +35,38 @@ function Sidebar() {
 
   function handleProjectChange(project: Project) {
     setProject(project);
+  }
+
+  function handleOpenProjectSettings() {
+    if (project === undefined) {
+      return;
+    }
+
+    const existing = openFiles.find((file) => file.type === "project-settings");
+
+    if (existing) {
+      setCurrentFile(existing.handle);
+
+      return;
+    }
+
+    loadProjectSettings(project).then((result) => {
+      const settings = result.type === "default" ? {} : JSON.parse(result.settings);
+
+      const tab: ProjectSettingsTab = {
+        type: "project-settings",
+        handle: nanoid(),
+        name: "Project Settings",
+        path:
+          result.type === "custom"
+            ? { type: "existing", filePath: `${project.root}/k6.json`, original: result.settings }
+            : { type: "new", initial: "{}" },
+        settings,
+      };
+
+      setOpenFiles((tabs) => [...tabs, tab]);
+      setCurrentFile(tab.handle);
+    });
   }
 
   useEffect(() => {
@@ -53,7 +96,12 @@ function Sidebar() {
 
       {project && (
         <>
-          <h2 className="font-bold">Project</h2>
+          <h2 className="flex justify-between font-bold">
+            Project{" "}
+            <button onClick={handleOpenProjectSettings}>
+              <Settings size={18} />
+            </button>
+          </h2>
           <ProjectTree project={project} onChange={handleProjectChange} />
         </>
       )}

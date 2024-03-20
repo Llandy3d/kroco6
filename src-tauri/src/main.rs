@@ -56,6 +56,7 @@ fn main() {
             load_project_config,
             save_project_config,
             js::open_project,
+            js::load_project_settings,
             js::open_file,
             js::save_file,
             js::save_file_as,

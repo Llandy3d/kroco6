@@ -1,7 +1,7 @@
-import type { VirtualFile } from "@/lib/stores/editor";
+import type { EditorTab } from "@/lib/stores/editor";
 import { atom, useAtom, useSetAtom } from "jotai";
 
-const openFiles = atom<VirtualFile[]>([]);
+const openFiles = atom<EditorTab[]>([]);
 
 const currentHandle = atom<string | null>(null);
 

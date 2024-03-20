@@ -287,3 +287,30 @@ pub async fn delete_directory<R: Runtime>(
 
     Ok(DeleteDirectoryResult { path, project })
 }
+
+#[derive(Clone, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case", tag = "type")]
+pub enum LoadProjectSettingsResult {
+    #[serde(rename_all = "camelCase")]
+    Default,
+    #[serde(rename_all = "camelCase")]
+    Custom { settings: String },
+}
+
+#[tauri::command]
+pub async fn load_project_settings<R: Runtime>(
+    _app: tauri::AppHandle<R>,
+    _window: tauri::Window<R>,
+    root: String,
+) -> Result<LoadProjectSettingsResult, String> {
+    let exists = Path::new(&format!("{}/k6.json", root)).exists();
+
+    if !exists {
+        return Ok(LoadProjectSettingsResult::Default);
+    }
+
+    let settings = fs::read_to_string(format!("{}/k6.json", root))
+        .map_err(|err| format!("Failed to read project settings at '{}': {}", root, err))?;
+
+    Ok(LoadProjectSettingsResult::Custom { settings })
+}

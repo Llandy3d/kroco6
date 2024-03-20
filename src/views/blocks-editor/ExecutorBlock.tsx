@@ -1,10 +1,10 @@
 import { detachBlock, updateBlock } from "@/lib/stores/blocks";
 import type { ExecutorBlock as ExecutorBlockType } from "@/lib/stores/blocks/model/loose";
-import { useSetTest } from "@/routes/test/edit/blocks/atoms";
-import { EXECUTOR_COLOR } from "@/routes/test/edit/blocks/colors";
-import { StringInput } from "@/routes/test/edit/blocks/inputs/StringInput";
-import { Block } from "@/routes/test/edit/blocks/primitives/Block";
-import { Field } from "@/routes/test/edit/blocks/primitives/Field";
+import { useSetTest } from "@/views/blocks-editor/atoms";
+import { EXECUTOR_COLOR } from "@/views/blocks-editor/colors";
+import { StringInput } from "@/views/blocks-editor/inputs/StringInput";
+import { Block } from "@/views/blocks-editor/primitives/Block";
+import { Field } from "@/views/blocks-editor/primitives/Field";
 
 interface ExecutorProps {
   executor: ExecutorBlockType["executor"];

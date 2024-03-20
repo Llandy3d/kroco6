@@ -17,17 +17,17 @@ import {
   type Project,
   type ProjectConfig,
 } from "@/lib/backend-client";
-import type { VirtualFile } from "@/lib/stores/editor";
+import type { EditorTab } from "@/lib/stores/editor";
 import { Loader2, PlayCircle, Save, UploadCloud } from "lucide-react";
 import { useEffect, useState, type ChangeEvent, type ReactNode } from "react";
 
 interface TestToolbarProps {
-  file: VirtualFile;
+  file: EditorTab;
   project: Project;
   running: boolean;
   leftItems?: ReactNode;
   rightItems?: ReactNode;
-  onSave: (file: VirtualFile) => void;
+  onSave: (file: EditorTab) => void;
   onRunLocally: () => void;
   onRunInCloud: (config: ProjectConfig) => void;
 }

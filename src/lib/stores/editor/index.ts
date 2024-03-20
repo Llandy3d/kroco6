@@ -13,29 +13,35 @@ interface ExistingPath {
 
 type Path = NewPath | ExistingPath;
 
-interface OpenFileBase {
+interface TabBase {
   handle: string;
   name: string;
   path: Path;
 }
 
-interface BlockFile extends OpenFileBase {
+interface BlockTab extends TabBase {
   type: "blocks";
   blocks: Test;
 }
 
-interface ScriptFile extends OpenFileBase {
+interface ScriptTab extends TabBase {
   type: "script";
   script: string;
 }
 
-type VirtualFile = BlockFile | ScriptFile;
+interface ProjectSettingsTab extends TabBase {
+  type: "project-settings";
+  settings: unknown;
+}
+
+type EditorTab = BlockTab | ScriptTab | ProjectSettingsTab;
 
 export {
-  type BlockFile,
+  type BlockTab,
+  type EditorTab,
   type ExistingPath,
   type NewPath,
   type Path,
-  type ScriptFile,
-  type VirtualFile,
+  type ProjectSettingsTab,
+  type ScriptTab,
 };

@@ -6,16 +6,16 @@ import {
   type Project,
   type ProjectConfig,
 } from "@/lib/backend-client";
-import type { ScriptFile, VirtualFile } from "@/lib/stores/editor";
+import type { EditorTab, ScriptTab } from "@/lib/stores/editor";
 import { useSetCurrentFile, useSetOpenFiles } from "@/routes/test/edit/atoms";
 import * as monaco from "monaco-editor";
 import { useRef, useState } from "react";
-import { TestToolbar } from "./TestToolbar";
+import { TestToolbar } from "../../routes/test/edit/TestToolbar";
 
 interface ScriptEditorProps {
-  file: ScriptFile;
+  file: ScriptTab;
   project: Project;
-  onChange: (file: ScriptFile) => void;
+  onChange: (file: ScriptTab) => void;
 }
 
 function ScriptEditor({ file, project, onChange }: ScriptEditorProps) {
@@ -64,7 +64,7 @@ function ScriptEditor({ file, project, onChange }: ScriptEditorProps) {
     }
   }
 
-  async function handleSaveTest(file: VirtualFile) {
+  async function handleSaveTest(file: EditorTab) {
     saveFile(file, file.type === "script" ? file.script : "").then((savedFile) => {
       setOpenFiles((files) =>
         files.map((file) => (file.handle === savedFile.handle ? savedFile : file)),

@@ -8,15 +8,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Project } from "@/lib/backend-client";
 import { NEW_SCRIPT } from "@/lib/files";
 import { EMPTY_BLOCK_TEST } from "@/lib/stores/blocks/constants";
-import type { BlockFile, VirtualFile } from "@/lib/stores/editor";
+import type { BlockTab, EditorTab } from "@/lib/stores/editor";
 import { exhaustive } from "@/lib/utils/typescript";
+import { ProjectIcon } from "@/routes/ProjectIcon";
 import { useCurrentFile, useOpenFiles } from "@/routes/test/edit/atoms";
+import { ProjectSettings } from "@/views/project-settings/ProjectSettings";
 import { Box, FileCode, PlusIcon, X } from "lucide-react";
 import { nanoid } from "nanoid";
 import { forwardRef, type HTMLAttributes } from "react";
+import { BlocksEditor } from "../../../views/blocks-editor/BlocksEditor";
+import { ScriptEditor } from "../../../views/script-editor/ScriptEditor";
 import { EmptyEditor } from "./EmptyEditor";
-import { ScriptEditor } from "./ScriptEditor";
-import { BlocksEditor } from "./blocks/BlocksEditor";
 
 type TabButtonProps = HTMLAttributes<HTMLButtonElement> & {
   "data-state"?: string;
@@ -45,9 +47,9 @@ const TabButton = forwardRef<HTMLDivElement, TabButtonProps>(function TabButton(
 });
 
 interface TestEditorProps {
-  file: VirtualFile;
+  file: EditorTab;
   project: Project;
-  onChange: (file: VirtualFile) => void;
+  onChange: (file: EditorTab) => void;
 }
 
 function TestEditor({ file, project, onChange }: TestEditorProps) {
@@ -58,9 +60,34 @@ function TestEditor({ file, project, onChange }: TestEditorProps) {
     case "blocks":
       return <BlocksEditor file={file} project={project} environment={null} onChange={onChange} />;
 
+    case "project-settings":
+      return <ProjectSettings />;
+
     default:
       return exhaustive(file);
   }
+}
+
+interface TabTextProps {
+  file: EditorTab;
+}
+
+function TabText({ file }: TabTextProps) {
+  if (file.type === "project-settings") {
+    return (
+      <>
+        <ProjectIcon size={14} /> Project settings
+      </>
+    );
+  }
+
+  return (
+    <>
+      {file.type === "blocks" ? <Box size={14} /> : <FileCode size={14} />}
+      {file.name}
+      {file.path.type === "new" && "*"}
+    </>
+  );
 }
 
 interface EditorProps {
@@ -75,7 +102,7 @@ function Editor({ project }: EditorProps) {
     setCurrentFile(handle ?? null);
   }
 
-  function handleClose(file: VirtualFile) {
+  function handleClose(file: EditorTab) {
     const index = openFiles.findIndex((f) => f.handle === file.handle);
 
     setCurrentFile(openFiles[index + 1]?.handle ?? openFiles[index - 1]?.handle ?? null);
@@ -83,7 +110,7 @@ function Editor({ project }: EditorProps) {
   }
 
   function handleNewBlocksFile() {
-    const newFile: BlockFile = {
+    const newFile: BlockTab = {
       type: "blocks",
       name: "New Blocks",
       handle: nanoid(),
@@ -99,7 +126,7 @@ function Editor({ project }: EditorProps) {
   }
 
   function handleNewScriptFile() {
-    const newFile: VirtualFile = {
+    const newFile: EditorTab = {
       type: "script",
       name: "New Script",
       handle: nanoid(),
@@ -114,7 +141,7 @@ function Editor({ project }: EditorProps) {
     setCurrentFile(newFile.handle);
   }
 
-  function handleFileChange(file: VirtualFile) {
+  function handleFileChange(file: EditorTab) {
     setOpenFiles(openFiles.map((current) => (current.handle === file.handle ? file : current)));
   }
 
@@ -129,9 +156,7 @@ function Editor({ project }: EditorProps) {
           return (
             <TabsTrigger asChild key={file.handle} value={file.handle}>
               <TabButton onClose={() => handleClose(file)}>
-                {file.type === "blocks" ? <Box size={14} /> : <FileCode size={14} />}
-                {file.name}
-                {file.path.type === "new" && "*"}
+                <TabText file={file} />
               </TabButton>
             </TabsTrigger>
           );

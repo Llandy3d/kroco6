@@ -1,4 +1,4 @@
-import type { VirtualFile } from "@/lib/stores/editor";
+import type { EditorTab } from "@/lib/stores/editor";
 import { invoke } from "@tauri-apps/api/tauri";
 
 interface Environment {
@@ -153,7 +153,7 @@ interface SaveCancelled {
 
 type SaveFileResult = SavedResult | SaveCancelled;
 
-async function saveFile(file: VirtualFile, content: string): Promise<VirtualFile> {
+async function saveFile(file: EditorTab, content: string): Promise<EditorTab> {
   const result =
     file.path.type === "existing"
       ? await invoke<SaveFileResult>("save_file", { params: { path: file.path.filePath, content } })
@@ -174,7 +174,7 @@ async function saveFile(file: VirtualFile, content: string): Promise<VirtualFile
   };
 }
 
-function saveFileAs(file: VirtualFile, content: string) {
+function saveFileAs(file: EditorTab, content: string) {
   return invoke<SaveFileResult>("save_file_as", {
     params: {
       kind: file.type,
@@ -217,12 +217,28 @@ function deleteDirectory(root: string, path: string) {
   return invoke<DeleteDirectoryResult>("delete_directory", { root, path });
 }
 
+interface DefaultProjectSettings {
+  type: "default";
+}
+
+interface CustomProjectSettings {
+  type: "custom";
+  settings: string;
+}
+
+type LoadProjectSettingsResult = DefaultProjectSettings | CustomProjectSettings;
+
+function loadProjectSettings(project: Project) {
+  return invoke<LoadProjectSettingsResult>("load_project_settings", { root: project.root });
+}
+
 export {
   createDirectory,
   deleteEntry,
   getCloudTests,
   listProjects,
   loadProjectConfig,
+  loadProjectSettings,
   openFile,
   openProject,
   refreshProject,

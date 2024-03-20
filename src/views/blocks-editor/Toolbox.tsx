@@ -5,12 +5,8 @@ import {
   type Test,
 } from "@/lib/stores/blocks/model/loose";
 import { exhaustive, isTruthy, type Falsy } from "@/lib/utils/typescript";
-import { AnyBlock } from "@/routes/test/edit/blocks/AnyBlock";
-import {
-  VerticalTabs,
-  VerticalTabsContent,
-  type Tab,
-} from "@/routes/test/edit/blocks/VerticalTabs";
+import { AnyBlock } from "@/views/blocks-editor/AnyBlock";
+import { VerticalTabs, VerticalTabsContent, type Tab } from "@/views/blocks-editor/VerticalTabs";
 import { CloudCog, FileSliders, Layers } from "lucide-react";
 import { nanoid } from "nanoid";
 import { useMemo, useState } from "react";

@@ -1,14 +1,14 @@
 import { type Block } from "@/lib/stores/blocks/model/loose";
 import { exhaustive } from "@/lib/utils/typescript";
-import { CheckBlock } from "@/routes/test/edit/blocks/CheckBlock";
-import { ExecutorBlock } from "@/routes/test/edit/blocks/ExecutorBlock";
-import { GroupBlock } from "@/routes/test/edit/blocks/GroupBlock";
-import { HttpRequestBlock } from "@/routes/test/edit/blocks/HttpRequestBlock";
-import { LibraryBlock } from "@/routes/test/edit/blocks/LibraryBlock";
-import { ScenarioBlock } from "@/routes/test/edit/blocks/ScenarioBlock";
-import { SleepBlock } from "@/routes/test/edit/blocks/SleepBlock";
-import { useDragEnabled } from "@/routes/test/edit/blocks/dnd/DragEnabled";
-import { Draggable } from "@/routes/test/edit/blocks/dnd/Draggable";
+import { CheckBlock } from "@/views/blocks-editor/CheckBlock";
+import { ExecutorBlock } from "@/views/blocks-editor/ExecutorBlock";
+import { GroupBlock } from "@/views/blocks-editor/GroupBlock";
+import { HttpRequestBlock } from "@/views/blocks-editor/HttpRequestBlock";
+import { LibraryBlock } from "@/views/blocks-editor/LibraryBlock";
+import { ScenarioBlock } from "@/views/blocks-editor/ScenarioBlock";
+import { SleepBlock } from "@/views/blocks-editor/SleepBlock";
+import { useDragEnabled } from "@/views/blocks-editor/dnd/DragEnabled";
+import { Draggable } from "@/views/blocks-editor/dnd/Draggable";
 
 interface AnyBlockSwitchProps {
   block: Block;

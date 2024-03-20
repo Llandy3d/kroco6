@@ -1,9 +1,9 @@
 import { isTemplate, type Block as BlockType } from "@/lib/stores/blocks/model/loose";
 import { isDescendantOf } from "@/lib/stores/blocks/model/utils";
 import { cn } from "@/lib/utils";
-import type { DropData } from "@/routes/test/edit/blocks/dnd/types";
-import type { Connection } from "@/routes/test/edit/blocks/primitives/connections/types";
-import { toBlockColorStyle, type BlockColor } from "@/routes/test/edit/blocks/primitives/types";
+import type { DropData } from "@/views/blocks-editor/dnd/types";
+import type { Connection } from "@/views/blocks-editor/primitives/connections/types";
+import { toBlockColorStyle, type BlockColor } from "@/views/blocks-editor/primitives/types";
 import { useDroppable } from "@dnd-kit/core";
 import { css } from "@emotion/css";
 

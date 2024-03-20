@@ -11,26 +11,26 @@ import {
 } from "@/lib/backend-client";
 import { convertToScript } from "@/lib/stores/blocks/convert";
 import type { Test } from "@/lib/stores/blocks/model/loose";
-import type { BlockFile } from "@/lib/stores/editor";
+import type { BlockTab } from "@/lib/stores/editor";
 import { EMPTY_ENVIRONMENT } from "@/lib/stores/projects";
 import { useSetCurrentFile, useSetOpenFiles } from "@/routes/test/edit/atoms";
-import { Canvas } from "@/routes/test/edit/blocks/Canvas";
-import { ScriptPreview } from "@/routes/test/edit/blocks/ScriptPreview";
-import { testAtom, useTest } from "@/routes/test/edit/blocks/atoms";
-import { Library } from "@/routes/test/edit/blocks/library/Library";
+import { Canvas } from "@/views/blocks-editor/Canvas";
+import { ScriptPreview } from "@/views/blocks-editor/ScriptPreview";
+import { testAtom, useTest } from "@/views/blocks-editor/atoms";
+import { Library } from "@/views/blocks-editor/library/Library";
 import { Provider, createStore } from "jotai";
 import { Book, Code, Layers, ScrollText } from "lucide-react";
 import type { OpenAPIV3 } from "openapi-types";
 import { useEffect, useState } from "react";
 import { useMemoOne } from "use-memo-one";
-import { TestToolbar } from "../TestToolbar";
+import { TestToolbar } from "../../routes/test/edit/TestToolbar";
 import { TabButton } from "./TabButton";
 
 interface BlocksEditorProps {
-  file: BlockFile;
+  file: BlockTab;
   project: Project;
   environment: Environment | null;
-  onChange: (file: BlockFile) => void;
+  onChange: (file: BlockTab) => void;
 }
 
 function BlocksEditorContainer({ file, project, environment }: BlocksEditorProps) {

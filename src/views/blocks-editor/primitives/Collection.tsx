@@ -1,8 +1,8 @@
 import { type Block as BlockType } from "@/lib/stores/blocks/model/loose";
 import { cn } from "@/lib/utils";
-import { Bottom } from "@/routes/test/edit/blocks/primitives/connections/Bottom";
-import type { Connection } from "@/routes/test/edit/blocks/primitives/connections/types";
-import { toBlockColorStyle, type BlockColor } from "@/routes/test/edit/blocks/primitives/types";
+import { Bottom } from "@/views/blocks-editor/primitives/connections/Bottom";
+import type { Connection } from "@/views/blocks-editor/primitives/connections/types";
+import { toBlockColorStyle, type BlockColor } from "@/views/blocks-editor/primitives/types";
 import { css } from "@emotion/css";
 
 const styles = {

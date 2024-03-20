@@ -7,10 +7,10 @@ import {
 } from "@/lib/stores/blocks";
 import { isExecutorBlock, isHttpRequestBlock, isStepBlock } from "@/lib/stores/blocks/utils";
 import { cn } from "@/lib/utils";
-import { AnyBlock } from "@/routes/test/edit/blocks/AnyBlock";
-import { Root } from "@/routes/test/edit/blocks/Root";
-import { Toolbox } from "@/routes/test/edit/blocks/Toolbox";
-import type { DragData, DropData } from "@/routes/test/edit/blocks/dnd/types";
+import { AnyBlock } from "@/views/blocks-editor/AnyBlock";
+import { Root } from "@/views/blocks-editor/Root";
+import { Toolbox } from "@/views/blocks-editor/Toolbox";
+import type { DragData, DropData } from "@/views/blocks-editor/dnd/types";
 import {
   DndContext,
   DragOverlay,
@@ -30,9 +30,9 @@ import { useState, type MouseEvent, type ReactNode } from "react";
 import { instantiate, type Block, type Test } from "@/lib/stores/blocks/model/loose";
 import { detach } from "@/lib/stores/blocks/model/utils";
 import { exhaustive } from "@/lib/utils/typescript";
-import { BlockSidebar } from "@/routes/test/edit/blocks/BlockSidebar";
-import { useSetSelectedBlock } from "@/routes/test/edit/blocks/atoms";
-import { DragEnabled } from "@/routes/test/edit/blocks/dnd/DragEnabled";
+import { BlockSidebar } from "@/views/blocks-editor/BlockSidebar";
+import { useSetSelectedBlock } from "@/views/blocks-editor/atoms";
+import { DragEnabled } from "@/views/blocks-editor/dnd/DragEnabled";
 import { css } from "@emotion/css";
 
 const interactiveElements = ["input", "button", "textarea", "select"];

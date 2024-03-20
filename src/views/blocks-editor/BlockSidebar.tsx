@@ -1,12 +1,8 @@
 import { Input } from "@/components/ui/input";
 import { updateBlock } from "@/lib/stores/blocks";
 import type { Block, HttpRequestBlock } from "@/lib/stores/blocks/model/loose";
-import {
-  VerticalTabs,
-  VerticalTabsContent,
-  type Tab,
-} from "@/routes/test/edit/blocks/VerticalTabs";
-import { useSelectedBlockValue, useSetTest } from "@/routes/test/edit/blocks/atoms";
+import { VerticalTabs, VerticalTabsContent, type Tab } from "@/views/blocks-editor/VerticalTabs";
+import { useSelectedBlockValue, useSetTest } from "@/views/blocks-editor/atoms";
 import { Handshake, PackageOpen, Trash2, Variable } from "lucide-react";
 import { nanoid } from "nanoid";
 import { useState, type ChangeEvent } from "react";

@@ -1,8 +1,8 @@
 import type { Check } from "@/lib/stores/blocks/model/strict";
 import { exhaustive } from "@/lib/utils/typescript";
-import { SelectInput, type Selected } from "@/routes/test/edit/blocks/inputs/SelectInput";
-import { StringInput } from "@/routes/test/edit/blocks/inputs/StringInput";
-import { Field } from "@/routes/test/edit/blocks/primitives/Field";
+import { SelectInput, type Selected } from "@/views/blocks-editor/inputs/SelectInput";
+import { StringInput } from "@/views/blocks-editor/inputs/StringInput";
+import { Field } from "@/views/blocks-editor/primitives/Field";
 import { X } from "lucide-react";
 
 const items: Selected<Check["type"]>[] = [

@@ -1,14 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { VirtualFile } from "@/lib/stores/editor";
+import type { EditorTab } from "@/lib/stores/editor";
 import { Popover, PopoverContent, PopoverTrigger } from "@radix-ui/react-popover";
 import { Save } from "lucide-react";
 import { useState, type ChangeEvent } from "react";
 
 interface SaveTestButtonProps {
-  file: VirtualFile;
-  onSave: (file: VirtualFile) => void;
+  file: EditorTab;
+  onSave: (file: EditorTab) => void;
 }
 
 function SaveTestButton({ file, onSave }: SaveTestButtonProps) {

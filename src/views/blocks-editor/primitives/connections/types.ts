@@ -1,5 +1,5 @@
 import type { Block } from "@/lib/stores/blocks/model/loose";
-import type { DropAction } from "@/routes/test/edit/blocks/dnd/types";
+import type { DropAction } from "@/views/blocks-editor/dnd/types";
 import type { ReactNode } from "react";
 
 interface TopConnection {

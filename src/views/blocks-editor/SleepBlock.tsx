@@ -1,12 +1,12 @@
 import { detachBlock, updateBlock } from "@/lib/stores/blocks";
 import type { SleepBlock as SleepBlockType } from "@/lib/stores/blocks/model/loose";
 import { isStepBlock } from "@/lib/stores/blocks/utils";
-import { AnyBlock } from "@/routes/test/edit/blocks/AnyBlock";
-import { useSetTest } from "@/routes/test/edit/blocks/atoms";
-import { STEP_COLOR } from "@/routes/test/edit/blocks/colors";
-import { StringInput } from "@/routes/test/edit/blocks/inputs/StringInput";
-import { Block } from "@/routes/test/edit/blocks/primitives/Block";
-import { Field } from "@/routes/test/edit/blocks/primitives/Field";
+import { AnyBlock } from "@/views/blocks-editor/AnyBlock";
+import { useSetTest } from "@/views/blocks-editor/atoms";
+import { STEP_COLOR } from "@/views/blocks-editor/colors";
+import { StringInput } from "@/views/blocks-editor/inputs/StringInput";
+import { Block } from "@/views/blocks-editor/primitives/Block";
+import { Field } from "@/views/blocks-editor/primitives/Field";
 
 interface SleepBlockProps {
   block: SleepBlockType;

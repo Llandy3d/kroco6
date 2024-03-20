@@ -8,23 +8,19 @@ import { useToast } from "@/components/ui/use-toast";
 import {
   createDirectory,
   deleteEntry,
-  openFile,
   rename,
   type Project,
   type ProjectDirectory,
   type ProjectEntry,
 } from "@/lib/backend-client";
-import { parse } from "@/lib/stores/blocks/model/loose";
-import type { VirtualFile } from "@/lib/stores/editor";
 import { cn } from "@/lib/utils";
-import { tryParseJSON } from "@/lib/utils/json";
 import { getExtension, getPathName } from "@/lib/utils/path";
 import { exhaustive } from "@/lib/utils/typescript";
 import { PlaceholderIcon } from "@/routes/PlaceholderIcon";
 import { ProjectIcon } from "@/routes/ProjectIcon";
-import { useCurrentFile, useOpenFiles } from "@/routes/test/edit/atoms";
+import { loadFile } from "@/routes/actions";
+import { useCurrentFile, useOpenFiles, useSetOpenFiles } from "@/routes/test/edit/atoms";
 import { Box, ChevronDown, ChevronRight, FileCode, FolderClosed, FolderOpen } from "lucide-react";
-import { nanoid } from "nanoid";
 import { useRef, type FocusEvent, type KeyboardEvent, type ReactNode } from "react";
 import {
   NodeApi,
@@ -35,49 +31,6 @@ import {
   type RenameHandler,
 } from "react-arborist";
 import { useResizeObserver } from "usehooks-ts";
-
-function loadFile(path: string, content: string): VirtualFile | null {
-  const fileName = getPathName(path);
-  const extension = getExtension(path);
-
-  if (extension === "js") {
-    return {
-      type: "script",
-      handle: nanoid(),
-      name: fileName ?? "Untitled",
-      path: {
-        type: "existing",
-        filePath: path,
-        original: content,
-      },
-      script: content,
-    };
-  }
-
-  const value = tryParseJSON(content);
-
-  if (value === null) {
-    return null;
-  }
-
-  const blocks = parse(value);
-
-  if (!blocks.success) {
-    return null;
-  }
-
-  return {
-    type: "blocks",
-    handle: nanoid(),
-    name: fileName ?? "Untitled",
-    path: {
-      type: "existing",
-      filePath: path,
-      original: content,
-    },
-    blocks: blocks.output,
-  };
-}
 
 interface ProjectEntryBase {
   path: string;
@@ -283,7 +236,10 @@ function FileNode({ tree, node, entry }: NodeRendererProps<TreeItem> & { entry: 
 
   function handleClick() {
     const existingFile = openFiles.find(
-      (file) => file.path.type === "existing" && file.path.filePath === entry.path,
+      (file) =>
+        file.type !== "project-settings" &&
+        file.path.type === "existing" &&
+        file.path.filePath === entry.path,
     );
 
     if (existingFile !== undefined) {
@@ -292,14 +248,12 @@ function FileNode({ tree, node, entry }: NodeRendererProps<TreeItem> & { entry: 
       return;
     }
 
-    openFile(entry.path)
-      .then((result) => {
-        const file = loadFile(result.path, result.content);
-
+    loadFile(entry.path)
+      .then((file) => {
         if (file === null) {
           toast({
             title: "Failed to open file",
-            description: `The file "${result.path}" could not be opened.`,
+            description: `The file "${entry.path}" could not be opened.`,
             variant: "destructive",
           });
 
@@ -372,6 +326,18 @@ function ProjectEntryNode(props: NodeRendererProps<TreeItem>) {
   }
 }
 
+function sortEntries(a: TreeItem, b: TreeItem) {
+  if (a.type === "directory" && b.type === "file") {
+    return -1;
+  }
+
+  if (a.type === "file" && b.type === "directory") {
+    return 1;
+  }
+
+  return a.name.localeCompare(b.name);
+}
+
 function toTreeItem(file: ProjectEntry): TreeItem {
   const name = getPathName(file.path) ?? "<unknown>";
 
@@ -397,7 +363,7 @@ function toProjectItem(file: ProjectDirectory): TreeItem {
     type: "project",
     path: file.path,
     name: getPathName(file.path) ?? "<unknown>",
-    children: file.entries.map(toTreeItem),
+    children: file.entries.map(toTreeItem).sort(sortEntries),
   };
 }
 
@@ -408,6 +374,8 @@ interface ProjectTreeProps {
 
 function ProjectTree({ project, onChange }: ProjectTreeProps) {
   const items: TreeItem[] = [toProjectItem(project.directory)];
+
+  const setOpenFiles = useSetOpenFiles();
 
   const container = useRef<HTMLDivElement | null>(null);
 
@@ -450,7 +418,24 @@ function ProjectTree({ project, onChange }: ProjectTreeProps) {
     const from = node.data.path;
     const to = `${basePath}/${name}`;
 
-    return rename(from, to).then(() => {});
+    return rename(from, to).then(() => {
+      setOpenFiles((tabs) => {
+        return tabs.map((tab) => {
+          if (tab.path.type === "existing" && tab.path.filePath === from) {
+            return {
+              ...tab,
+              name,
+              path: {
+                ...tab.path,
+                filePath: to,
+              },
+            };
+          }
+
+          return tab;
+        });
+      });
+    });
   };
 
   return (
