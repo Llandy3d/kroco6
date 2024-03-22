@@ -4,7 +4,7 @@ function CloudTab() {
   return (
     <div className="px-10 py-8">
       <SettingsSection heading="Authentication">
-        <p>Connect your cloud provider to sync your projects.</p>
+        <p>Connect to Grafana Cloud k6 to run tests in the cloud.</p>
       </SettingsSection>
     </div>
   );

@@ -9,13 +9,12 @@ import {
 } from "@/lib/backend-client";
 import { ProjectTree } from "@/routes/ProjectTree";
 import { ExternalLink, Settings } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { SidebarSection } from "./SidebarSection";
 
-import { useToast } from "@/components/ui/use-toast";
+import { useProject } from "@/atoms/project";
 import type { ProjectSettingsTab } from "@/lib/stores/editor";
 import { useOpenTabs, useSetCurrentTab } from "@/routes/test/edit/atoms";
-import { parseProjectSettings } from "@/schemas/project";
 import { listen } from "@tauri-apps/api/event";
 import { nanoid } from "nanoid";
 
@@ -23,9 +22,7 @@ function Sidebar() {
   const setCurrentFile = useSetCurrentTab();
   const [openFiles, setOpenFiles] = useOpenTabs();
 
-  const [project, setProject] = useState<Project>();
-
-  const { toast } = useToast();
+  const [project, setProject] = useProject();
 
   function handleOpenProject() {
     openProject().then((result) => {
@@ -42,7 +39,7 @@ function Sidebar() {
   }
 
   function handleOpenProjectSettings() {
-    if (project === undefined) {
+    if (project === null) {
       return;
     }
 
@@ -54,31 +51,18 @@ function Sidebar() {
       return;
     }
 
-    loadProjectSettings(project).then((result) => {
-      const settings =
-        result.type === "custom"
-          ? parseProjectSettings(JSON.parse(result.settings))
-          : parseProjectSettings({});
-
-      if (!settings.success) {
-        toast({
-          title: "Error",
-          description: "Failed to parse project settings.",
-        });
-
-        return;
-      }
-
+    loadProjectSettings(project).then((settings) => {
       const tab: ProjectSettingsTab = {
         type: "project-settings",
         handle: nanoid(),
         name: "Project Settings",
-        path:
-          result.type === "custom"
-            ? { type: "existing", filePath: `${project.root}/k6.json`, original: result.settings }
-            : { type: "new", initial: "{}" },
+        path: {
+          type: "existing",
+          filePath: `${project.root}/k6.json`,
+          original: JSON.stringify(settings),
+        },
         rootPath: project.root,
-        settings: settings.output,
+        settings,
       };
 
       setOpenFiles((tabs) => [...tabs, tab]);

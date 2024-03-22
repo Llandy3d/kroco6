@@ -1,3 +1,5 @@
+import { useProjectValue } from "@/atoms/project";
+import { useSetCurrentRun } from "@/atoms/runs";
 import { Button } from "@/components/ui/button";
 import { TabsContent } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
@@ -5,13 +7,13 @@ import {
   runScriptInCloud,
   runScriptLocally,
   type Environment,
-  type Project,
   type ProjectConfig,
 } from "@/lib/backend-client";
 import { convertToScript } from "@/lib/stores/blocks/convert";
 import type { Test } from "@/lib/stores/blocks/model/loose";
-import type { BlockTab, EditorTab } from "@/lib/stores/editor";
+import type { BlockTab, FileTab, TestResultsTab } from "@/lib/stores/editor";
 import { EMPTY_ENVIRONMENT } from "@/lib/stores/projects";
+import { useSetCurrentTab, useSetOpenTabs } from "@/routes/test/edit/atoms";
 import { EditorTabs, EditorTabsList, EditorTabsTrigger } from "@/views/EditorTabs";
 import { Canvas } from "@/views/blocks-editor/Canvas";
 import { ScriptPreview } from "@/views/blocks-editor/ScriptPreview";
@@ -19,34 +21,49 @@ import { testAtom, useTest } from "@/views/blocks-editor/atoms";
 import { Library } from "@/views/blocks-editor/library/Library";
 import { Provider, createStore } from "jotai";
 import { Book, Code, Layers, ScrollText } from "lucide-react";
+import { nanoid } from "nanoid";
 import type { OpenAPIV3 } from "openapi-types";
 import { useEffect, useState } from "react";
 import { useMemoOne } from "use-memo-one";
 import { TestToolbar } from "../../routes/test/edit/TestToolbar";
 
-interface BlocksEditorProps {
+interface BlocksEditorContainerProps {
   tab: BlockTab;
-  project: Project;
   environment: Environment | null;
-  onChange: (file: BlockTab) => void;
-  onSave: (file: EditorTab) => void;
+  onSave: (file: FileTab) => void;
+  onStarted: () => void;
 }
 
-function BlocksEditorContainer({ tab: file, project, environment, onSave }: BlocksEditorProps) {
+function BlocksEditorContainer({
+  tab: file,
+  environment,
+  onSave,
+  onStarted,
+}: BlocksEditorContainerProps) {
   const { toast } = useToast();
+
+  const setCurrentRun = useSetCurrentRun();
+  const project = useProjectValue();
 
   const [test, setTest] = useTest();
   const [tab, setTab] = useState("build");
   const [running, setRunning] = useState(false);
 
   async function runTestLocally() {
+    const settings = project?.settings;
+
+    if (settings === undefined) {
+      return;
+    }
+
     try {
       setRunning(true);
 
       const script = await convertToScript(environment ?? EMPTY_ENVIRONMENT, test);
-      const response = await runScriptLocally(script);
 
-      console.log(response);
+      setCurrentRun(runScriptLocally(settings, script).then(console.log).catch(console.error));
+
+      onStarted();
     } catch (error) {
       console.error(error);
     } finally {
@@ -139,7 +156,6 @@ function BlocksEditorContainer({ tab: file, project, environment, onSave }: Bloc
               <ScrollText size={14} />
             </Button>
             <TestToolbar
-              project={project}
               file={file}
               running={running}
               onRunLocally={runTestLocally}
@@ -163,7 +179,17 @@ function BlocksEditorContainer({ tab: file, project, environment, onSave }: Bloc
   );
 }
 
-function BlocksEditor({ tab: file, project, environment, onChange, onSave }: BlocksEditorProps) {
+interface BlocksEditorProps {
+  tab: BlockTab;
+  environment: Environment | null;
+  onChange: (file: BlockTab) => void;
+  onSave: (file: FileTab) => void;
+}
+
+function BlocksEditor({ tab: file, environment, onChange, onSave }: BlocksEditorProps) {
+  const setOpenTabs = useSetOpenTabs();
+  const setCurrentTab = useSetCurrentTab();
+
   const store = useMemoOne(() => {
     return createStore();
   }, []);
@@ -171,7 +197,7 @@ function BlocksEditor({ tab: file, project, environment, onChange, onSave }: Blo
   useEffect(() => {
     store.set(testAtom, file.blocks);
 
-    const unsub = store.sub(testAtom, () => {
+    const unsubTest = store.sub(testAtom, () => {
       const test = store.get(testAtom);
 
       onChange({
@@ -181,18 +207,30 @@ function BlocksEditor({ tab: file, project, environment, onChange, onSave }: Blo
     });
 
     return () => {
-      unsub();
+      unsubTest();
     };
   }, [file, store]);
+
+  function handleStarted() {
+    const tab: TestResultsTab = {
+      handle: nanoid(),
+      name: "Test Results",
+      type: "test-results",
+    };
+
+    setTimeout(() => {
+      setOpenTabs((tabs) => [...tabs, tab]);
+      setCurrentTab(tab.handle);
+    }, 0);
+  }
 
   return (
     <Provider store={store}>
       <BlocksEditorContainer
         tab={file}
-        project={project}
         environment={environment}
-        onChange={onChange}
         onSave={onSave}
+        onStarted={handleStarted}
       />
     </Provider>
   );

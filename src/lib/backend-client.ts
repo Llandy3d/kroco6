@@ -1,4 +1,5 @@
-import type { EditorTab } from "@/lib/stores/editor";
+import type { EditorTab, FileTab } from "@/lib/stores/editor";
+import type { ProjectSettings } from "@/schemas/project";
 import { invoke } from "@tauri-apps/api/tauri";
 
 interface Environment {
@@ -22,13 +23,6 @@ interface CloudTest {
 interface ProjectConfig {
   cloud_token: string;
   cloud_project_id: string;
-}
-
-interface Project {
-  name: string;
-  test_collections?: Array<Test>;
-  description?: string;
-  project_config?: ProjectConfig;
 }
 
 class Test {
@@ -63,8 +57,11 @@ async function listProjects(): Promise<Project[]> {
   return await invoke("list_projects", {});
 }
 
-function runScriptLocally(script: string): Promise<string> {
-  return invoke("open_run_window", { script });
+function runScriptLocally(project: ProjectSettings, script: string): Promise<string> {
+  return invoke("run_script", {
+    script,
+    version: project.k6.version,
+  });
 }
 
 function runScriptInCloud({
@@ -98,6 +95,7 @@ async function getCloudTests(projectName: string): Promise<Array<CloudTest>> {
 interface Project {
   root: string;
   directory: ProjectDirectory;
+  settings: ProjectSettings;
 }
 
 interface ProjectFile {
@@ -145,6 +143,7 @@ function openFile(path: string): Promise<FileOpenResult> {
 interface SavedResult {
   type: "saved";
   path: string;
+  project: Project;
 }
 
 interface SaveCancelled {
@@ -153,34 +152,45 @@ interface SaveCancelled {
 
 type SaveFileResult = SavedResult | SaveCancelled;
 
-async function saveFile(file: EditorTab, content: string): Promise<EditorTab> {
+interface ProjectAndTab {
+  project: Project;
+  tab: EditorTab;
+}
+
+async function saveFile(project: Project, tab: FileTab, content: string): Promise<ProjectAndTab> {
   const result =
-    file.path.type === "existing"
-      ? await invoke<SaveFileResult>("save_file", { params: { path: file.path.filePath, content } })
-      : await saveFileAs(file, content);
+    tab.path.type === "existing"
+      ? await invoke<SaveFileResult>("save_file", {
+          root: project.root,
+          path: tab.path.filePath,
+          content,
+        })
+      : await saveFileAs(project, tab, content);
 
   if (result.type === "cancelled") {
-    return file;
+    return { project, tab };
   }
 
   return {
-    ...file,
-    name: result.path.slice(result.path.lastIndexOf("/") + 1),
-    path: {
-      type: "existing",
-      filePath: result.path,
-      original: content,
+    project: result.project,
+    tab: {
+      ...tab,
+      name: result.path.slice(result.path.lastIndexOf("/") + 1),
+      path: {
+        type: "existing",
+        filePath: result.path,
+        original: content,
+      },
     },
   };
 }
 
-function saveFileAs(file: EditorTab, content: string) {
+function saveFileAs(project: Project, file: EditorTab, content: string) {
   return invoke<SaveFileResult>("save_file_as", {
-    params: {
-      kind: file.type,
-      fileName: file.name + (file.type === "blocks" ? ".blk6" : ".js"),
-      content,
-    },
+    root: project.root,
+    kind: file.type,
+    fileName: file.name + (file.type === "blocks" ? ".blk6" : ".js"),
+    content,
   });
 }
 
@@ -217,25 +227,32 @@ function deleteDirectory(root: string, path: string) {
   return invoke<DeleteDirectoryResult>("delete_directory", { root, path });
 }
 
-interface DefaultProjectSettings {
-  type: "default";
-}
-
-interface CustomProjectSettings {
-  type: "custom";
-  settings: string;
-}
-
-type LoadProjectSettingsResult = DefaultProjectSettings | CustomProjectSettings;
-
 function loadProjectSettings(project: Project) {
-  return invoke<LoadProjectSettingsResult>("load_project_settings", { root: project.root });
+  return invoke<ProjectSettings>("load_project_settings", { root: project.root });
+}
+
+function isVersionInstalled(version: string) {
+  return invoke<boolean>("is_k6_version_installed", { version });
+}
+
+interface Version {
+  version: string;
+  name: string;
+  url: string;
+}
+
+function installVersion(version: Version) {
+  return invoke<void>("install_k6_version", {
+    ...version,
+  });
 }
 
 export {
   createDirectory,
   deleteEntry,
   getCloudTests,
+  installVersion,
+  isVersionInstalled,
   listProjects,
   loadProjectConfig,
   loadProjectSettings,
@@ -260,4 +277,5 @@ export {
   type ProjectOpened,
   type Test,
   type TestKind,
+  type Version,
 };

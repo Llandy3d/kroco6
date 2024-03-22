@@ -1,3 +1,4 @@
+import { useSetProject } from "@/atoms/project";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,19 +9,20 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { saveFile, type Project } from "@/lib/backend-client";
 import { NEW_SCRIPT } from "@/lib/files";
 import { EMPTY_BLOCK_TEST } from "@/lib/stores/blocks/constants";
-import type { BlockTab, EditorTab } from "@/lib/stores/editor";
+import type { BlockTab, EditorTab, FileTab } from "@/lib/stores/editor";
 import { exhaustive } from "@/lib/utils/typescript";
 import { ProjectIcon } from "@/routes/ProjectIcon";
 import { useCurrentTab, useOpenTabs } from "@/routes/test/edit/atoms";
 import { ProjectSettingsEditor } from "@/views/project-settings/ProjectSettingsEditor";
-import { Box, FileCode, PlusIcon, X } from "lucide-react";
+import { TestResultsView } from "@/views/test-results2/TestResultsView";
+import { Box, FileCode, LineChart, PlusIcon, X } from "lucide-react";
 import { nanoid } from "nanoid";
-import { forwardRef, type HTMLAttributes } from "react";
+import { forwardRef, useEffect, type HTMLAttributes } from "react";
 import { BlocksEditor } from "../../../views/blocks-editor/BlocksEditor";
 import { ScriptEditor } from "../../../views/script-editor/ScriptEditor";
 import { EmptyEditor } from "./EmptyEditor";
 
-async function saveTab(tab: EditorTab) {
+function saveTab(project: Project, tab: FileTab) {
   const content =
     tab.type === "blocks"
       ? JSON.stringify(tab.blocks)
@@ -28,7 +30,7 @@ async function saveTab(tab: EditorTab) {
         ? JSON.stringify(tab.settings)
         : tab.script;
 
-  return await saveFile(tab, content);
+  return saveFile(project, tab, content);
 }
 
 type TabButtonProps = HTMLAttributes<HTMLButtonElement> & {
@@ -59,29 +61,23 @@ const TabButton = forwardRef<HTMLDivElement, TabButtonProps>(function TabButton(
 
 interface TestEditorProps {
   tab: EditorTab;
-  project: Project;
-  onChange: (file: EditorTab) => void;
-  onSave: (file: EditorTab) => void;
+  onChange: (file: FileTab) => void;
+  onSave: (file: FileTab) => void;
 }
 
-function TestEditor({ tab, project, onChange, onSave }: TestEditorProps) {
+function TestEditor({ tab, onChange, onSave }: TestEditorProps) {
   switch (tab.type) {
     case "script":
-      return <ScriptEditor tab={tab} project={project} onChange={onChange} onSave={onSave} />;
+      return <ScriptEditor tab={tab} onChange={onChange} onSave={onSave} />;
 
     case "blocks":
-      return (
-        <BlocksEditor
-          tab={tab}
-          project={project}
-          environment={null}
-          onChange={onChange}
-          onSave={onSave}
-        />
-      );
+      return <BlocksEditor tab={tab} environment={null} onChange={onChange} onSave={onSave} />;
 
     case "project-settings":
       return <ProjectSettingsEditor tab={tab} onChange={onChange} onSave={onSave} />;
+
+    case "test-results":
+      return <TestResultsView />;
 
     default:
       return exhaustive(tab);
@@ -101,6 +97,14 @@ function TabText({ file }: TabTextProps) {
     );
   }
 
+  if (file.type === "test-results") {
+    return (
+      <>
+        <LineChart size={14} /> Test Results
+      </>
+    );
+  }
+
   return (
     <>
       {file.type === "blocks" ? <Box size={14} /> : <FileCode size={14} />}
@@ -115,28 +119,34 @@ interface EditorProps {
 }
 
 function Editor({ project }: EditorProps) {
-  const [openFiles, setOpenFiles] = useOpenTabs();
-  const [currentFile, setCurrentFile] = useCurrentTab();
+  const setProject = useSetProject();
 
-  function handleCurrentFileChange(handle: string | undefined) {
-    setCurrentFile(handle ?? null);
+  const [openTabs, setOpenTabs] = useOpenTabs();
+  const [currentTab, setCurrentTab] = useCurrentTab();
+
+  function handleCurrentTabChange(handle: string | undefined) {
+    setCurrentTab(handle ?? null);
   }
 
   function handleClose(file: EditorTab) {
-    const index = openFiles.findIndex((f) => f.handle === file.handle);
+    const index = openTabs.findIndex((f) => f.handle === file.handle);
 
-    setCurrentFile(openFiles[index + 1]?.handle ?? openFiles[index - 1]?.handle ?? null);
-    setOpenFiles(openFiles.filter((f) => f.handle !== file.handle));
+    setCurrentTab(openTabs[index + 1]?.handle ?? openTabs[index - 1]?.handle ?? null);
+    setOpenTabs(openTabs.filter((f) => f.handle !== file.handle));
   }
 
-  function handleSave(file: EditorTab) {
-    saveTab(file).then(() => {
-      setOpenFiles(openFiles.map((current) => (current.handle === file.handle ? file : current)));
+  function handleSave(file: FileTab) {
+    saveTab(project, file).then(({ project, tab }) => {
+      setOpenTabs((files) =>
+        files.map((current) => (current.handle === tab.handle ? tab : current)),
+      );
+
+      setProject(project);
     });
   }
 
   function handleNewBlocksFile() {
-    const newFile: BlockTab = {
+    const newTab: BlockTab = {
       type: "blocks",
       name: "New Blocks",
       handle: nanoid(),
@@ -147,12 +157,12 @@ function Editor({ project }: EditorProps) {
       blocks: EMPTY_BLOCK_TEST,
     };
 
-    setOpenFiles([...openFiles, newFile]);
-    setCurrentFile(newFile.handle);
+    setOpenTabs([...openTabs, newTab]);
+    setCurrentTab(newTab.handle);
   }
 
   function handleNewScriptFile() {
-    const newFile: EditorTab = {
+    const newTab: EditorTab = {
       type: "script",
       name: "New Script",
       handle: nanoid(),
@@ -163,22 +173,26 @@ function Editor({ project }: EditorProps) {
       script: NEW_SCRIPT,
     };
 
-    setOpenFiles([...openFiles, newFile]);
-    setCurrentFile(newFile.handle);
+    setOpenTabs([...openTabs, newTab]);
+    setCurrentTab(newTab.handle);
   }
 
-  function handleFileChange(file: EditorTab) {
-    setOpenFiles(openFiles.map((current) => (current.handle === file.handle ? file : current)));
+  function handleTabChange(tab: EditorTab) {
+    setOpenTabs(openTabs.map((current) => (current.handle === tab.handle ? tab : current)));
   }
+
+  useEffect(() => {
+    console.log("open tabs", openTabs);
+  }, [openTabs]);
 
   return (
     <Tabs
-      value={currentFile?.handle ?? "empty"}
+      value={currentTab?.handle ?? "empty"}
       className="flex flex-auto flex-col"
-      onValueChange={handleCurrentFileChange}
+      onValueChange={handleCurrentTabChange}
     >
       <TabsList className="flex h-10 items-center justify-start gap-2 text-sm font-light">
-        {openFiles.map((file) => {
+        {openTabs.map((file) => {
           return (
             <TabsTrigger asChild key={file.handle} value={file.handle}>
               <TabButton onClose={() => handleClose(file)}>
@@ -197,16 +211,11 @@ function Editor({ project }: EditorProps) {
           </DropdownMenuContent>
         </DropdownMenu>
       </TabsList>
-      {openFiles.map((file) => {
+      {openTabs.map((file) => {
         return (
           <TabsContent key={file.handle} value={file.handle} className="mt-0 flex-auto bg-white">
             <div className="border-[1px] border-[#F2F1F5] flex h-full flex-col">
-              <TestEditor
-                tab={file}
-                project={project}
-                onChange={handleFileChange}
-                onSave={handleSave}
-              />
+              <TestEditor tab={file} onChange={handleTabChange} onSave={handleSave} />
             </div>
           </TabsContent>
         );

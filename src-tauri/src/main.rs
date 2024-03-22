@@ -6,12 +6,12 @@ mod js;
 mod models;
 mod operations;
 
+use dirs::config_dir;
 use regex::Regex;
 use std::fs;
 use std::io::{BufRead, BufReader, Read, Write};
 use std::path::Path;
 use std::process::{Command, Stdio};
-use std::sync::Mutex;
 use tauri::{Manager, Window};
 
 use crate::operations::ProjectManager;
@@ -39,7 +39,6 @@ fn main() {
             get_cloud_tests,
             show_splashscreen,
             close_splashscreen,
-            open_run_window,
             run_script,
             run_script_in_cloud,
             list_projects,
@@ -64,7 +63,9 @@ fn main() {
             js::refresh_project,
             js::rename,
             js::create_directory,
-            js::delete_directory
+            js::delete_directory,
+            js::is_k6_version_installed,
+            js::install_k6_version,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -116,30 +117,6 @@ async fn show_splashscreen(window: Window) {
         .expect("no window labeled 'splashscreen' found")
         .show()
         .unwrap();
-}
-
-#[tauri::command]
-async fn open_run_window(
-    handle: tauri::AppHandle,
-    state: tauri::State<'_, ApplicationState>,
-    script: String,
-) -> Result<(), String> {
-    let run_window = tauri::WindowBuilder::new(
-        &handle,
-        "run_window", /* the unique window label */
-        tauri::WindowUrl::App("test/run".into()),
-    )
-    .inner_size(1400.0, 1000.0)
-    .build()
-    .unwrap();
-    run_window.set_title("Kroco Gator").unwrap();
-
-    let mut state_script = state.script.lock().unwrap();
-    state_script.clear();
-    state_script.push_str(script.as_str());
-    println!("{:?}", state_script);
-
-    Ok(())
 }
 
 #[tauri::command]
@@ -265,27 +242,20 @@ async fn save_test(
 }
 
 #[tauri::command]
-async fn run_script(state: tauri::State<'_, ApplicationState>) -> Result<String, String> {
-    // let script = r#"
+async fn run_script(
+    _state: tauri::State<'_, ApplicationState>,
+    script: String,
+    version: String,
+) -> Result<String, String> {
+    let command = config_dir()
+        .unwrap()
+        .join(format!("k6-ui/binaries/k6/{}/k6", version));
 
-    // import http from 'k6/http';
-    // import { sleep } from 'k6';
+    if !command.exists() {
+        return Err(format!("k6 version {} is not installed", version));
+    }
 
-    // export const options = {
-    //   vus: 1,
-    //   duration: '2s',
-    // };
-
-    // export default function () {
-    //   http.get('http://test.k6.io');
-    //   sleep(1);
-    // }
-    // "#;
-
-    let script = {
-        let state_script = state.script.lock().unwrap();
-        state_script.clone()
-    };
+    println!("Running script using {:?}", command);
 
     // TODO: make it toggable
     std::env::set_var("K6_WEB_DASHBOARD", "true");
@@ -329,9 +299,6 @@ struct ApplicationState {
 
     // The environment manager used to interact with environments
     pub environment_manager: operations::EnvironmentManager,
-
-    // Legacy: the script to run
-    script: Mutex<String>,
 }
 
 impl ApplicationState {
@@ -351,7 +318,6 @@ impl ApplicationState {
             // storage_path: storage_path.clone(),
             project_manager: operations::LocalProjectManager::new(storage_path.clone()),
             environment_manager: operations::EnvironmentManager::new(storage_path.clone()),
-            script: Mutex::new(String::new()),
         }
     }
 

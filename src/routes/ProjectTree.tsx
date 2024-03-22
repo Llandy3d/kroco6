@@ -54,6 +54,18 @@ interface ProjectItem extends ProjectEntryBase {
 
 type TreeItem = FileItem | DirectoryItem | ProjectItem;
 
+function* filesIn(node: TreeItem): Generator<FileItem> {
+  if (node.type === "file") {
+    yield node;
+  }
+
+  if (node.type === "directory" || node.type === "project") {
+    for (const child of node.children) {
+      yield* filesIn(child);
+    }
+  }
+}
+
 interface NodeProps {
   node: NodeApi<TreeItem>;
   name: string;
@@ -237,9 +249,7 @@ function FileNode({ tree, node, entry }: NodeRendererProps<TreeItem> & { entry: 
   function handleClick() {
     const existingFile = openFiles.find(
       (file) =>
-        file.type !== "project-settings" &&
-        file.path.type === "existing" &&
-        file.path.filePath === entry.path,
+        "path" in file && file.path.type === "existing" && file.path.filePath === entry.path,
     );
 
     if (existingFile !== undefined) {
@@ -291,7 +301,10 @@ function FileNode({ tree, node, entry }: NodeRendererProps<TreeItem> & { entry: 
           node={node}
           name={entry.name}
           selected={
-            currentFile?.path.type === "existing" && currentFile.path.filePath === entry.path
+            currentFile !== null &&
+            "path" in currentFile &&
+            currentFile?.path.type === "existing" &&
+            currentFile.path.filePath === entry.path
           }
           icon={
             <>
@@ -375,7 +388,7 @@ interface ProjectTreeProps {
 function ProjectTree({ project, onChange }: ProjectTreeProps) {
   const items: TreeItem[] = [toProjectItem(project.directory)];
 
-  const setOpenFiles = useSetOpenTabs();
+  const setOpenTabs = useSetOpenTabs();
 
   const container = useRef<HTMLDivElement | null>(null);
 
@@ -408,6 +421,16 @@ function ProjectTree({ project, onChange }: ProjectTreeProps) {
     }
 
     return deleteEntry(project.root, target.data.type, target.data.path).then(({ project }) => {
+      const deletedFiles = new Set([...filesIn(target.data)].map((file) => file.path));
+
+      setOpenTabs((tabs) =>
+        tabs.filter(
+          (tab) =>
+            !("path" in tab) ||
+            (tab.path.type === "existing" && !deletedFiles.has(tab.path.filePath)),
+        ),
+      );
+
       onChange(project);
     });
   };
@@ -419,8 +442,12 @@ function ProjectTree({ project, onChange }: ProjectTreeProps) {
     const to = `${basePath}/${name}`;
 
     return rename(from, to).then(() => {
-      setOpenFiles((tabs) => {
+      setOpenTabs((tabs) => {
         return tabs.map((tab) => {
+          if (tab.type === "project-settings" || tab.type === "test-results") {
+            return tab;
+          }
+
           if (tab.path.type === "existing" && tab.path.filePath === from) {
             return {
               ...tab,

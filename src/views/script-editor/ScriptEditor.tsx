@@ -1,34 +1,36 @@
+import { useProjectValue } from "@/atoms/project";
 import { useToast } from "@/components/ui/use-toast";
-import {
-  runScriptInCloud,
-  runScriptLocally,
-  type Project,
-  type ProjectConfig,
-} from "@/lib/backend-client";
-import type { EditorTab, ScriptTab } from "@/lib/stores/editor";
+import { runScriptInCloud, runScriptLocally, type ProjectConfig } from "@/lib/backend-client";
+import type { FileTab, ScriptTab } from "@/lib/stores/editor";
 import * as monaco from "monaco-editor";
 import { useRef, useState } from "react";
 import { TestToolbar } from "../../routes/test/edit/TestToolbar";
 
 interface ScriptEditorProps {
   tab: ScriptTab;
-  project: Project;
   onChange: (file: ScriptTab) => void;
-  onSave: (file: EditorTab) => void;
+  onSave: (file: FileTab) => void;
 }
 
-function ScriptEditor({ tab: file, project, onChange, onSave }: ScriptEditorProps) {
+function ScriptEditor({ tab: file, onChange, onSave }: ScriptEditorProps) {
   const { toast } = useToast();
 
   const editor = useRef<monaco.editor.IStandaloneCodeEditor>();
+  const project = useProjectValue();
 
   const [running, setRunning] = useState(false);
 
   async function handleRunLocally() {
     try {
+      const settings = project?.settings;
+
+      if (settings === undefined) {
+        return;
+      }
+
       setRunning(true);
 
-      const response = await runScriptLocally(file.script);
+      const response = await runScriptLocally(settings, file.script);
 
       console.log(response);
     } catch (error) {
@@ -82,7 +84,6 @@ function ScriptEditor({ tab: file, project, onChange, onSave }: ScriptEditorProp
   return (
     <div className="flex flex-auto flex-col bg-white">
       <TestToolbar
-        project={project}
         file={file}
         running={running}
         onRunLocally={handleRunLocally}

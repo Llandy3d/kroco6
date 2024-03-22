@@ -1,21 +1,11 @@
-import { listProjects, type Project } from "@/lib/backend-client";
-import { invoke } from "@tauri-apps/api/tauri";
-import { useEffect, useState } from "react";
+import { useProjectValue } from "@/atoms/project";
 import { Layout } from "./Layout";
 import { Editor } from "./test/edit/Editor";
 
 function Page() {
-  const [activeProject, setActiveProject] = useState<Project | null>(null);
+  const project = useProjectValue();
 
-  useEffect(() => {
-    Promise.all([listProjects()]).then(([projects]) => {
-      setActiveProject(projects[0] ?? null);
-
-      invoke("close_splashscreen");
-    });
-  }, []);
-
-  return <Layout>{activeProject !== null && <Editor project={activeProject} />}</Layout>;
+  return <Layout>{project && <Editor project={project} />}</Layout>;
 }
 
 export { Page };
