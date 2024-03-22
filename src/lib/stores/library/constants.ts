@@ -1,14 +1,13 @@
-import { OpenAPIV3 } from "openapi-types";
+import type { HttpMethod } from "@/schemas/openapi";
 
-const HTTP_METHODS = [
-  OpenAPIV3.HttpMethods.GET,
-  OpenAPIV3.HttpMethods.PUT,
-  OpenAPIV3.HttpMethods.POST,
-  OpenAPIV3.HttpMethods.DELETE,
-  OpenAPIV3.HttpMethods.PATCH,
-  OpenAPIV3.HttpMethods.HEAD,
-  OpenAPIV3.HttpMethods.OPTIONS,
-  OpenAPIV3.HttpMethods.TRACE,
+const HTTP_METHODS: HttpMethod[] = [
+  "get",
+  "put",
+  "post",
+  "delete",
+  "patch",
+  "head",
+  "options",
 ];
 
 export { HTTP_METHODS };

@@ -2,9 +2,8 @@ import { openFile } from "@/lib/backend-client";
 import { parse } from "@/lib/stores/blocks/model/loose";
 import type { EditorTab } from "@/lib/stores/editor";
 import { tryParseJSON } from "@/lib/utils/json";
-import { basename, extname } from "@/lib/utils/path";
+import { basename, dirname, extname } from "@/lib/utils/path";
 import { nanoid } from "nanoid";
-import { dirname } from "path";
 
 function parseContent(path: string, content: string): EditorTab | null {
   const name = basename(path);

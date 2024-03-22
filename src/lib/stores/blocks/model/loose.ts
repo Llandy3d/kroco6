@@ -2,6 +2,7 @@ import {
   nameValuePair,
   type NameValuePair,
 } from "@/lib/stores/blocks/model/generic";
+import { OpenAPISchema } from "@/schemas/openapi";
 import { nanoid } from "nanoid";
 import {
   array,
@@ -20,7 +21,6 @@ import {
   type BaseSchema,
   type Output,
 } from "valibot";
-import { openapi } from "./openapi";
 
 const template = Symbol(
   "This block is a template and should be cloned before use.",
@@ -254,7 +254,7 @@ const root = object({
 type Root = Output<typeof root>;
 
 const test = object({
-  library: openapi,
+  library: OpenAPISchema,
   roots: array(root),
 });
 

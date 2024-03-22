@@ -17,6 +17,9 @@ module.exports = {
     ecmaVersion: 2020,
   },
   settings: {
+    react: {
+      version: "detect",
+    },
     "import/parsers": {
       "@typescript-eslint/parser": [".ts", ".tsx"],
     },

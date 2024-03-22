@@ -14,6 +14,7 @@ import { convertToScript } from "@/lib/stores/blocks/convert";
 import type { Test } from "@/lib/stores/blocks/model/loose";
 import type { BlockTab, FileTab, TestResultsTab } from "@/lib/stores/editor";
 import { EMPTY_ENVIRONMENT } from "@/lib/stores/projects";
+import type { OpenAPI } from "@/schemas/openapi";
 import {
   EditorTabs,
   EditorTabsList,
@@ -26,7 +27,6 @@ import { Library } from "@/views/editor/tabs/blocks-editor/library/Library";
 import { Provider, createStore } from "jotai";
 import { Book, Code, Layers, ScrollText } from "lucide-react";
 import { nanoid } from "nanoid";
-import type { OpenAPIV3 } from "openapi-types";
 import { useEffect, useState } from "react";
 import { useMemoOne } from "use-memo-one";
 import { TestToolbar } from "../../../../routes/test/edit/TestToolbar";
@@ -134,7 +134,7 @@ function BlocksEditorContainer({
     setTest(test);
   }
 
-  function handleLibraryChange(library: OpenAPIV3.Document) {
+  function handleLibraryChange(library: OpenAPI) {
     setTest((test) => {
       return {
         ...test,
@@ -144,50 +144,48 @@ function BlocksEditorContainer({
   }
 
   return (
-    <div className="flex flex-auto">
-      <EditorTabs value={tab} onValueChange={setTab}>
-        <EditorTabsList className="justify-between">
-          <div className="flex">
-            <EditorTabsTrigger value="build">
-              <Layers size={14} /> Build
-            </EditorTabsTrigger>
-            <EditorTabsTrigger value="library">
-              <Book size={14} /> Library
-            </EditorTabsTrigger>
-            <EditorTabsTrigger value="script">
-              <Code size={14} /> Script
-            </EditorTabsTrigger>
-          </div>
-          <div className="flex items-center">
-            <Button
-              size="icon"
-              className="rounded-full"
-              variant="ghost"
-              onClick={handleConvertToScript}
-            >
-              <ScrollText size={14} />
-            </Button>
-            <TestToolbar
-              file={file}
-              running={running}
-              onRunLocally={runTestLocally}
-              onRunInCloud={runTestInCloud}
-              onSave={onSave}
-            />
-          </div>
-        </EditorTabsList>
+    <EditorTabs value={tab} onValueChange={setTab}>
+      <EditorTabsList className="justify-between">
+        <div className="flex">
+          <EditorTabsTrigger value="build">
+            <Layers size={14} /> Build
+          </EditorTabsTrigger>
+          <EditorTabsTrigger value="library">
+            <Book size={14} /> Library
+          </EditorTabsTrigger>
+          <EditorTabsTrigger value="script">
+            <Code size={14} /> Script
+          </EditorTabsTrigger>
+        </div>
+        <div className="flex items-center">
+          <Button
+            size="icon"
+            className="rounded-full"
+            variant="ghost"
+            onClick={handleConvertToScript}
+          >
+            <ScrollText size={14} />
+          </Button>
+          <TestToolbar
+            file={file}
+            running={running}
+            onRunLocally={runTestLocally}
+            onRunInCloud={runTestInCloud}
+            onSave={onSave}
+          />
+        </div>
+      </EditorTabsList>
 
-        <TabsContent value="build" className="mt-0 flex-auto">
-          <Canvas test={test} onChange={handleTestChange} />
-        </TabsContent>
-        <TabsContent value="library" className="mt-0 flex-auto">
-          <Library library={test.library} onChange={handleLibraryChange} />
-        </TabsContent>
-        <TabsContent value="script" className="mt-0 flex-auto">
-          <ScriptPreview test={test} />
-        </TabsContent>
-      </EditorTabs>
-    </div>
+      <TabsContent value="build" className="mt-0 flex-auto">
+        <Canvas test={test} onChange={handleTestChange} />
+      </TabsContent>
+      <TabsContent value="library" className="mt-0 flex-auto">
+        <Library library={test.library} onChange={handleLibraryChange} />
+      </TabsContent>
+      <TabsContent value="script" className="mt-0 flex-auto">
+        <ScriptPreview test={test} />
+      </TabsContent>
+    </EditorTabs>
   );
 }
 

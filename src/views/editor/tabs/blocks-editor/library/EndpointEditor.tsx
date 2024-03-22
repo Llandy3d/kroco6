@@ -10,15 +10,15 @@ import { Label } from "@/components/base/label";
 import { HTTP_METHODS } from "@/lib/stores/library/constants";
 import type { ApiEndpoint, ApiOperation } from "@/lib/stores/library/types";
 import { cn } from "@/lib/utils";
+import type { HttpMethod, Operation } from "@/schemas/openapi";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
 import { Plus } from "lucide-react";
-import { OpenAPIV3 } from "openapi-types";
 import type { ChangeEvent } from "react";
 import { MethodEditor } from "./MethodEditor";
 
 interface EndpointEditorProps {
   endpoint: ApiEndpoint;
-  selected: OpenAPIV3.HttpMethods;
+  selected: HttpMethod;
   onChange: (endpoint: ApiEndpoint) => void;
   onOperationSelected: (operation: ApiOperation) => void;
 }
@@ -34,15 +34,15 @@ function EndpointEditor({
       !endpoint.operations.some((operation) => operation.method === method),
   );
 
-  function handleSummaryChange(event: ChangeEvent<HTMLInputElement>) {
-    onChange({
-      ...endpoint,
-      details: {
-        ...endpoint.details,
-        summary: event.target.value,
-      },
-    });
-  }
+  // function handleSummaryChange(event: ChangeEvent<HTMLInputElement>) {
+  //   onChange({
+  //     ...endpoint,
+  //     details: {
+  //       ...endpoint.details,
+  //       summary: event.target.value,
+  //     },
+  //   });
+  // }
 
   function handlePathChange(event: ChangeEvent<HTMLInputElement>) {
     onChange({
@@ -73,9 +73,8 @@ function EndpointEditor({
     onOperationSelected(operation);
   }
 
-  function handleAddOperation(method: OpenAPIV3.HttpMethods) {
-    const newOperation: OpenAPIV3.OperationObject = {
-      summary: "",
+  function handleAddOperation(method: HttpMethod) {
+    const newOperation: Operation = {
       description: "",
       responses: {},
     };
@@ -103,14 +102,14 @@ function EndpointEditor({
           Path
         </Label>
         <Input id="path" value={endpoint.path} onChange={handlePathChange} />
-        <Label htmlFor="summary" className="text-right font-normal">
+        {/* <Label htmlFor="summary" className="text-right font-normal">
           Summary
         </Label>
         <Input
           id="summary"
           value={endpoint.details.summary}
           onChange={handleSummaryChange}
-        />
+        /> */}
       </div>
 
       <Tabs

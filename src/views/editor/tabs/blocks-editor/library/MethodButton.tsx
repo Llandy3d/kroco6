@@ -13,8 +13,8 @@ function MethodButton({ selected, operation, onClick }: MethodButtonProps) {
     <ListButton selected={selected} onClick={() => onClick(operation)}>
       <div className="flex items-center">
         <MethodBadge method={operation.method} />
-        <div className="flex flex-col items-start">
-          <div className="font-bold">
+        <div className="flex flex-col items-start overflow-hidden text-ellipsis text-nowrap">
+          <div className="overflow-hidden text-ellipsis text-sm font-semibold">
             {operation.details.summary || operation.path}
           </div>
           {operation.details.summary && (

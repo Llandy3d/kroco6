@@ -1,16 +1,16 @@
-import type { OpenAPIV3 } from "openapi-types";
+import type { HttpMethod, Operation, PathItem } from "@/schemas/openapi";
 
 interface ApiEndpoint {
   path: string;
-  details: OpenAPIV3.PathItemObject;
+  details: PathItem;
   operations: ApiOperation[];
 }
 
 interface ApiOperation {
   id: string;
   path: string;
-  method: OpenAPIV3.HttpMethods;
-  details: OpenAPIV3.OperationObject;
+  method: HttpMethod;
+  details: Operation;
 }
 
 export type { ApiEndpoint, ApiOperation };

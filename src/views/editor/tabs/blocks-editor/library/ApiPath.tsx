@@ -28,7 +28,7 @@ function ApiPath({ endpoint, selected, onItemSelected }: ApiPathProps) {
       <h3 className="flex items-center justify-between p-2 font-semibold">
         <div>
           {endpoint.path}
-          {endpoint.details.summary ? ` - ${endpoint.details.summary}` : ""}
+          {/* {endpoint.details.summary ? ` - ${endpoint.details.summary}` : ""} */}
         </div>
         <div>
           <button>

@@ -2,6 +2,7 @@ import {
   nameValuePair,
   type NameValuePair,
 } from "@/lib/stores/blocks/model/generic";
+import { OpenAPISchema } from "@/schemas/openapi";
 import {
   array,
   boolean,
@@ -18,7 +19,6 @@ import {
   type BaseSchema,
   type Output,
 } from "valibot";
-import { openapi } from "./openapi";
 
 interface BlockBase {
   id: string;
@@ -230,7 +230,7 @@ const root = object({
 type Root = Output<typeof root>;
 
 const test = object({
-  library: openapi,
+  library: OpenAPISchema,
   roots: array(root),
 });
 

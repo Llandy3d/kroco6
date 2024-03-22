@@ -1,16 +1,22 @@
 import { Button } from "@/components/base/button";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/base/resizable";
+import { ScrollArea } from "@/components/base/scroll-area";
 import { HTTP_METHODS } from "@/lib/stores/library/constants";
 import type { ApiEndpoint, ApiOperation } from "@/lib/stores/library/types";
+import type { OpenAPI, PathItem } from "@/schemas/openapi";
 import { Plus, RefreshCcw } from "lucide-react";
-import type { OpenAPIV3 } from "openapi-types";
 import { useMemo, useState } from "react";
 import { ApiPath } from "./ApiPath";
 import { EndpointEditor } from "./EndpointEditor";
 import { SyncDialog } from "./SyncDialog";
 
 interface LibraryProps {
-  library: OpenAPIV3.Document;
-  onChange: (library: OpenAPIV3.Document) => void;
+  library: OpenAPI;
+  onChange: (library: OpenAPI) => void;
 }
 
 function Library({ library, onChange }: LibraryProps) {
@@ -18,7 +24,9 @@ function Library({ library, onChange }: LibraryProps) {
   const [importModalOpen, setImportModalOpen] = useState(false);
 
   const endpoints: ApiEndpoint[] = useMemo(() => {
-    const paths = Object.entries(library.paths ?? {});
+    const paths = Object.entries(library.paths ?? {}) satisfies Array<
+      [string, PathItem]
+    >;
 
     return paths.flatMap(([path, value]) => {
       if (value === undefined) {
@@ -54,12 +62,7 @@ function Library({ library, onChange }: LibraryProps) {
     setImportModalOpen(true);
   };
 
-  const handleImport = (api: OpenAPIV3.Document) => {
-    // For now we only support V3
-    if (!("openapi" in api)) {
-      return;
-    }
-
+  const handleImport = (api: OpenAPI) => {
     onChange(api);
 
     setImportModalOpen(false);
@@ -90,51 +93,59 @@ function Library({ library, onChange }: LibraryProps) {
 
   return (
     <>
-      <div className="flex h-full flex-col">
-        <div className="flex flex-auto">
-          <div className="flex h-full w-96 flex-col gap-4 border-r-[1px] p-2">
-            <h2 className="flex items-center justify-between">
-              <span className="font-bold uppercase">{library.info.title}</span>
-              <Button
-                className="gap-2"
-                variant="ghost"
-                size="sm"
-                onClick={handleSyncClick}
-              >
-                <RefreshCcw size={14} /> Sync
-              </Button>
-            </h2>
-            {endpoints.map((endpoint) => {
-              return (
-                <div key={endpoint.path}>
-                  <ApiPath
-                    endpoint={endpoint}
-                    selected={selected}
-                    onItemSelected={handleItemSelected}
-                  />
+      <ResizablePanelGroup direction="horizontal">
+        <ResizablePanel className="flex flex-col p-2" maxSize={30}>
+          <h2 className="flex items-center justify-between">
+            <span className="font-bold uppercase">{library.info.title}</span>
+            <Button
+              className="gap-2"
+              variant="ghost"
+              size="sm"
+              onClick={handleSyncClick}
+            >
+              <RefreshCcw size={14} /> Sync
+            </Button>
+          </h2>
+          <div className="relative my-2 flex-auto">
+            <div className="absolute inset-0 overflow-y-auto">
+              <ScrollArea>
+                <div>
+                  {endpoints.map((endpoint) => {
+                    return (
+                      <div key={endpoint.path}>
+                        <ApiPath
+                          endpoint={endpoint}
+                          selected={selected}
+                          onItemSelected={handleItemSelected}
+                        />
+                      </div>
+                    );
+                  })}
                 </div>
-              );
-            })}
-            <div className="flex gap-2">
-              <Button className="flex-1 gap-2">
-                <Plus /> Add
-              </Button>
+              </ScrollArea>
             </div>
           </div>
-          <div className="flex flex-auto flex-col p-4">
-            {endpoint !== undefined && selected !== undefined && (
-              <EndpointEditor
-                selected={selected.method}
-                endpoint={endpoint}
-                onChange={handleEndpointChange}
-                onOperationSelected={handleItemSelected}
-              />
-            )}
+          <div className="flex gap-2">
+            <Button className="flex-1 gap-2">
+              <Plus /> Add
+            </Button>
           </div>
-        </div>
-      </div>
+        </ResizablePanel>
+        <ResizableHandle />
+        <ResizablePanel className="p-4">
+          {endpoint !== undefined && selected !== undefined && (
+            <EndpointEditor
+              selected={selected.method}
+              endpoint={endpoint}
+              onChange={handleEndpointChange}
+              onOperationSelected={handleItemSelected}
+            />
+          )}
+        </ResizablePanel>
+      </ResizablePanelGroup>
 
       <SyncDialog
+        syncedFrom={library["x-synced-from"]}
         open={importModalOpen}
         onDismiss={handleSyncDialogDismiss}
         onSync={handleImport}

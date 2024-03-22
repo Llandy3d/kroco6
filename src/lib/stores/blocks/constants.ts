@@ -1,8 +1,8 @@
-import type { OpenAPIV3 } from "openapi-types";
+import type { OpenAPI } from "@/schemas/openapi";
 import type { Test } from "./model/strict";
 
-const EMPTY_LIBRARY: OpenAPIV3.Document = {
-  openapi: "3.0.0",
+const EMPTY_LIBRARY: OpenAPI = {
+  swagger: "2.0",
   info: {
     title: "Untitled API",
     version: "0.0.0",

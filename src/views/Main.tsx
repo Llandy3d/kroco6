@@ -16,10 +16,8 @@ function Main() {
         <Sidebar />
       </ResizablePanel>
       <ResizableHandle />
-      <ResizablePanel className="flex flex-col">
-        <div className="flex flex-auto flex-col bg-[#F9F8FC] p-4 pt-1">
-          {project && <Editor project={project} />}
-        </div>
+      <ResizablePanel className="flex h-screen flex-auto flex-col overflow-hidden bg-[#F9F8FC] p-4 pt-1">
+        {project && <Editor project={project} />}
       </ResizablePanel>
     </ResizablePanelGroup>
   );

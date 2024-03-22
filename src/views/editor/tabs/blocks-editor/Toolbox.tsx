@@ -129,7 +129,7 @@ function Toolbox({ test }: ToolboxProps) {
   const [current, setCurrent] = useState<Tab>(() => toTab(DEFAULT_CATEGORY));
 
   const categories: ToolboxCategory[] = useMemo(() => {
-    const baseUrl = test.library.servers?.[0]?.url ?? "";
+    const baseUrl = test.library["x-synced-from"] ?? "";
 
     const blocks = Object.entries(test.library.paths ?? {}).flatMap(
       ([path, methods]) => {

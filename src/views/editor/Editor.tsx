@@ -224,6 +224,7 @@ function Editor({ project }: EditorProps) {
             </TabsTrigger>
           );
         })}
+        <TabsTrigger className="hidden" value="empty" role="presentation" />
         <DropdownMenu>
           <DropdownMenuTrigger className="p-2 hover:bg-slate-200">
             <PlusIcon size={14} />
@@ -243,25 +244,24 @@ function Editor({ project }: EditorProps) {
           <TabsContent
             key={file.handle}
             value={file.handle}
-            className="mt-0 flex-auto bg-white"
+            className="mt-0 flex h-full flex-auto flex-col border-[1px] border-[#F2F1F5] bg-white data-[state=inactive]:hidden"
           >
-            <div className="border-[1px] border-[#F2F1F5] flex h-full flex-col">
-              <TestEditor
-                tab={file}
-                onChange={handleTabChange}
-                onSave={handleSave}
-              />
-            </div>
+            <TestEditor
+              tab={file}
+              onChange={handleTabChange}
+              onSave={handleSave}
+            />
           </TabsContent>
         );
       })}
-      <TabsContent value="empty" className="mt-0 flex-auto bg-white">
-        <div className="border-[1px] border-[#F2F1F5] flex h-full flex-col">
-          <EmptyEditor
-            onNewBlocks={handleNewBlocksFile}
-            onNewScript={handleNewScriptFile}
-          />
-        </div>
+      <TabsContent
+        value="empty"
+        className="mt-0 flex h-full flex-auto flex-col border-[1px] border-[#F2F1F5] bg-white data-[state=inactive]:hidden"
+      >
+        <EmptyEditor
+          onNewBlocks={handleNewBlocksFile}
+          onNewScript={handleNewScriptFile}
+        />
       </TabsContent>
     </Tabs>
   );

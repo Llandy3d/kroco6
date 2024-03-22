@@ -1,3 +1,4 @@
+import type { Paths } from "@/schemas/openapi/v2";
 import type { OpenAPIV3 } from "openapi-types";
 import type { Test } from "../blocks/model/loose";
 import type { ApiEndpoint } from "./types";
@@ -6,10 +7,7 @@ function syncLibrary(test: Test, newLibrary: OpenAPIV3.Document) {
   return { ...test, library: newLibrary };
 }
 
-function updateInPaths(
-  test: Test,
-  fn: (operation: OpenAPIV3.PathsObject) => OpenAPIV3.PathsObject,
-) {
+function updateInPaths(test: Test, fn: (operation: Paths) => Paths) {
   return {
     ...test,
     library: {
@@ -29,7 +27,7 @@ function updateEndpoint(test: Test, previous: ApiEndpoint, next: ApiEndpoint) {
       }
 
       return { ...acc, [path]: details };
-    }, {} as OpenAPIV3.PathsObject);
+    }, {} as Paths);
   });
 }
 
