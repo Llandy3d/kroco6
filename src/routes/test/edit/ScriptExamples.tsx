@@ -1,6 +1,6 @@
 import * as scripts from "@/lib/example-scripts";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/base/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,7 +9,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/base/dropdown-menu";
 import { ChevronDown } from "lucide-react";
 
 interface ScriptExamplesProps {

@@ -1,14 +1,18 @@
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import type { EditorTab } from "@/lib/stores/editor";
-import { Popover, PopoverContent, PopoverTrigger } from "@radix-ui/react-popover";
+import { Button } from "@/components/base/button";
+import { Input } from "@/components/base/input";
+import { Label } from "@/components/base/label";
+import type { FileTab } from "@/lib/stores/editor";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@radix-ui/react-popover";
 import { Save } from "lucide-react";
 import { useState, type ChangeEvent } from "react";
 
 interface SaveTestButtonProps {
-  file: EditorTab;
-  onSave: (file: EditorTab) => void;
+  file: FileTab;
+  onSave: (file: FileTab) => void;
 }
 
 function SaveTestButton({ file, onSave }: SaveTestButtonProps) {
@@ -39,7 +43,12 @@ function SaveTestButton({ file, onSave }: SaveTestButtonProps) {
 
   if (file.path.type === "existing") {
     return (
-      <Button variant="ghost" size="icon" className="rounded-full" onClick={handleSave}>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="rounded-full"
+        onClick={handleSave}
+      >
         <Save size={14} />
       </Button>
     );
@@ -55,7 +64,12 @@ function SaveTestButton({ file, onSave }: SaveTestButtonProps) {
       <PopoverContent>
         <div className="flex flex-col gap-2">
           <Label htmlFor="k6-test-name">Test name</Label>
-          <Input id="k6-test-name" className="mb-2" value={name} onChange={handleNameChange} />
+          <Input
+            id="k6-test-name"
+            className="mb-2"
+            value={name}
+            onChange={handleNameChange}
+          />
 
           <Button size="sm" onClick={handleNameAndSave}>
             Save changes

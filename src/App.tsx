@@ -1,6 +1,7 @@
+import { Toaster } from "@/components/base/toaster";
 import "./globals.css";
 
-import { Page } from "@/routes/Page";
+import { Main } from "@/views/Main";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
@@ -11,7 +12,8 @@ function App() {
   return (
     <StrictMode>
       <QueryClientProvider client={client}>
-        <Page />
+        <Toaster />
+        <Main />
       </QueryClientProvider>
     </StrictMode>
   );

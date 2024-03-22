@@ -2,14 +2,15 @@ import { openFile } from "@/lib/backend-client";
 import { parse } from "@/lib/stores/blocks/model/loose";
 import type { EditorTab } from "@/lib/stores/editor";
 import { tryParseJSON } from "@/lib/utils/json";
-import { getExtension, getPathName } from "@/lib/utils/path";
+import { basename, extname } from "@/lib/utils/path";
 import { nanoid } from "nanoid";
+import { dirname } from "path";
 
 function parseContent(path: string, content: string): EditorTab | null {
-  const fileName = getPathName(path);
-  const extension = getExtension(path);
+  const name = basename(path);
+  const extension = extname(path);
 
-  if (fileName === "k6.json") {
+  if (name === "k6.json") {
     return {
       type: "project-settings",
       handle: nanoid(),
@@ -19,6 +20,7 @@ function parseContent(path: string, content: string): EditorTab | null {
         filePath: path,
         original: content,
       },
+      rootPath: dirname(path),
       settings: tryParseJSON(content) ?? {},
     };
   }
@@ -27,7 +29,7 @@ function parseContent(path: string, content: string): EditorTab | null {
     return {
       type: "script",
       handle: nanoid(),
-      name: fileName ?? "Untitled",
+      name: name ?? "Untitled",
       path: {
         type: "existing",
         filePath: path,
@@ -52,7 +54,7 @@ function parseContent(path: string, content: string): EditorTab | null {
   return {
     type: "blocks",
     handle: nanoid(),
-    name: fileName ?? "Untitled",
+    name: name ?? "Untitled",
     path: {
       type: "existing",
       filePath: path,

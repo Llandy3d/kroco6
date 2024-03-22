@@ -8,11 +8,6 @@ interface Environment {
   variables: Record<string, string>;
 }
 
-interface EnvironmentsData {
-  active: string;
-  environments: Array<Environment>;
-}
-
 interface CloudTest {
   id: string;
   name: string;
@@ -266,16 +261,12 @@ export {
   saveFileAs,
   saveProjectConfig,
   saveToken,
-  type CloudTest,
   type Environment,
-  type EnvironmentsData,
   type Project,
   type ProjectConfig,
   type ProjectDirectory,
   type ProjectEntry,
   type ProjectFile,
-  type ProjectOpened,
   type Test,
-  type TestKind,
   type Version,
 };

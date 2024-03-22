@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/base/button";
 import {
   Dialog,
   DialogContent,
@@ -6,8 +6,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+} from "@/components/base/dialog";
+import { Input } from "@/components/base/input";
 import type { Environment as EnvironmentType } from "@/lib/backend-client";
 import { Container, Trash2 } from "lucide-react";
 import type { ChangeEvent } from "react";

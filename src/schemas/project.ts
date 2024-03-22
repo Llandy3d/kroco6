@@ -1,15 +1,15 @@
-import { array, fallback, literal, object, safeParse, string, union, type Output } from "valibot";
+import { array, literal, object, optional, safeParse, string, union, type Output } from "valibot";
 
 const VersionSchema = union([literal("v0.49.0"), string()]);
 const ExtensionsSchema = array(string());
 
 const K6SettingsSchema = object({
-  version: fallback(VersionSchema, "v0.49.0"),
-  extensions: fallback(ExtensionsSchema, []),
+  version: optional(VersionSchema, "v0.49.0"),
+  extensions: optional(ExtensionsSchema, []),
 });
 
 const ProjectSettingsSchema = object({
-  k6: fallback(K6SettingsSchema, {
+  k6: optional(K6SettingsSchema, {
     version: "v0.49.0",
     extensions: [],
   }),

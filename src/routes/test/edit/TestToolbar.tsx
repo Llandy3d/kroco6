@@ -1,5 +1,10 @@
-import { Button } from "@/components/ui/button";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Button } from "@/components/base/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/base/tooltip";
 import { type ProjectConfig } from "@/lib/backend-client";
 import type { FileTab } from "@/lib/stores/editor";
 import { Loader2, PlayCircle, Save, UploadCloud } from "lucide-react";

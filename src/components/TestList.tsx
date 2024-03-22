@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/base/button";
 import { atom, useSetAtom } from "jotai";
 import { FileJson2, Layers } from "lucide-react";
 import type { Test } from "../lib/backend-client";
