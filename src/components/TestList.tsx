@@ -26,7 +26,11 @@ function TestList({ tests }: TestListProps) {
                 openTestAsFile(test);
               }}
             >
-              {test.kind === "Javascript" ? <FileJson2 size="12" /> : <Layers size="12" />}
+              {test.kind === "Javascript" ? (
+                <FileJson2 size="12" />
+              ) : (
+                <Layers size="12" />
+              )}
 
               {test.name}
             </button>

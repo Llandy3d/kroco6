@@ -1,5 +1,9 @@
 import { useProjectValue } from "@/atoms/project";
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/base/resizable";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/base/resizable";
 import { Editor } from "@/views/editor/Editor";
 import { Sidebar } from "../views/sidebar/Sidebar";
 

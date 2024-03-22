@@ -8,7 +8,9 @@ interface SettingsSectionProps {
 function SettingsSection({ heading, children }: SettingsSectionProps) {
   return (
     <section className="mb-8">
-      <h2 className="mb-4 border-b-[1px] pb-2 text-lg font-semibold">{heading}</h2>
+      <h2 className="mb-4 border-b-[1px] pb-2 text-lg font-semibold">
+        {heading}
+      </h2>
       {children}
     </section>
   );

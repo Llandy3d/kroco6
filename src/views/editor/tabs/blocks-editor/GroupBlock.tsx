@@ -50,7 +50,8 @@ function GroupBlock({ block }: GroupBlockProps) {
       onDelete={handleDelete}
     >
       <Field>
-        Grouped as <StringInput value={block.name} onChange={handleNameChange} />
+        Grouped as{" "}
+        <StringInput value={block.name} onChange={handleNameChange} />
       </Field>
       <Field>do the following:</Field>
       <Collection

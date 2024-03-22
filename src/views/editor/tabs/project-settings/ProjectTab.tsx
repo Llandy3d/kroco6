@@ -7,7 +7,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/base/select";
-import { installVersion, isVersionInstalled, type Version } from "@/lib/backend-client";
+import {
+  installVersion,
+  isVersionInstalled,
+  type Version,
+} from "@/lib/backend-client";
 import type { ProjectSettings } from "@/schemas/project";
 import { SettingsSection } from "@/views/editor/tabs/project-settings/SettingsSection";
 import { css } from "@emotion/css";
@@ -26,7 +30,9 @@ function toArchString(arch: os.Arch) {
       return "arm64";
 
     default:
-      throw new Error(`Unsupported architecture: ${arch}. This should not happen. :/`);
+      throw new Error(
+        `Unsupported architecture: ${arch}. This should not happen. :/`,
+      );
   }
 }
 
@@ -80,7 +86,9 @@ function useVersions() {
 
       return response.data.flatMap((release) => {
         const name = formatAssetName(release.tag_name, info);
-        const asset = release.assets.find((asset) => asset.name.startsWith(name));
+        const asset = release.assets.find((asset) =>
+          asset.name.startsWith(name),
+        );
 
         if (asset === undefined) {
           return [];
@@ -156,7 +164,10 @@ function ProjectTab({ settings, onChange }: ProjectTabProps) {
 
     setIsInstalled("installing");
 
-    const targetVersion = findTargetVersion(availableVersions, settings.k6.version);
+    const targetVersion = findTargetVersion(
+      availableVersions,
+      settings.k6.version,
+    );
 
     if (targetVersion === undefined) {
       return;
@@ -176,7 +187,10 @@ function ProjectTab({ settings, onChange }: ProjectTabProps) {
       return;
     }
 
-    const targetVersion = findTargetVersion(availableVersions, settings.k6.version);
+    const targetVersion = findTargetVersion(
+      availableVersions,
+      settings.k6.version,
+    );
 
     if (targetVersion === undefined) {
       return;
@@ -215,7 +229,8 @@ function ProjectTab({ settings, onChange }: ProjectTabProps) {
           <span className="flex items-center gap-2 text-sm">
             {isInstalled === "checking" && (
               <>
-                <Loader2 size={14} className="animate-spin" /> Checking version availability...
+                <Loader2 size={14} className="animate-spin" /> Checking version
+                availability...
               </>
             )}
             {isInstalled === "installed" && (

@@ -11,7 +11,11 @@ import {
 import type { StepBlock } from "./model/strict";
 import { concat, detach, findBlockById, replace } from "./model/utils";
 
-function dropOnCanvas(test: Test, target: Block, position: { top: number; left: number }): Test {
+function dropOnCanvas(
+  test: Test,
+  target: Block,
+  position: { top: number; left: number },
+): Test {
   const instance = instantiate(target);
 
   const existing = test.roots.find((root) => root.block.id === instance.id);
@@ -25,7 +29,9 @@ function dropOnCanvas(test: Test, target: Block, position: { top: number; left: 
 
     return {
       ...test,
-      roots: test.roots.map((root) => (root.block.id === instance.id ? newRoot : root)),
+      roots: test.roots.map((root) =>
+        root.block.id === instance.id ? newRoot : root,
+      ),
     };
   }
 
@@ -64,13 +70,18 @@ function detachBlock(test: Test, block: Block) {
 function updateBlock(test: Test, block: Block) {
   const roots = test.roots.map((root) => ({
     ...root,
-    block: root.block.id === block.id ? block : replace(root.block, block, block),
+    block:
+      root.block.id === block.id ? block : replace(root.block, block, block),
   }));
 
   return { ...test, roots };
 }
 
-function insertChild(test: Test, block: ScenarioBlock | GroupBlock, step: StepBlock) {
+function insertChild(
+  test: Test,
+  block: ScenarioBlock | GroupBlock,
+  step: StepBlock,
+) {
   if (step.id === block.step?.id) {
     return test;
   }

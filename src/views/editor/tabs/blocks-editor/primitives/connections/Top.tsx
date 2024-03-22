@@ -39,8 +39,22 @@ function Top() {
       <div className={styles.left}></div>
       <div className={cn(styles.notch, "relative w-4")}>
         <svg className="absolute block w-4" viewBox="0 0 100 50">
-          <line x1="0" y1="0" x2="50" y2="40" strokeWidth="6" stroke="currentColor" />
-          <line x1="50" y1="40" x2="100" y2="0" strokeWidth="6" stroke="currentColor" />
+          <line
+            x1="0"
+            y1="0"
+            x2="50"
+            y2="40"
+            strokeWidth="6"
+            stroke="currentColor"
+          />
+          <line
+            x1="50"
+            y1="40"
+            x2="100"
+            y2="0"
+            strokeWidth="6"
+            stroke="currentColor"
+          />
         </svg>
       </div>
       <div className={styles.right}></div>

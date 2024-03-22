@@ -5,12 +5,19 @@ import {
   insertNext,
   updateBlock,
 } from "@/lib/stores/blocks";
-import { isExecutorBlock, isHttpRequestBlock, isStepBlock } from "@/lib/stores/blocks/utils";
+import {
+  isExecutorBlock,
+  isHttpRequestBlock,
+  isStepBlock,
+} from "@/lib/stores/blocks/utils";
 import { cn } from "@/lib/utils";
 import { AnyBlock } from "@/views/editor/tabs/blocks-editor/AnyBlock";
 import { Root } from "@/views/editor/tabs/blocks-editor/Root";
 import { Toolbox } from "@/views/editor/tabs/blocks-editor/Toolbox";
-import type { DragData, DropData } from "@/views/editor/tabs/blocks-editor/dnd/types";
+import type {
+  DragData,
+  DropData,
+} from "@/views/editor/tabs/blocks-editor/dnd/types";
 import {
   DndContext,
   DragOverlay,
@@ -27,7 +34,11 @@ import {
 } from "@dnd-kit/core";
 import { useState, type MouseEvent, type ReactNode } from "react";
 
-import { instantiate, type Block, type Test } from "@/lib/stores/blocks/model/loose";
+import {
+  instantiate,
+  type Block,
+  type Test,
+} from "@/lib/stores/blocks/model/loose";
 import { detach } from "@/lib/stores/blocks/model/utils";
 import { exhaustive } from "@/lib/utils/typescript";
 import { BlockSidebar } from "@/views/editor/tabs/blocks-editor/BlockSidebar";
@@ -44,7 +55,8 @@ class NonInteractiveMouseSensor extends PointerSensor {
       handler({ nativeEvent: event }: MouseEvent) {
         if (event.target instanceof HTMLElement) {
           return (
-            event.button === 0 && !interactiveElements.includes(event.target.tagName.toLowerCase())
+            event.button === 0 &&
+            !interactiveElements.includes(event.target.tagName.toLowerCase())
           );
         }
 
@@ -79,7 +91,12 @@ interface SidebarProps {
 
 function Sidebar({ align, children }: SidebarProps) {
   return (
-    <div className={cn("absolute bottom-0 top-0 z-10 bg-white", align === "right" && "right-0")}>
+    <div
+      className={cn(
+        "absolute bottom-0 top-0 z-10 bg-white",
+        align === "right" && "right-0",
+      )}
+    >
       {children}
     </div>
   );
@@ -135,7 +152,11 @@ function isInRange(value: number, min: number, max: number) {
   return value >= min && value <= max;
 }
 
-function isOverlappingHorizontally(left: ClientRect, right: ClientRect, toleranceX: number) {
+function isOverlappingHorizontally(
+  left: ClientRect,
+  right: ClientRect,
+  toleranceX: number,
+) {
   return isInRange(left.left, right.left - toleranceX, right.right);
 }
 
@@ -170,7 +191,9 @@ const collisionDetection: CollisionDetection = (args) => {
     });
   }
 
-  const sorted: Collision[] = collisions.sort((a, b) => a.difference - b.difference);
+  const sorted: Collision[] = collisions.sort(
+    (a, b) => a.difference - b.difference,
+  );
 
   const canvas = pointerWithin({
     ...args,
@@ -193,7 +216,9 @@ function Canvas({ test, onChange }: CanvasProps) {
   const [dragging, setDragging] = useState<Block | null>(null);
 
   const sensors = useSensors(
-    useSensor(NonInteractiveMouseSensor, { activationConstraint: { distance: 1 } }),
+    useSensor(NonInteractiveMouseSensor, {
+      activationConstraint: { distance: 1 },
+    }),
     useSensor(KeyboardSensor, {}),
   );
 

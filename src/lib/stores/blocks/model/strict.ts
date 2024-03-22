@@ -1,4 +1,7 @@
-import { nameValuePair, type NameValuePair } from "@/lib/stores/blocks/model/generic";
+import {
+  nameValuePair,
+  type NameValuePair,
+} from "@/lib/stores/blocks/model/generic";
 import {
   array,
   boolean,
@@ -165,7 +168,13 @@ const sleepBlock: BaseSchema<SleepBlock> = merge([
   }),
 ]);
 
-const stepBlock = union([groupBlock, libraryBlock, checkBlock, sleepBlock, httpRequestBlock]);
+const stepBlock = union([
+  groupBlock,
+  libraryBlock,
+  checkBlock,
+  sleepBlock,
+  httpRequestBlock,
+]);
 
 type StepBlock = Output<typeof stepBlock>;
 

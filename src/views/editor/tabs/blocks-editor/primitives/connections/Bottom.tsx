@@ -54,7 +54,12 @@ function Bottom({ owner, connection }: BottomProps) {
   return (
     <>
       <div className={cn(styles.root, "relative z-20")}>
-        <svg width="16px" height="8px" viewBox="0 0 100 50" xmlns="http://www.w3.org/2000/svg">
+        <svg
+          width="16px"
+          height="8px"
+          viewBox="0 0 100 50"
+          xmlns="http://www.w3.org/2000/svg"
+        >
           <polygon points="0,0 100,0 50,40" />
         </svg>
       </div>

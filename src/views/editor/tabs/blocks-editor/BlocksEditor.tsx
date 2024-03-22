@@ -14,7 +14,11 @@ import { convertToScript } from "@/lib/stores/blocks/convert";
 import type { Test } from "@/lib/stores/blocks/model/loose";
 import type { BlockTab, FileTab, TestResultsTab } from "@/lib/stores/editor";
 import { EMPTY_ENVIRONMENT } from "@/lib/stores/projects";
-import { EditorTabs, EditorTabsList, EditorTabsTrigger } from "@/views/editor/tabs/EditorTabs";
+import {
+  EditorTabs,
+  EditorTabsList,
+  EditorTabsTrigger,
+} from "@/views/editor/tabs/EditorTabs";
 import { Canvas } from "@/views/editor/tabs/blocks-editor/Canvas";
 import { ScriptPreview } from "@/views/editor/tabs/blocks-editor/ScriptPreview";
 import { testAtom, useTest } from "@/views/editor/tabs/blocks-editor/atoms";
@@ -59,9 +63,16 @@ function BlocksEditorContainer({
     try {
       setRunning(true);
 
-      const script = await convertToScript(environment ?? EMPTY_ENVIRONMENT, test);
+      const script = await convertToScript(
+        environment ?? EMPTY_ENVIRONMENT,
+        test,
+      );
 
-      setCurrentRun(runScriptLocally(settings, script).then(console.log).catch(console.error));
+      setCurrentRun(
+        runScriptLocally(settings, script)
+          .then(console.log)
+          .catch(console.error),
+      );
 
       onStarted();
     } catch (error) {
@@ -113,7 +124,8 @@ function BlocksEditorContainer({
     } catch {
       toast({
         variant: "destructive",
-        description: "The script could not be generated because the blocks contain errors.",
+        description:
+          "The script could not be generated because the blocks contain errors.",
       });
     }
   }
@@ -186,7 +198,12 @@ interface BlocksEditorProps {
   onSave: (file: FileTab) => void;
 }
 
-function BlocksEditor({ tab: file, environment, onChange, onSave }: BlocksEditorProps) {
+function BlocksEditor({
+  tab: file,
+  environment,
+  onChange,
+  onSave,
+}: BlocksEditorProps) {
   const setOpenTabs = useSetOpenTabs();
   const setCurrentTab = useSetCurrentTab();
 

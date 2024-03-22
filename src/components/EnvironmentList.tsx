@@ -8,7 +8,11 @@ interface EnvironmentListProps {
 
 function EnvironmentList({ environments, onChange }: EnvironmentListProps) {
   function handleEnvironmentChange(environment: EnvironmentType) {
-    onChange(environments.map((env) => (env.name === environment.name ? environment : env)));
+    onChange(
+      environments.map((env) =>
+        env.name === environment.name ? environment : env,
+      ),
+    );
   }
 
   return (

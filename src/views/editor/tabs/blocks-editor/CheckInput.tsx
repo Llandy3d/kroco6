@@ -1,6 +1,9 @@
 import type { Check } from "@/lib/stores/blocks/model/strict";
 import { exhaustive } from "@/lib/utils/typescript";
-import { SelectInput, type Selected } from "@/views/editor/tabs/blocks-editor/inputs/SelectInput";
+import {
+  SelectInput,
+  type Selected,
+} from "@/views/editor/tabs/blocks-editor/inputs/SelectInput";
 import { StringInput } from "@/views/editor/tabs/blocks-editor/inputs/StringInput";
 import { Field } from "@/views/editor/tabs/blocks-editor/primitives/Field";
 import { X } from "lucide-react";
@@ -68,14 +71,26 @@ export function CheckInput({ check, onChange, onRemove }: CheckInputProps) {
 
   return (
     <Field>
-      <SelectInput value={check.type} items={items} onChange={handleSelectedChange} />
+      <SelectInput
+        value={check.type}
+        items={items}
+        onChange={handleSelectedChange}
+      />
 
       {check.type === "status" && (
-        <StringInput size={3} value={check.value} onChange={handleStatusChange} />
+        <StringInput
+          size={3}
+          value={check.value}
+          onChange={handleStatusChange}
+        />
       )}
 
       {check.type === "contains" && (
-        <StringInput size={10} value={check.value} onChange={handleBodyContainsChange} />
+        <StringInput
+          size={10}
+          value={check.value}
+          onChange={handleBodyContainsChange}
+        />
       )}
 
       <button onClick={handleRemove}>

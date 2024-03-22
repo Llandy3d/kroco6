@@ -1,6 +1,10 @@
 import { useProjectValue } from "@/atoms/project";
 import { useToast } from "@/components/base/use-toast";
-import { runScriptInCloud, runScriptLocally, type ProjectConfig } from "@/lib/backend-client";
+import {
+  runScriptInCloud,
+  runScriptLocally,
+  type ProjectConfig,
+} from "@/lib/backend-client";
 import type { FileTab, ScriptTab } from "@/lib/stores/editor";
 import * as monaco from "monaco-editor";
 import { useRef, useState } from "react";
@@ -68,7 +72,8 @@ function ScriptEditor({ tab: file, onChange, onSave }: ScriptEditorProps) {
     }
 
     editor.current = monaco.editor.create(container, {
-      value: file.path.type === "existing" ? file.path.original : file.path.initial,
+      value:
+        file.path.type === "existing" ? file.path.original : file.path.initial,
       language: "javascript",
       automaticLayout: true,
     });

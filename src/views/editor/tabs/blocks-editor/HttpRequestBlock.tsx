@@ -40,7 +40,10 @@ function HttpRequestBlock({ block }: HttpRequestBlockProps) {
     });
   }
 
-  const methods = HTTP_METHODS.map((method) => ({ value: method, label: method.toUpperCase() }));
+  const methods = HTTP_METHODS.map((method) => ({
+    value: method,
+    label: method.toUpperCase(),
+  }));
 
   return (
     <Block
@@ -60,7 +63,11 @@ function HttpRequestBlock({ block }: HttpRequestBlockProps) {
       onDelete={handleDelete}
     >
       <Field>
-        <SelectInput value={block.method} items={methods} onChange={handleMethodChange} />
+        <SelectInput
+          value={block.method}
+          items={methods}
+          onChange={handleMethodChange}
+        />
         <StringInput
           placeholder="Url"
           autoCapitalize="off"

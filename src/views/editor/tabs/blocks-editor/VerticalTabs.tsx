@@ -71,7 +71,10 @@ function VerticalTabs({
 
   return (
     <Tabs
-      className={cn("flex h-full", align === "left" ? "flex-row" : "flex-row-reverse")}
+      className={cn(
+        "flex h-full",
+        align === "left" ? "flex-row" : "flex-row-reverse",
+      )}
       value={current?.value ?? ""}
       orientation="vertical"
       onValueChange={handleValueChange}
@@ -86,7 +89,9 @@ function VerticalTabs({
               onClick={current?.value === tab.value ? handleToggle : undefined}
             >
               <span className="text-slate-400">{tab.icon}</span>
-              <span className="uppercase [writing-mode:vertical-lr]">{tab.label}</span>
+              <span className="uppercase [writing-mode:vertical-lr]">
+                {tab.label}
+              </span>
             </TabsTrigger>
           );
         })}
@@ -102,9 +107,16 @@ interface VerticalTabsContentProps {
   children: ReactNode;
 }
 
-function VerticalTabsContent({ className, value, children }: VerticalTabsContentProps) {
+function VerticalTabsContent({
+  className,
+  value,
+  children,
+}: VerticalTabsContentProps) {
   return (
-    <TabsContent value={value} className={cn("min-w-80 border-r-[1px] p-2", className)}>
+    <TabsContent
+      value={value}
+      className={cn("min-w-80 border-r-[1px] p-2", className)}
+    >
       {children}
     </TabsContent>
   );

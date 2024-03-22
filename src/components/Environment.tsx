@@ -20,7 +20,10 @@ interface EnvironmentProps {
 function Environment({ environment, onChange }: EnvironmentProps) {
   function handleAddVariable() {}
 
-  function handleNameEdit(event: ChangeEvent<HTMLInputElement>, originalName: string) {
+  function handleNameEdit(
+    event: ChangeEvent<HTMLInputElement>,
+    originalName: string,
+  ) {
     const { [originalName]: value, ...variables } = environment.variables;
 
     onChange({
@@ -63,7 +66,9 @@ function Environment({ environment, onChange }: EnvironmentProps) {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            {environment.name.charAt(0).toUpperCase() + environment.name.slice(1)} Environment
+            {environment.name.charAt(0).toUpperCase() +
+              environment.name.slice(1)}{" "}
+            Environment
           </DialogTitle>
           <DialogDescription>
             <table className="min-w-full divide-y divide-gray-300">
@@ -106,7 +111,11 @@ function Environment({ environment, onChange }: EnvironmentProps) {
                       />
                     </td>
                     <td>
-                      <Button variant="outline" size="icon" onClick={() => handleDelete(name)}>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => handleDelete(name)}
+                      >
                         <Trash2 size="16" />
                       </Button>
                     </td>

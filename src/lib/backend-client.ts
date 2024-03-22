@@ -52,7 +52,10 @@ async function listProjects(): Promise<Project[]> {
   return await invoke("list_projects", {});
 }
 
-function runScriptLocally(project: ProjectSettings, script: string): Promise<string> {
+function runScriptLocally(
+  project: ProjectSettings,
+  script: string,
+): Promise<string> {
   return invoke("run_script", {
     script,
     version: project.k6.version,
@@ -79,7 +82,10 @@ async function loadProjectConfig(projectName: string): Promise<ProjectConfig> {
 }
 
 // save project config
-async function saveProjectConfig(projectName: string, projectConfig: ProjectConfig): Promise<void> {
+async function saveProjectConfig(
+  projectName: string,
+  projectConfig: ProjectConfig,
+): Promise<void> {
   return await invoke("save_project_config", { projectName, projectConfig });
 }
 
@@ -152,7 +158,11 @@ interface ProjectAndTab {
   tab: EditorTab;
 }
 
-async function saveFile(project: Project, tab: FileTab, content: string): Promise<ProjectAndTab> {
+async function saveFile(
+  project: Project,
+  tab: FileTab,
+  content: string,
+): Promise<ProjectAndTab> {
   const result =
     tab.path.type === "existing"
       ? await invoke<SaveFileResult>("save_file", {
@@ -223,7 +233,9 @@ function deleteDirectory(root: string, path: string) {
 }
 
 function loadProjectSettings(project: Project) {
-  return invoke<ProjectSettings>("load_project_settings", { root: project.root });
+  return invoke<ProjectSettings>("load_project_settings", {
+    root: project.root,
+  });
 }
 
 function isVersionInstalled(version: string) {

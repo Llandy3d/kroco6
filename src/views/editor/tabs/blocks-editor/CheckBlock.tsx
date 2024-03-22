@@ -23,7 +23,9 @@ function CheckBlock({ block }: CheckBlockProps) {
     setTest((test) =>
       updateBlock(test, {
         ...block,
-        checks: block.checks.map((check) => (check.id === target.id ? target : check)),
+        checks: block.checks.map((check) =>
+          check.id === target.id ? target : check,
+        ),
       }),
     );
   }

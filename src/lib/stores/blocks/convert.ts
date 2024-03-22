@@ -17,7 +17,9 @@ function* enumerate(start: model.StepBlock | null): Generator<model.StepBlock> {
   }
 }
 
-function toHttpRequestStep(model: model.LibraryBlock | model.HttpRequestBlock): HttpRequestStep {
+function toHttpRequestStep(
+  model: model.LibraryBlock | model.HttpRequestBlock,
+): HttpRequestStep {
   switch (model.type) {
     case "http-request":
       return {
@@ -28,7 +30,9 @@ function toHttpRequestStep(model: model.LibraryBlock | model.HttpRequestBlock): 
           name: parameter.name,
           value: parameter.value,
         })),
-        headers: Object.fromEntries(model.headers.map((header) => [header.name, header.value])),
+        headers: Object.fromEntries(
+          model.headers.map((header) => [header.name, header.value]),
+        ),
         url: model.url,
       };
 
@@ -105,7 +109,9 @@ function toScenario(model: model.ScenarioBlock): Scenario {
 }
 
 function convertToTest(model: model.Test): Test {
-  const scenarios = model.roots.map((root) => root.block).filter(isScenarioBlock);
+  const scenarios = model.roots
+    .map((root) => root.block)
+    .filter(isScenarioBlock);
 
   return {
     scenarios: scenarios.map(toScenario),

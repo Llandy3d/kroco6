@@ -131,34 +131,36 @@ function Toolbox({ test }: ToolboxProps) {
   const categories: ToolboxCategory[] = useMemo(() => {
     const baseUrl = test.library.servers?.[0]?.url ?? "";
 
-    const blocks = Object.entries(test.library.paths ?? {}).flatMap(([path, methods]) => {
-      if (methods === undefined) {
-        return [];
-      }
+    const blocks = Object.entries(test.library.paths ?? {}).flatMap(
+      ([path, methods]) => {
+        if (methods === undefined) {
+          return [];
+        }
 
-      const a: Array<LibraryBlock | Falsy> = [
-        methods.get && {
-          type: "library",
-          id: nanoid(),
-          method: "get",
-          url: new URL(path, baseUrl).toString(),
-          name: methods.get.summary || `GET ${path}`,
-          parameters: {},
-          next: null,
-        },
-        methods.post && {
-          type: "library",
-          id: nanoid(),
-          method: "post",
-          url: new URL(path, baseUrl).toString(),
-          name: methods.post.summary || `POST ${path}`,
-          parameters: {},
-          next: null,
-        },
-      ];
+        const a: Array<LibraryBlock | Falsy> = [
+          methods.get && {
+            type: "library",
+            id: nanoid(),
+            method: "get",
+            url: new URL(path, baseUrl).toString(),
+            name: methods.get.summary || `GET ${path}`,
+            parameters: {},
+            next: null,
+          },
+          methods.post && {
+            type: "library",
+            id: nanoid(),
+            method: "post",
+            url: new URL(path, baseUrl).toString(),
+            name: methods.post.summary || `POST ${path}`,
+            parameters: {},
+            next: null,
+          },
+        ];
 
-      return a.filter(isTruthy);
-    });
+        return a.filter(isTruthy);
+      },
+    );
 
     const category: ToolboxCategory = {
       id: "api",
@@ -173,7 +175,12 @@ function Toolbox({ test }: ToolboxProps) {
   const tabs = useMemo<Tab[]>(() => categories.map(toTab), [categories]);
 
   return (
-    <VerticalTabs current={current} tabs={tabs} align="left" onChange={setCurrent}>
+    <VerticalTabs
+      current={current}
+      tabs={tabs}
+      align="left"
+      onChange={setCurrent}
+    >
       {categories.map((category) => {
         return (
           <VerticalTabsContent key={category.id} value={category.id}>

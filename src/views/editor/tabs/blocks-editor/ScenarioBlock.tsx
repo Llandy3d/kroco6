@@ -3,7 +3,10 @@ import type { ScenarioBlock as ScenarioBlockType } from "@/lib/stores/blocks/mod
 import { isExecutorBlock, isStepBlock } from "@/lib/stores/blocks/utils";
 import { AnyBlock } from "@/views/editor/tabs/blocks-editor/AnyBlock";
 import { useSetTest } from "@/views/editor/tabs/blocks-editor/atoms";
-import { EXECUTOR_COLOR, STEP_COLOR } from "@/views/editor/tabs/blocks-editor/colors";
+import {
+  EXECUTOR_COLOR,
+  STEP_COLOR,
+} from "@/views/editor/tabs/blocks-editor/colors";
 import { StringInput } from "@/views/editor/tabs/blocks-editor/inputs/StringInput";
 import { Block } from "@/views/editor/tabs/blocks-editor/primitives/Block";
 import { BlockInset } from "@/views/editor/tabs/blocks-editor/primitives/BlockInset";
@@ -41,7 +44,11 @@ function ScenarioBlock({ block }: ScenarioBlockProps) {
     >
       <Field>
         Run{" "}
-        <StringInput placeholder="Scenario name" value={block.name} onChange={handleNameChange} />
+        <StringInput
+          placeholder="Scenario name"
+          value={block.name}
+          onChange={handleNameChange}
+        />
         with{" "}
         <BlockInset
           owner={block}

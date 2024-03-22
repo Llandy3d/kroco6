@@ -65,7 +65,10 @@ function TestToolbar({
               {running ? (
                 <>Cloud run in progress</>
               ) : (
-                <>You need to configure a token and project id to run tests in the cloud.</>
+                <>
+                  You need to configure a token and project id to run tests in
+                  the cloud.
+                </>
               )}
             </TooltipContent>
           </Tooltip>

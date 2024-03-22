@@ -46,7 +46,9 @@ function Library({ library, onChange }: LibraryProps) {
     });
   }, [library]);
 
-  const endpoint = endpoints.find((endpoint) => endpoint.path === selected?.path);
+  const endpoint = endpoints.find(
+    (endpoint) => endpoint.path === selected?.path,
+  );
 
   const handleSyncClick = () => {
     setImportModalOpen(true);
@@ -93,7 +95,12 @@ function Library({ library, onChange }: LibraryProps) {
           <div className="flex h-full w-96 flex-col gap-4 border-r-[1px] p-2">
             <h2 className="flex items-center justify-between">
               <span className="font-bold uppercase">{library.info.title}</span>
-              <Button className="gap-2" variant="ghost" size="sm" onClick={handleSyncClick}>
+              <Button
+                className="gap-2"
+                variant="ghost"
+                size="sm"
+                onClick={handleSyncClick}
+              >
                 <RefreshCcw size={14} /> Sync
               </Button>
             </h2>

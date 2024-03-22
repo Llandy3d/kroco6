@@ -1,4 +1,7 @@
-import { nameValuePair, type NameValuePair } from "@/lib/stores/blocks/model/generic";
+import {
+  nameValuePair,
+  type NameValuePair,
+} from "@/lib/stores/blocks/model/generic";
 import { nanoid } from "nanoid";
 import {
   array,
@@ -19,7 +22,9 @@ import {
 } from "valibot";
 import { openapi } from "./openapi";
 
-const template = Symbol("This block is a template and should be cloned before use.");
+const template = Symbol(
+  "This block is a template and should be cloned before use.",
+);
 
 type WithTemplate<T> = T & {
   [template]?: true;
@@ -175,7 +180,13 @@ const sleepBlock: BaseSchema<SleepBlock> = merge([
   }),
 ]);
 
-const stepBlock = union([groupBlock, libraryBlock, checkBlock, sleepBlock, httpRequestBlock]);
+const stepBlock = union([
+  groupBlock,
+  libraryBlock,
+  checkBlock,
+  sleepBlock,
+  httpRequestBlock,
+]);
 
 type StepBlock = Output<typeof stepBlock>;
 

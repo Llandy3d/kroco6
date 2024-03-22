@@ -48,7 +48,12 @@ function SleepBlock({ block }: SleepBlockProps) {
       onDelete={handleDelete}
     >
       <Field>
-        Wait for <StringInput size={3} value={block.seconds} onChange={handleSecondsChange} />{" "}
+        Wait for{" "}
+        <StringInput
+          size={3}
+          value={block.seconds}
+          onChange={handleSecondsChange}
+        />{" "}
         seconds
       </Field>
     </Block>

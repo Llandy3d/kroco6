@@ -6,7 +6,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/base/dropdown-menu";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/base/tabs";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/base/tabs";
 import { ProjectIcon } from "@/components/icons/ProjectIcon";
 import { saveFile, type Project } from "@/lib/backend-client";
 import { NEW_SCRIPT } from "@/lib/files";
@@ -48,7 +53,10 @@ const TabButton = forwardRef<HTMLDivElement, TabButtonProps>(function TabButton(
       data-state={state}
       className="relative border-b-4 data-[state=active]:border-primary"
     >
-      <button {...props} className="flex items-center gap-2 p-2 pr-8 hover:bg-slate-200 "></button>
+      <button
+        {...props}
+        className="flex items-center gap-2 p-2 pr-8 hover:bg-slate-200 "
+      ></button>
       <button
         className="absolute bottom-0 right-2 top-0 flex items-center hover:scale-110"
         onClick={onClose}
@@ -71,10 +79,19 @@ function TestEditor({ tab, onChange, onSave }: TestEditorProps) {
       return <ScriptEditor tab={tab} onChange={onChange} onSave={onSave} />;
 
     case "blocks":
-      return <BlocksEditor tab={tab} environment={null} onChange={onChange} onSave={onSave} />;
+      return (
+        <BlocksEditor
+          tab={tab}
+          environment={null}
+          onChange={onChange}
+          onSave={onSave}
+        />
+      );
 
     case "project-settings":
-      return <ProjectSettingsEditor tab={tab} onChange={onChange} onSave={onSave} />;
+      return (
+        <ProjectSettingsEditor tab={tab} onChange={onChange} onSave={onSave} />
+      );
 
     case "test-results":
       return <TestResultsView />;
@@ -131,7 +148,9 @@ function Editor({ project }: EditorProps) {
   function handleClose(file: EditorTab) {
     const index = openTabs.findIndex((f) => f.handle === file.handle);
 
-    setCurrentTab(openTabs[index + 1]?.handle ?? openTabs[index - 1]?.handle ?? null);
+    setCurrentTab(
+      openTabs[index + 1]?.handle ?? openTabs[index - 1]?.handle ?? null,
+    );
     setOpenTabs(openTabs.filter((f) => f.handle !== file.handle));
   }
 
@@ -178,7 +197,11 @@ function Editor({ project }: EditorProps) {
   }
 
   function handleTabChange(tab: EditorTab) {
-    setOpenTabs(openTabs.map((current) => (current.handle === tab.handle ? tab : current)));
+    setOpenTabs(
+      openTabs.map((current) =>
+        current.handle === tab.handle ? tab : current,
+      ),
+    );
   }
 
   useEffect(() => {
@@ -206,23 +229,38 @@ function Editor({ project }: EditorProps) {
             <PlusIcon size={14} />
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuItem onClick={handleNewBlocksFile}>Blocks</DropdownMenuItem>
-            <DropdownMenuItem onClick={handleNewScriptFile}>Script</DropdownMenuItem>
+            <DropdownMenuItem onClick={handleNewBlocksFile}>
+              Blocks
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleNewScriptFile}>
+              Script
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </TabsList>
       {openTabs.map((file) => {
         return (
-          <TabsContent key={file.handle} value={file.handle} className="mt-0 flex-auto bg-white">
+          <TabsContent
+            key={file.handle}
+            value={file.handle}
+            className="mt-0 flex-auto bg-white"
+          >
             <div className="border-[1px] border-[#F2F1F5] flex h-full flex-col">
-              <TestEditor tab={file} onChange={handleTabChange} onSave={handleSave} />
+              <TestEditor
+                tab={file}
+                onChange={handleTabChange}
+                onSave={handleSave}
+              />
             </div>
           </TabsContent>
         );
       })}
       <TabsContent value="empty" className="mt-0 flex-auto bg-white">
         <div className="border-[1px] border-[#F2F1F5] flex h-full flex-col">
-          <EmptyEditor onNewBlocks={handleNewBlocksFile} onNewScript={handleNewScriptFile} />
+          <EmptyEditor
+            onNewBlocks={handleNewBlocksFile}
+            onNewScript={handleNewScriptFile}
+          />
         </div>
       </TabsContent>
     </Tabs>

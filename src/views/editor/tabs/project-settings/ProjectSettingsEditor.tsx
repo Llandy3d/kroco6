@@ -3,7 +3,11 @@ import { ProjectIcon } from "@/components/icons/ProjectIcon";
 import type { ProjectSettingsTab } from "@/lib/stores/editor";
 import { join } from "@/lib/utils/path";
 import type { ProjectSettings } from "@/schemas/project";
-import { EditorTabs, EditorTabsList, EditorTabsTrigger } from "@/views/editor/tabs/EditorTabs";
+import {
+  EditorTabs,
+  EditorTabsList,
+  EditorTabsTrigger,
+} from "@/views/editor/tabs/EditorTabs";
 import { CloudTab } from "@/views/editor/tabs/project-settings/CloudTab";
 import { ProjectTab } from "@/views/editor/tabs/project-settings/ProjectTab";
 import { TabsContent } from "@radix-ui/react-tabs";
@@ -16,7 +20,11 @@ interface ProjectSettingsProps {
   onSave: (tab: ProjectSettingsTab) => void;
 }
 
-function ProjectSettingsEditor({ tab: file, onChange, onSave }: ProjectSettingsProps) {
+function ProjectSettingsEditor({
+  tab: file,
+  onChange,
+  onSave,
+}: ProjectSettingsProps) {
   const [tab, setTab] = useState("project");
 
   function handleSettingsChange(settings: ProjectSettings) {
@@ -32,7 +40,10 @@ function ProjectSettingsEditor({ tab: file, onChange, onSave }: ProjectSettingsP
       path: {
         type: "existing",
         filePath: join(file.rootPath, "k6.json"),
-        original: file.path.type === "existing" ? file.path.original : file.path.initial,
+        original:
+          file.path.type === "existing"
+            ? file.path.original
+            : file.path.initial,
       },
     });
   }

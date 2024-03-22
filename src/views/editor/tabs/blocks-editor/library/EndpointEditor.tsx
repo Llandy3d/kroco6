@@ -30,7 +30,8 @@ function EndpointEditor({
   onOperationSelected,
 }: EndpointEditorProps) {
   const unusedMethods = HTTP_METHODS.filter(
-    (method) => !endpoint.operations.some((operation) => operation.method === method),
+    (method) =>
+      !endpoint.operations.some((operation) => operation.method === method),
   );
 
   function handleSummaryChange(event: ChangeEvent<HTMLInputElement>) {
@@ -61,7 +62,9 @@ function EndpointEditor({
   }
 
   function handleOperationSelected(value: string | undefined) {
-    const operation = endpoint.operations.find((operation) => operation.method === value);
+    const operation = endpoint.operations.find(
+      (operation) => operation.method === value,
+    );
 
     if (operation === undefined) {
       return;
@@ -103,10 +106,18 @@ function EndpointEditor({
         <Label htmlFor="summary" className="text-right font-normal">
           Summary
         </Label>
-        <Input id="summary" value={endpoint.details.summary} onChange={handleSummaryChange} />
+        <Input
+          id="summary"
+          value={endpoint.details.summary}
+          onChange={handleSummaryChange}
+        />
       </div>
 
-      <Tabs className="Root" value={selected} onValueChange={handleOperationSelected}>
+      <Tabs
+        className="Root"
+        value={selected}
+        onValueChange={handleOperationSelected}
+      >
         <TabsList className="mb-4 flex border-b-2 border-slate-200">
           {endpoint.operations.map((operation) => {
             return (
@@ -143,7 +154,10 @@ function EndpointEditor({
         {endpoint.operations.map((operation) => {
           return (
             <TabsContent key={operation.id} value={operation.method}>
-              <MethodEditor operation={operation} onChange={handleOperationChange} />
+              <MethodEditor
+                operation={operation}
+                onChange={handleOperationChange}
+              />
             </TabsContent>
           );
         })}

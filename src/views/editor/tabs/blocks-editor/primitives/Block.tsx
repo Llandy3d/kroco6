@@ -1,4 +1,7 @@
-import { isTemplate, type Block as BlockType } from "@/lib/stores/blocks/model/loose";
+import {
+  isTemplate,
+  type Block as BlockType,
+} from "@/lib/stores/blocks/model/loose";
 import { cn } from "@/lib/utils";
 import { useSelectedBlock } from "@/views/editor/tabs/blocks-editor/atoms";
 import { useDragging } from "@/views/editor/tabs/blocks-editor/dnd/Draggable";

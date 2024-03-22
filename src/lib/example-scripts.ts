@@ -1,6 +1,5 @@
 import dedent from "dedent";
 
-
 // Auhtentication/Authorization
 
 export const BASIC_AUTHENTICATION = dedent`

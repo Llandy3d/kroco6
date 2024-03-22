@@ -1,5 +1,11 @@
 import type { Project } from "@/lib/backend-client";
-import { atom, getDefaultStore, useAtom, useAtomValue, useSetAtom } from "jotai";
+import {
+  atom,
+  getDefaultStore,
+  useAtom,
+  useAtomValue,
+  useSetAtom,
+} from "jotai";
 
 const projectAtom = atom<Project | null>(null);
 

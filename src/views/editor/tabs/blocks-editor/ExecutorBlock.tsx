@@ -30,9 +30,17 @@ function Executor({ executor, onChange }: ExecutorProps) {
     <div>
       {executor.type === "constant-vus" && (
         <Field>
-          <StringInput size={3} value={executor.vus} onChange={handleVusChange} />
+          <StringInput
+            size={3}
+            value={executor.vus}
+            onChange={handleVusChange}
+          />
           VUs for
-          <StringInput size={3} value={executor.duration} onChange={handleDurationChange} />
+          <StringInput
+            size={3}
+            value={executor.duration}
+            onChange={handleDurationChange}
+          />
         </Field>
       )}
     </div>
@@ -62,7 +70,12 @@ function ExecutorBlock({ block }: ExecutorBlockProps) {
   }
 
   return (
-    <Block block={block} color={EXECUTOR_COLOR} top={true} onDelete={handleDelete}>
+    <Block
+      block={block}
+      color={EXECUTOR_COLOR}
+      top={true}
+      onDelete={handleDelete}
+    >
       <Executor executor={block.executor} onChange={handleExecutorChange} />
     </Block>
   );

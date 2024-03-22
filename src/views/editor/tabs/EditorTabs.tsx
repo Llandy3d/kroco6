@@ -10,7 +10,11 @@ interface EditorTabsProps {
 
 function EditorTabs({ value, children, onValueChange }: EditorTabsProps) {
   return (
-    <Tabs className="flex flex-auto flex-col" value={value} onValueChange={onValueChange}>
+    <Tabs
+      className="flex flex-auto flex-col"
+      value={value}
+      onValueChange={onValueChange}
+    >
       {children}
     </Tabs>
   );
@@ -24,7 +28,10 @@ interface EditorTabsListProps {
 function EditorTabsList({ className, children }: EditorTabsListProps) {
   return (
     <TabsList
-      className={cn("bg-default flex rounded-none border-b-[1px] p-4 shadow-none", className)}
+      className={cn(
+        "bg-default flex rounded-none border-b-[1px] p-4 shadow-none",
+        className,
+      )}
     >
       {children}
     </TabsList>

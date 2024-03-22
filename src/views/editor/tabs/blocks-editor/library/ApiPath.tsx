@@ -2,7 +2,10 @@ import type { ApiEndpoint, ApiOperation } from "@/lib/stores/library/types";
 import { Plus } from "lucide-react";
 import { MethodButton } from "./MethodButton";
 
-function isSameOperation(left: ApiOperation | undefined, right: ApiOperation | undefined) {
+function isSameOperation(
+  left: ApiOperation | undefined,
+  right: ApiOperation | undefined,
+) {
   if (left === undefined || right === undefined) {
     return false;
   }

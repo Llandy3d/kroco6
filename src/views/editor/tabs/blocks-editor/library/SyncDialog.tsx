@@ -43,12 +43,19 @@ function SyncDialog({ open, onDismiss, onSync }: SyncDialogProps) {
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent>
         <DialogHeader>Sync with OpenAPI</DialogHeader>
-        <DialogDescription>Sync library with your existing OpenAPI definitions.</DialogDescription>
+        <DialogDescription>
+          Sync library with your existing OpenAPI definitions.
+        </DialogDescription>
         <div className="grid grid-cols-4 items-center gap-4">
           <Label className="text-right" htmlFor="name">
             URL
           </Label>
-          <Input className="col-span-3" id="name" value={url} onChange={handleUrlChange} />
+          <Input
+            className="col-span-3"
+            id="name"
+            value={url}
+            onChange={handleUrlChange}
+          />
         </div>
         <DialogFooter>
           <Button className="flex gap-2" onClick={handleImportClick}>

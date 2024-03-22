@@ -2,7 +2,13 @@ import type { Environment } from "@/lib/backend-client";
 import * as prettier from "prettier";
 import * as babelParser from "prettier/parser-babel";
 import * as estreePlugin from "prettier/plugins/estree";
-import type { Executor, HttpRequestStep, Scenario, Step, Test } from "../../types";
+import type {
+  Executor,
+  HttpRequestStep,
+  Scenario,
+  Step,
+  Test,
+} from "../../types";
 import { exhaustive } from "../../utils/typescript";
 
 type Substitution = [name: string, value: string];
@@ -13,7 +19,9 @@ function sanitizeName(name: string) {
     .map((part) => part.replaceAll(/[^_a-zA-Z0-9]/g, ""))
     .filter((part) => part !== "")
     .map((part, index) =>
-      index > 0 ? part[0]?.toUpperCase() + part.slice(1) : part[0]?.toLowerCase() + part.slice(1),
+      index > 0
+        ? part[0]?.toUpperCase() + part.slice(1)
+        : part[0]?.toLowerCase() + part.slice(1),
     );
 
   const sanitizied = parts.join("");
@@ -26,7 +34,10 @@ function sanitizeName(name: string) {
 }
 
 function substitute(target: string, substitutions: Substitution[]) {
-  return substitutions.reduce((acc, [name, value]) => acc.replaceAll(`{{${name}}}`, value), target);
+  return substitutions.reduce(
+    (acc, [name, value]) => acc.replaceAll(`{{${name}}}`, value),
+    target,
+  );
 }
 
 function emitHttpOptionsObject(headers: [string, string][]) {
@@ -41,15 +52,20 @@ function emitHttpOptionsObject(headers: [string, string][]) {
   }`;
 }
 
-function emitHttpRequestStep(step: HttpRequestStep, substitutions: Substitution[]): string {
+function emitHttpRequestStep(
+  step: HttpRequestStep,
+  substitutions: Substitution[],
+): string {
   const headers = Object.entries(step.headers);
-  const optionsObject = headers.length > 0 ? emitHttpOptionsObject(headers) : null;
+  const optionsObject =
+    headers.length > 0 ? emitHttpOptionsObject(headers) : null;
 
   const params = new URLSearchParams(
     step.parameters.map((param) => [param.name, param.value]),
   ).toString();
 
-  const url = substitute(step.url, substitutions) + (params ? `?${params}` : "");
+  const url =
+    substitute(step.url, substitutions) + (params ? `?${params}` : "");
 
   const args = [JSON.stringify(url), optionsObject].filter(Boolean).join(", ");
 
@@ -95,7 +111,11 @@ function emitStep(step: Step, substitutions: Substitution[]): string {
   }
 }
 
-function emitExecutor(exec: string, executor: Executor, substitutions: Substitution[]) {
+function emitExecutor(
+  exec: string,
+  executor: Executor,
+  substitutions: Substitution[],
+) {
   switch (executor.type) {
     case "constant-vus":
       return `
@@ -127,7 +147,10 @@ function emitExecutor(exec: string, executor: Executor, substitutions: Substitut
   }
 }
 
-function emitScenarioOptions(scenario: Scenario, substitutions: Substitution[]) {
+function emitScenarioOptions(
+  scenario: Scenario,
+  substitutions: Substitution[],
+) {
   const fn = sanitizeName(scenario.name);
   const executor = emitExecutor(fn, scenario.executor, substitutions);
 
@@ -153,7 +176,9 @@ function emitScript(env: Environment, test: Test) {
     emitScenarioOptions(scenario, substitutions),
   );
 
-  const scenarios = test.scenarios.map((scenario) => emitScenario(scenario, substitutions));
+  const scenarios = test.scenarios.map((scenario) =>
+    emitScenario(scenario, substitutions),
+  );
 
   const code = `
     import http from 'k6/http';

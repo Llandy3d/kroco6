@@ -71,7 +71,12 @@ function Logo(props: SVGAttributes<SVGSVGElement>) {
       </g>
       <defs>
         <clipPath id="clip0_40_75537">
-          <rect width="120" height="17.9528" fill="white" transform="translate(41 12)" />
+          <rect
+            width="120"
+            height="17.9528"
+            fill="white"
+            transform="translate(41 12)"
+          />
         </clipPath>
       </defs>
     </svg>

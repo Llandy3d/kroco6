@@ -1,4 +1,7 @@
-import { isTemplate, type Block as BlockType } from "@/lib/stores/blocks/model/loose";
+import {
+  isTemplate,
+  type Block as BlockType,
+} from "@/lib/stores/blocks/model/loose";
 import { isDescendantOf } from "@/lib/stores/blocks/model/utils";
 import { cn } from "@/lib/utils";
 import type { DropData } from "@/views/editor/tabs/blocks-editor/dnd/types";
@@ -67,7 +70,10 @@ function BlockInset({ owner, color, connection }: BlockInsetProps) {
       >
         <div
           ref={setNodeRef}
-          className={cn("absolute bottom-0 left-0 right-0 top-0 hidden", accepting && "block")}
+          className={cn(
+            "absolute bottom-0 left-0 right-0 top-0 hidden",
+            accepting && "block",
+          )}
         ></div>
         {connection.node}
       </div>

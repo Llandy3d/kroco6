@@ -29,10 +29,14 @@ function ScriptExamples({ onSelect }: ScriptExamplesProps) {
         <DropdownMenuGroup>
           <DropdownMenuLabel>Authentication/Authorization</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => onSelect(scripts.BASIC_AUTHENTICATION)}>
+          <DropdownMenuItem
+            onClick={() => onSelect(scripts.BASIC_AUTHENTICATION)}
+          >
             Basic Authentication
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => onSelect(scripts.DIGEST_AUTHENTICATION)}>
+          <DropdownMenuItem
+            onClick={() => onSelect(scripts.DIGEST_AUTHENTICATION)}
+          >
             Digest Authentication
           </DropdownMenuItem>
         </DropdownMenuGroup>
@@ -49,7 +53,9 @@ function ScriptExamples({ onSelect }: ScriptExamplesProps) {
           <DropdownMenuItem onClick={() => onSelect(scripts.COOKIES_HEADER)}>
             Accessing a cookie set in response headers
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => onSelect(scripts.COOKIES_LOG_RESPONSE)}>
+          <DropdownMenuItem
+            onClick={() => onSelect(scripts.COOKIES_LOG_RESPONSE)}
+          >
             Logging all cookies in response
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => onSelect(scripts.COOKIES_SET_JAR)}>

@@ -46,4 +46,9 @@ interface DropData {
   action: DropAction;
 }
 
-export { type DragData, type DropAction, type DropData, type DropOnCanvasAction };
+export {
+  type DragData,
+  type DropAction,
+  type DropData,
+  type DropOnCanvasAction,
+};

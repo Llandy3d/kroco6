@@ -17,7 +17,11 @@ interface SelectInputProps<Value extends string> {
   onChange: (value: Value) => void;
 }
 
-function SelectInput<Value extends string>({ value, items, onChange }: SelectInputProps<Value>) {
+function SelectInput<Value extends string>({
+  value,
+  items,
+  onChange,
+}: SelectInputProps<Value>) {
   function handleSelectedChange(value: string | undefined) {
     const selected = items.find((item) => item.value === value);
 

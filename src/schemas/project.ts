@@ -1,4 +1,13 @@
-import { array, literal, object, optional, safeParse, string, union, type Output } from "valibot";
+import {
+  array,
+  literal,
+  object,
+  optional,
+  safeParse,
+  string,
+  union,
+  type Output,
+} from "valibot";
 
 const VersionSchema = union([literal("v0.49.0"), string()]);
 const ExtensionsSchema = array(string());

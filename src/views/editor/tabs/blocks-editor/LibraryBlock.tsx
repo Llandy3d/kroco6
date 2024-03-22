@@ -40,7 +40,9 @@ export function LibraryBlock({ block }: LibraryBlockProps) {
         return (
           <Field key={key}>
             {key}:{" "}
-            {param.type === "string" && <StringInput value={param.value} onChange={() => {}} />}
+            {param.type === "string" && (
+              <StringInput value={param.value} onChange={() => {}} />
+            )}
           </Field>
         );
       })}

@@ -6,7 +6,10 @@ import {
   VerticalTabsContent,
   type Tab,
 } from "@/views/editor/tabs/blocks-editor/VerticalTabs";
-import { useSelectedBlockValue, useSetTest } from "@/views/editor/tabs/blocks-editor/atoms";
+import {
+  useSelectedBlockValue,
+  useSetTest,
+} from "@/views/editor/tabs/blocks-editor/atoms";
 import { Handshake, PackageOpen, Trash2, Variable } from "lucide-react";
 import { nanoid } from "nanoid";
 import { useState, type ChangeEvent } from "react";
@@ -41,7 +44,12 @@ interface NameValueInputProps {
   onDelete?: (value: NameValuePair) => void;
 }
 
-function NameValueInput({ entry, onChange, onCommit, onDelete }: NameValueInputProps) {
+function NameValueInput({
+  entry,
+  onChange,
+  onCommit,
+  onDelete,
+}: NameValueInputProps) {
   function handleNameChange(event: ChangeEvent<HTMLInputElement>) {
     onChange({
       ...entry,
@@ -191,17 +199,30 @@ function HttpRequestSidebar({ block }: HttpRequestSidebarProps) {
   }
 
   return (
-    <VerticalTabs current={current} align="right" tabs={tabs} onChange={setCurrent}>
+    <VerticalTabs
+      current={current}
+      align="right"
+      tabs={tabs}
+      onChange={setCurrent}
+    >
       <VerticalTabsContent className="min-w-[32rem]" value="parameters">
         <div className="p-2">
-          <h2 className="text-l mb-4 font-semibold uppercase">Query parameters</h2>
-          <NameValueEditor entries={block.parameters} onChange={handleParametersChange} />
+          <h2 className="text-l mb-4 font-semibold uppercase">
+            Query parameters
+          </h2>
+          <NameValueEditor
+            entries={block.parameters}
+            onChange={handleParametersChange}
+          />
         </div>
       </VerticalTabsContent>
       <VerticalTabsContent className="min-w-[32rem]" value="headers">
         <div className="p-2">
           <h2 className="text-l mb-4 font-semibold uppercase">Headers</h2>
-          <NameValueEditor entries={block.headers} onChange={handleHeadersChange} />
+          <NameValueEditor
+            entries={block.headers}
+            onChange={handleHeadersChange}
+          />
         </div>
       </VerticalTabsContent>
       <VerticalTabsContent className="min-w-[32rem]" value="body">

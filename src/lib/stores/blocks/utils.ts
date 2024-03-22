@@ -1,4 +1,10 @@
-import type { Block, ExecutorBlock, LibraryBlock, ScenarioBlock, StepBlock } from "./model/strict";
+import type {
+  Block,
+  ExecutorBlock,
+  LibraryBlock,
+  ScenarioBlock,
+  StepBlock,
+} from "./model/strict";
 
 function isBlock(value: unknown): value is Block {
   return typeof value === "object" && value !== null && "type" in value;
@@ -42,4 +48,10 @@ function isExecutorBlock(value: unknown): value is ExecutorBlock {
   return value.type === "executor";
 }
 
-export { isBlock, isExecutorBlock, isHttpRequestBlock, isScenarioBlock, isStepBlock };
+export {
+  isBlock,
+  isExecutorBlock,
+  isHttpRequestBlock,
+  isScenarioBlock,
+  isStepBlock,
+};
