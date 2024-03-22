@@ -9,8 +9,8 @@ import { Input } from "@/components/base/input";
 import { Label } from "@/components/base/label";
 import { HTTP_METHODS } from "@/lib/stores/library/constants";
 import type { ApiEndpoint, ApiOperation } from "@/lib/stores/library/types";
+import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
-import clsx from "clsx";
 import { Plus } from "lucide-react";
 import { OpenAPIV3 } from "openapi-types";
 import type { ChangeEvent } from "react";
@@ -141,7 +141,7 @@ function EndpointEditor({
                 return (
                   <DropdownMenuItem
                     key={method}
-                    className={clsx("p-2")}
+                    className={cn("p-2")}
                     onClick={() => handleAddOperation(method)}
                   >
                     {method.toUpperCase()}

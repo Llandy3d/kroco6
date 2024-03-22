@@ -13,18 +13,13 @@ const items: Selected<Check["type"]>[] = [
   { value: "contains", label: "body contained" },
 ];
 
-export let check: Check;
-
-export let onChange: (check: Check) => void;
-export let onRemove: (check: Check) => void;
-
 interface CheckInputProps {
   check: Check;
   onChange: (check: Check) => void;
   onRemove: (check: Check) => void;
 }
 
-export function CheckInput({ check, onChange, onRemove }: CheckInputProps) {
+function CheckInput({ check, onChange, onRemove }: CheckInputProps) {
   const handleStatusChange = (value: string) => {
     onChange({
       type: "status",
@@ -99,3 +94,5 @@ export function CheckInput({ check, onChange, onRemove }: CheckInputProps) {
     </Field>
   );
 }
+
+export { CheckInput };

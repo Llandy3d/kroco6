@@ -1,6 +1,7 @@
 import type { Environment } from "@/lib/backend-client";
 import * as prettier from "prettier";
 import * as babelParser from "prettier/parser-babel";
+// eslint-disable-next-line import/namespace
 import * as estreePlugin from "prettier/plugins/estree";
 import type {
   Executor,

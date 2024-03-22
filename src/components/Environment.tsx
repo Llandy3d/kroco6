@@ -95,7 +95,7 @@ function Environment({ environment, onChange }: EnvironmentProps) {
 
               <tbody className="divide-y divide-gray-200 bg-white">
                 {Object.entries(environment.variables).map(([name, value]) => (
-                  <tr>
+                  <tr key={name}>
                     <td>
                       <Input
                         className="border-none"

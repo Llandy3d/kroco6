@@ -4,6 +4,7 @@ import { defineConfig } from "vite";
 import monacoEditor from "vite-plugin-monaco-editor";
 
 // https://vitejs.dev/config/
+// eslint-disable-next-line import/no-default-export
 export default defineConfig(async () => ({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   plugins: [react(), (monacoEditor as any).default({})],

@@ -29,8 +29,8 @@ function ScriptPreview({ test }: ScriptPreviewProps) {
   if (error !== null) {
     return (
       <div className="flex h-full items-center justify-center">
-        An error occurred while converting to script. Make sure you've filled in
-        all the required data.
+        An error occurred while converting to script. Make sure {"you've"}{" "}
+        filled in all the required data.
       </div>
     );
   }
