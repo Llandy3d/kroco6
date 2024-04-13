@@ -5,18 +5,16 @@ mod models;
 mod operations;
 mod cloud;
 
-use core::fmt;
-use std::ffi::OsStr;
 use std::fs;
 use std::io::{Read, Write, BufRead, BufReader};
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::process::{Command, Stdio};
 use std::sync::Mutex;
 use std::time::Duration;
 use tauri::{Manager, Window};
 use regex::Regex;
 use tokio::task;
-use sysinfo::System;
+use headless_chrome::browser::default_executable;
 
 use crate::operations::ProjectManager;
 
@@ -89,33 +87,15 @@ async fn get_cloud_tests(state: tauri::State<'_, ApplicationState>, project_name
 
 #[tauri::command]
 async fn open_browser() {
-    let mut browser_command = open::with_command("https://grafana.com", "Google Chrome");
-    browser_command.arg("--new").args(["--args", "--user-data-dir=/tmp/kroco6", "--ignore-certificate-errors-spki-list=pXWvAFIlMGj9EcIWKFJOpLkB6v0xCWDmz4k4T/sdu6E=", "--proxy-server=http://localhost:8080", "--hide-crash-restore-bubble"]);
-
-    let mut sys = System::new();
-    sys.refresh_processes();
-
-    let mut chrome_pids = vec![];
-    for (pid, process) in sys.processes() {
-        if process.name().contains("Google Chrome") {
-            chrome_pids.push(pid.as_u32());
-        }
-    }
 
     task::spawn_blocking(move || {
-        browser_command.spawn().expect("Failed to start browser");
+        let path = default_executable().expect("failed to retrieve the browser");
+        let mut command = Command::new(path)
+            .arg("--new")
+            .arg("https://grafana.com")
+            .args(["--args", "--user-data-dir=/tmp/kroco6", "--ignore-certificate-errors-spki-list=pXWvAFIlMGj9EcIWKFJOpLkB6v0xCWDmz4k4T/sdu6E=", "--proxy-server=http://localhost:8080", "--hide-crash-restore-bubble", "--test-type", "--no-default-browser-check", "--no-first-run"])
+        .spawn().expect("failed to launch browser");
 
-        let new_chrome_pid = 'outer: loop {
-            sys.refresh_processes();
-            for (pid, process) in sys.processes() {
-                if process.name() == "Google Chrome" && !chrome_pids.contains(&pid.as_u32()) {
-                        break 'outer pid;
-                }
-            }
-            std::thread::sleep(Duration::from_secs(1));
-        };
-
-        println!("FINALLY FOUND CHROME: {}", new_chrome_pid);
         println!("Sleeping for 10 secs and then killing");
         let mut x = 10;
         loop {
@@ -127,12 +107,8 @@ async fn open_browser() {
             std::thread::sleep(Duration::from_secs(1));
         }
 
-        if let Some(process) = sys.process(*new_chrome_pid) {
-            process.kill();
-        }
+        command.kill().expect("failed to kill the browser process");
     });
-
-
 }
 
 #[tauri::command]
