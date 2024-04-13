@@ -87,13 +87,17 @@ async fn get_cloud_tests(state: tauri::State<'_, ApplicationState>, project_name
 
 #[tauri::command]
 async fn open_browser() {
+    // temp directory for the browser
+    let mut user_data_dir = std::env::temp_dir();
+    user_data_dir.push("kroco6");
+    let user_data_dir = format!("--user-data-dir={}", user_data_dir.display());
 
     task::spawn_blocking(move || {
         let path = default_executable().expect("failed to retrieve the browser");
         let mut command = Command::new(path)
             .arg("--new")
             .arg("https://grafana.com")
-            .args(["--args", "--user-data-dir=/tmp/kroco6", "--ignore-certificate-errors-spki-list=pXWvAFIlMGj9EcIWKFJOpLkB6v0xCWDmz4k4T/sdu6E=", "--proxy-server=http://localhost:8080", "--hide-crash-restore-bubble", "--test-type", "--no-default-browser-check", "--no-first-run"])
+            .args(["--args", &user_data_dir, "--ignore-certificate-errors-spki-list=pXWvAFIlMGj9EcIWKFJOpLkB6v0xCWDmz4k4T/sdu6E=", "--proxy-server=http://localhost:8080", "--hide-crash-restore-bubble", "--test-type", "--no-default-browser-check", "--no-first-run"])
         .spawn().expect("failed to launch browser");
 
         println!("Sleeping for 10 secs and then killing");
