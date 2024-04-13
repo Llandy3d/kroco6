@@ -6,13 +6,17 @@ mod operations;
 mod cloud;
 
 use core::fmt;
+use std::ffi::OsStr;
 use std::fs;
 use std::io::{Read, Write, BufRead, BufReader};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::sync::Mutex;
+use std::time::Duration;
 use tauri::{Manager, Window};
 use regex::Regex;
+use tokio::task;
+use sysinfo::System;
 
 use crate::operations::ProjectManager;
 
@@ -56,6 +60,7 @@ fn main() {
             save_test,
             load_project_config,
             save_project_config,
+            open_browser,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -80,6 +85,54 @@ async fn get_cloud_tests(state: tauri::State<'_, ApplicationState>, project_name
             e.to_string()
         })?;
     Ok(cloud_tests)
+}
+
+#[tauri::command]
+async fn open_browser() {
+    let mut browser_command = open::with_command("https://grafana.com", "Google Chrome");
+    browser_command.arg("--new").args(["--args", "--user-data-dir=/tmp/kroco6", "--ignore-certificate-errors-spki-list=pXWvAFIlMGj9EcIWKFJOpLkB6v0xCWDmz4k4T/sdu6E=", "--proxy-server=http://localhost:8080", "--hide-crash-restore-bubble"]);
+
+    let mut sys = System::new();
+    sys.refresh_processes();
+
+    let mut chrome_pids = vec![];
+    for (pid, process) in sys.processes() {
+        if process.name().contains("Google Chrome") {
+            chrome_pids.push(pid.as_u32());
+        }
+    }
+
+    task::spawn_blocking(move || {
+        browser_command.spawn().expect("Failed to start browser");
+
+        let new_chrome_pid = 'outer: loop {
+            sys.refresh_processes();
+            for (pid, process) in sys.processes() {
+                if process.name() == "Google Chrome" && !chrome_pids.contains(&pid.as_u32()) {
+                        break 'outer pid;
+                }
+            }
+            std::thread::sleep(Duration::from_secs(1));
+        };
+
+        println!("FINALLY FOUND CHROME: {}", new_chrome_pid);
+        println!("Sleeping for 10 secs and then killing");
+        let mut x = 10;
+        loop {
+            if x == 0 {
+                break;
+            }
+            x -= 1;
+            println!("{}", x);
+            std::thread::sleep(Duration::from_secs(1));
+        }
+
+        if let Some(process) = sys.process(*new_chrome_pid) {
+            process.kill();
+        }
+    });
+
+
 }
 
 #[tauri::command]

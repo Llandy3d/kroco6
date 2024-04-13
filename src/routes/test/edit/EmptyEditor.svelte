@@ -3,6 +3,7 @@
   import BlockEditorIllustration from "$lib/components/ui/illustrations/BlockEditorIllustration.svelte";
   import ScriptEditorIllustration from "$lib/components/ui/illustrations/ScriptEditorIllustration.svelte";
   import { newFile } from "$lib/stores/editor";
+  import { invoke } from "@tauri-apps/api";
 
   let message: string | null = null;
 
@@ -27,6 +28,13 @@
       type: "script",
     });
   }
+
+  function handleNewBrowser() {
+    //newFile({
+    //  type: "script",
+    //});
+    invoke("open_browser");
+  }
 </script>
 
 <div class="flex flex-auto flex-col items-center">
@@ -48,6 +56,14 @@
         Use our code samples as a foundation for your script or start from a clean slate.
       </p>
       <Button variant="outline" on:click={handleNewScript}>Start scripting</Button>
+    </div>
+    <div class="flex w-64 flex-col items-center">
+      <BlockEditorIllustration class="my-2" />
+      <h3 class="my-3 text-xl">Browser test</h3>
+      <p class="mb-4 text-center font-thin">
+        blah blah browser.
+      </p>
+      <Button variant="outline" on:click={handleNewBrowser}>Start browsing</Button>
     </div>
   </div>
 </div>
