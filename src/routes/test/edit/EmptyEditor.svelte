@@ -2,10 +2,19 @@
   import { Button } from "$lib/components/ui/button";
   import BlockEditorIllustration from "$lib/components/ui/illustrations/BlockEditorIllustration.svelte";
   import ScriptEditorIllustration from "$lib/components/ui/illustrations/ScriptEditorIllustration.svelte";
+  import * as Dialog from "$lib/components/ui/dialog";
+  import { Progress } from "$lib/components/ui/progress/index.js";
   import { newFile } from "$lib/stores/editor";
   import { invoke } from "@tauri-apps/api";
+  import { once, listen } from '@tauri-apps/api/event'
 
   let message: string | null = null;
+  let browserDialogOpen: boolean = false;
+  let browserProxyingProgress: number = 0;
+
+  function browserProxyingAnimation() {
+    setInterval(() => (browserProxyingProgress += 10), 1000);
+  }
 
   function handleMouseEnter(event: MouseEvent) {
     if (event.target instanceof HTMLButtonElement) {
@@ -29,10 +38,16 @@
     });
   }
 
-  function handleNewBrowser() {
-    //newFile({
-    //  type: "script",
-    //});
+  async function handleNewBrowser() {
+    browserDialogOpen = true;
+    browserProxyingAnimation();
+
+    await once("browser-started", (event) => {
+      console.log(event);
+      browserDialogOpen = false;
+      browserProxyingProgress = 0;
+    });
+
     invoke("open_browser");
   }
 </script>
@@ -67,6 +82,18 @@
     </div>
   </div>
 </div>
+
+<Dialog.Root bind:open={browserDialogOpen} closeOnEscape={false} closeOnOutsideClick={false}>
+  <Dialog.Content>
+    <Dialog.Header>
+      <Dialog.Title>Proxifying your browser...</Dialog.Title>
+      <Dialog.Description>
+        <br>
+        <Progress value={browserProxyingProgress} max={100}  />
+      </Dialog.Description>
+    </Dialog.Header>
+  </Dialog.Content>
+</Dialog.Root>
 
 <style>
   .create-test-button {

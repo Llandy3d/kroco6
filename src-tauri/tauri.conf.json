@@ -22,7 +22,21 @@
         "scope": ["http://*", "https://*"]
       },
       "shell": {
-        "open": true
+        "open": true,
+        "sidecar": true,
+        "scope": [
+            { 
+                "name": "binaries/mitmdump",
+                "sidecar": true, 
+                "args": [
+                    "-s",
+                    "-q"
+                ]
+            }
+        ]
+      },
+      "fs": {
+          "scope": ["$RESOURCE/resources/json_output.py"]
       }
     },
     "bundle": {
@@ -32,7 +46,9 @@
       "deb": {
         "depends": []
       },
-      "externalBin": [],
+      "externalBin": [
+          "binaries/mitmdump"
+      ],
       "icon": [
         "icons/32x32.png",
         "icons/128x128.png",
@@ -49,7 +65,9 @@
         "providerShortName": null,
         "signingIdentity": null
       },
-      "resources": [],
+      "resources": [
+          "resources/json_output.py"
+      ],
       "shortDescription": "",
       "targets": "all",
       "windows": {

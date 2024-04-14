@@ -12,6 +12,7 @@ use std::process::{Command, Stdio};
 use std::sync::Mutex;
 use std::time::Duration;
 use tauri::{Manager, Window};
+use tauri::api::process;
 use regex::Regex;
 use tokio::task;
 use headless_chrome::browser::default_executable;
@@ -85,8 +86,44 @@ async fn get_cloud_tests(state: tauri::State<'_, ApplicationState>, project_name
     Ok(cloud_tests)
 }
 
+#[derive(Clone, serde::Serialize)]
+struct Payload {
+  message: String,
+}
+
 #[tauri::command]
-async fn open_browser() {
+async fn open_browser(handle: tauri::AppHandle, window: Window) {
+    let resource_path = handle.path_resolver()
+      .resolve_resource("resources/json_output.py")
+      .expect("failed to resolve resource");
+    let resource_path = format!("{}", resource_path.display());
+
+    let (mut rx, mut child) = process::Command::new_sidecar("mitmdump")
+      .expect("failed to create `mitmdump` binary command")
+      .args(["-q", "-s", &resource_path])
+      .spawn()
+      .expect("Failed to spawn sidecar");
+
+    // the first event lets us know that the proxy started~
+    if let Some(process::CommandEvent::Stdout(line)) = rx.recv().await {
+        println!("{:?}", line);
+    } else {
+        panic!("Failed to start proxy");
+    }
+
+    tauri::async_runtime::spawn(async move {
+      while let Some(event) = rx.recv().await {
+        if let process::CommandEvent::Stdout(line) = event {
+          println!("{:?}", line);
+          // window
+          //   .emit("message", Some(format!("'{}'", line)))
+          //   .expect("failed to emit event");
+          // write to stdin
+          // child.write("message from Rust\n".as_bytes()).unwrap();
+        }
+      }
+    });
+
     // temp directory for the browser
     let mut user_data_dir = std::env::temp_dir();
     user_data_dir.push("kroco6");
@@ -100,14 +137,16 @@ async fn open_browser() {
             .args(["--args", &user_data_dir, "--ignore-certificate-errors-spki-list=pXWvAFIlMGj9EcIWKFJOpLkB6v0xCWDmz4k4T/sdu6E=", "--proxy-server=http://localhost:8080", "--hide-crash-restore-bubble", "--test-type", "--no-default-browser-check", "--no-first-run"])
         .spawn().expect("failed to launch browser");
 
+        window.emit("browser-started", "").unwrap();
+
         println!("Sleeping for 10 secs and then killing");
-        let mut x = 10;
+        let mut x = 60;
         loop {
             if x == 0 {
                 break;
             }
             x -= 1;
-            println!("{}", x);
+            // println!("{}", x);
             std::thread::sleep(Duration::from_secs(1));
         }
 
