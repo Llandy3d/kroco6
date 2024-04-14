@@ -112,12 +112,21 @@ async fn open_browser(handle: tauri::AppHandle, window: Window) {
       .spawn()
       .expect("Failed to spawn sidecar");
 
-    // the first & second events are a warning and the message that lets us know the proxy started
-    // so we consume them here
-    let event = rx.recv().await;
-    println!("{:?}", event);
-    let event = rx.recv().await;
-    println!("{:?}", event);
+    // the first event lets us know that the proxy started, it could either be the actual started
+    // message or a warning from the tool, so we need to handle that case
+    match rx.recv().await.unwrap() {
+        process::CommandEvent::Stdout(line) => {
+            // we got the proxy start event so we can continue
+            println!("{:?}", line);
+        }
+        process::CommandEvent::Stderr(line) => {
+            // we got the warning from the tool first so we still have to wait for the start event
+            println!("{:?}", line);
+            let event = rx.recv().await;
+            println!("{:?}", event);
+        }
+        _ => {}
+    };
 
     let window_clone = window.clone();
     // spawn a task to receive the events from the proxy and send them to the frontend
@@ -128,6 +137,8 @@ async fn open_browser(handle: tauri::AppHandle, window: Window) {
                 println!("{:?}", line);
                 let v: Value = serde_json::from_str(line).unwrap();
                 window_clone.emit("browser-request", v).expect("failed to send browser-request event");
+            } else {
+                println!("{:?}", event);
             }
         }
     });
