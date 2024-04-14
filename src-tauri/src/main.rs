@@ -100,18 +100,24 @@ async fn open_browser(handle: tauri::AppHandle, window: Window) {
       .expect("failed to resolve resource");
     let resource_path = format!("{}", resource_path.display());
 
+    let certificates_path = handle.path_resolver()
+      .resolve_resource("resources/certificates")
+      .expect("failed to resolve resource");
+    let certificates_setting = format!("confdir={}", certificates_path.display());
+
+
     let (mut rx, child) = process::Command::new_sidecar("mitmdump")
       .expect("failed to create `mitmdump` binary command")
-      .args(["-q", "-s", &resource_path])
+      .args(["-q", "-s", &resource_path, "--set", &certificates_setting])
       .spawn()
       .expect("Failed to spawn sidecar");
 
-    // the first event lets us know that the proxy started~
-    if let Some(process::CommandEvent::Stdout(line)) = rx.recv().await {
-        println!("{:?}", line);
-    } else {
-        panic!("Failed to start proxy");
-    }
+    // the first & second events are a warning and the message that lets us know the proxy started
+    // so we consume them here
+    let event = rx.recv().await;
+    println!("{:?}", event);
+    let event = rx.recv().await;
+    println!("{:?}", event);
 
     let window_clone = window.clone();
     // spawn a task to receive the events from the proxy and send them to the frontend
@@ -131,6 +137,8 @@ async fn open_browser(handle: tauri::AppHandle, window: Window) {
     user_data_dir.push("kroco6");
     let user_data_dir = format!("--user-data-dir={}", user_data_dir.display());
 
+    let trust_certificate_fingerprint = "--ignore-certificate-errors-spki-list=pXWvAFIlMGj9EcIWKFJOpLkB6v0xCWDmz4k4T/sdu6E=";
+
     // create a channel to communicate back when the stop-recorder event is received
     // this channel doesn't send anything, it will just be dropped to indicate the arrival of the
     // event. Since we are not passing anything the type of the channel has to be specified.
@@ -141,7 +149,7 @@ async fn open_browser(handle: tauri::AppHandle, window: Window) {
         let mut command = Command::new(path)
             .arg("--new")
             .arg("https://grafana.com")
-            .args(["--args", &user_data_dir, "--ignore-certificate-errors-spki-list=pXWvAFIlMGj9EcIWKFJOpLkB6v0xCWDmz4k4T/sdu6E=", "--proxy-server=http://localhost:8080", "--hide-crash-restore-bubble", "--test-type", "--no-default-browser-check", "--no-first-run"])
+            .args(["--args", &user_data_dir, &trust_certificate_fingerprint, "--proxy-server=http://localhost:8080", "--hide-crash-restore-bubble", "--test-type", "--no-default-browser-check", "--no-first-run"])
         .spawn().expect("failed to launch browser");
 
         window.emit("browser-started", "").unwrap();
