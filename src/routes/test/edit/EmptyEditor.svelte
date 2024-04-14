@@ -7,6 +7,7 @@
   import { newFile } from "$lib/stores/editor";
   import { invoke } from "@tauri-apps/api";
   import { once, listen } from '@tauri-apps/api/event'
+  import { goto } from '$app/navigation';
 
   let message: string | null = null;
   let browserDialogOpen: boolean = false;
@@ -44,6 +45,8 @@
 
     await once("browser-started", (event) => {
       console.log(event);
+      goto("/test/browser");
+
       browserDialogOpen = false;
       browserProxyingProgress = 0;
     });
@@ -86,7 +89,7 @@
 <Dialog.Root bind:open={browserDialogOpen} closeOnEscape={false} closeOnOutsideClick={false}>
   <Dialog.Content>
     <Dialog.Header>
-      <Dialog.Title>Proxifying your browser...</Dialog.Title>
+      <Dialog.Title class="text-center">Proxifying your browser...</Dialog.Title>
       <Dialog.Description>
         <br>
         <Progress value={browserProxyingProgress} max={100}  />

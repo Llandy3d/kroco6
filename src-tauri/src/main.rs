@@ -15,6 +15,7 @@ use tauri::{Manager, Window};
 use tauri::api::process;
 use regex::Regex;
 use tokio::task;
+use tokio::sync::mpsc;
 use headless_chrome::browser::default_executable;
 
 use crate::operations::ProjectManager;
@@ -98,7 +99,7 @@ async fn open_browser(handle: tauri::AppHandle, window: Window) {
       .expect("failed to resolve resource");
     let resource_path = format!("{}", resource_path.display());
 
-    let (mut rx, mut child) = process::Command::new_sidecar("mitmdump")
+    let (mut rx, child) = process::Command::new_sidecar("mitmdump")
       .expect("failed to create `mitmdump` binary command")
       .args(["-q", "-s", &resource_path])
       .spawn()
@@ -129,6 +130,11 @@ async fn open_browser(handle: tauri::AppHandle, window: Window) {
     user_data_dir.push("kroco6");
     let user_data_dir = format!("--user-data-dir={}", user_data_dir.display());
 
+    // create a channel to communicate back when the stop-recorder event is received
+    // this channel doesn't send anything, it will just be dropped to indicate the arrival of the
+    // event. Since we are not passing anything the type of the channel has to be specified.
+    let (stop_recorder_tx, mut stop_recorder_rx) = mpsc::channel::<()>(1);
+
     task::spawn_blocking(move || {
         let path = default_executable().expect("failed to retrieve the browser");
         let mut command = Command::new(path)
@@ -139,18 +145,16 @@ async fn open_browser(handle: tauri::AppHandle, window: Window) {
 
         window.emit("browser-started", "").unwrap();
 
-        println!("Sleeping for 10 secs and then killing");
-        let mut x = 60;
-        loop {
-            if x == 0 {
-                break;
-            }
-            x -= 1;
-            // println!("{}", x);
-            std::thread::sleep(Duration::from_secs(1));
-        }
+        window.once("stop-recorder", move |_| {
+            // dropping the tx channel to indicate that we received the event
+            drop(stop_recorder_tx);
+        });
+
+        // wait for stop-recorder event
+        stop_recorder_rx.blocking_recv();
 
         command.kill().expect("failed to kill the browser process");
+        child.kill().expect("failed to kill the proxy process");
     });
 }
 

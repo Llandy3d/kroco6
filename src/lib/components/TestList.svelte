@@ -3,6 +3,7 @@
   import Button from "$lib/components/ui/button/button.svelte";
   import { currentFile, openTestAsFile } from "$lib/stores/editor";
   import { FileJson2, Layers } from "lucide-svelte";
+  import { goto } from '$app/navigation';
 
   export let tests: Test[] = [];
   $: tests, console.log(`tests changed in test list:`, tests);
@@ -33,6 +34,9 @@
     class="w-full"
     on:click={() => {
       currentFile.set(null);
+      // TODO: this breaks everything due to browser tests, needs to be reworked the whole system of sidebar separation from page separation
+      goto("/");
+
     }}>Create test</Button
   >
 </div>
