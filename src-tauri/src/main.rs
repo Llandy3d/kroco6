@@ -11,6 +11,7 @@ use std::path::Path;
 use std::process::{Command, Stdio};
 use std::sync::Mutex;
 use std::time::Duration;
+use serde_json::Value;
 use tauri::{Manager, Window};
 use tauri::api::process;
 use regex::Regex;
@@ -112,17 +113,17 @@ async fn open_browser(handle: tauri::AppHandle, window: Window) {
         panic!("Failed to start proxy");
     }
 
+    let window_clone = window.clone();
+    // spawn a task to receive the events from the proxy and send them to the frontend
     tauri::async_runtime::spawn(async move {
-      while let Some(event) = rx.recv().await {
-        if let process::CommandEvent::Stdout(line) = event {
-          println!("{:?}", line);
-          // window
-          //   .emit("message", Some(format!("'{}'", line)))
-          //   .expect("failed to emit event");
-          // write to stdin
-          // child.write("message from Rust\n".as_bytes()).unwrap();
+        while let Some(event) = rx.recv().await {
+            if let process::CommandEvent::Stdout(line) = event {
+                let line = line.trim_end();
+                println!("{:?}", line);
+                let v: Value = serde_json::from_str(line).unwrap();
+                window_clone.emit("browser-request", v).expect("failed to send browser-request event");
+            }
         }
-      }
     });
 
     // temp directory for the browser

@@ -1,14 +1,39 @@
 <script lang="ts">
   import { Button } from "$lib/components/ui/button";
+  import { Input } from "$lib/components/ui/input";
   import { toast } from "svelte-sonner";
-  import { onMount } from "svelte";
+  import { onMount, onDestroy } from "svelte";
   import { Disc } from "lucide-svelte";
   import * as Table from "$lib/components/ui/table";
   import { appWindow } from '@tauri-apps/api/window'
+  import { listen } from '@tauri-apps/api/event'
+  import type { BrowserRequest, BrowserResponse, BrowserEvent } from "$lib/browser-types";
 
-  onMount(() => {
+  let unlisten;
+  let browserRequestResponseList: Array<BrowserEvent> = [];
 
+  let hostFilterValue = "";
+
+  function onFilterValueChange() {
+    // trigger the recreation of the table
+    browserRequestResponseList = browserRequestResponseList;
+  }
+
+  onMount(async () => {
+    const unlisten = await listen('browser-request', (event) => {
+      console.log(event);
+      browserRequestResponseList.push(event.payload);
+
+      // trigger svelte reactivity
+      browserRequestResponseList = browserRequestResponseList;
+    });
+    window.levent = browserRequestResponseList;
   });
+
+  onDestroy(() => {
+    unlisten();
+  });
+
 
   let recordingDisabled = false;
   let recordingDiscColor = "text-red-600";
@@ -28,41 +53,38 @@
   <hr>
 </div>
 
+<div class="max-w-[200px] w-1/4">
+  <Input placeholder="Filter by hostname" bind:value={hostFilterValue} on:input={onFilterValueChange} autocomplete="off" />
+</div>
 
-
-<Table.Root>
-  <Table.Caption>A list of your recent invoices.</Table.Caption>
-  <Table.Header>
-    <Table.Row>
-      <Table.Head class="w-[100px]">Invoice</Table.Head>
-      <Table.Head>Status</Table.Head>
-      <Table.Head>Method</Table.Head>
-      <Table.Head class="text-right">Amount</Table.Head>
-    </Table.Row>
-  </Table.Header>
-  <Table.Body>
-    <Table.Row>
-      <Table.Cell class="font-medium">INV001</Table.Cell>
-      <Table.Cell>Paid</Table.Cell>
-      <Table.Cell>Credit Card</Table.Cell>
-      <Table.Cell class="text-right">$250.00</Table.Cell>
-    </Table.Row>
-  </Table.Body>
-</Table.Root>
-
-
-<!-- <div class="flex flex-auto flex-col bg-white"> -->
-<!--   <TestToolbar runTest={runTestLocally} {runTestInCloud} saveTest={handleSaveTest} /> -->
-<!--   <div class="flex gap-2"> -->
-<!--     <ScriptExamples onSelectExample={handleExScript} /> -->
-<!--     <Button -->
-<!--       size="sm" -->
-<!--       variant="ghost" -->
-<!--       on:click={() => { -->
-<!--         cloudTestDialogOpen = true; -->
-<!--       }}>Import script</Button -->
-<!--     > -->
-<!--   </div> -->
-<!--   <ImportDialog bind:open={cloudTestDialogOpen} {setCloudScriptInEditor} /> -->
-<!--   <div class="full-w flex-auto" bind:this={container}></div> -->
-<!-- </div> -->
+<div class="overflow-y-auto max-h-[700px]">
+  <Table.Root>
+    <Table.Caption>Captured requests</Table.Caption>
+    <Table.Header>
+      <Table.Row>
+        <Table.Head class="w-[100px]">Method</Table.Head>
+        <Table.Head>Host</Table.Head>
+        <Table.Head>Path</Table.Head>
+        <Table.Head class="text-right">Timestamp</Table.Head>
+      </Table.Row>
+    </Table.Header>
+    <Table.Body>
+      {#each browserRequestResponseList as event}
+        {#if event.response}
+          <!-- todo: fill with status -->
+        {:else}
+          {#if event.request.host.includes(hostFilterValue)}
+            <Table.Row>
+              <Table.Cell class="font-medium">{event.request.method}</Table.Cell>
+              <!-- <Table.Cell class="max-w-[30px] whitespace-normal">{event.request.host}</Table.Cell> -->
+              <!-- <Table.Cell class="max-w-[20px] whitespace-normal text-ellipsis">{event.request.path}</Table.Cell> -->
+              <Table.Cell>{event.request.host}</Table.Cell>
+              <Table.Cell>{event.request.path}</Table.Cell>
+              <Table.Cell class="text-right">{event.request.timestamp_start}</Table.Cell>
+            </Table.Row>
+          {/if}
+        {/if}
+      {/each}
+    </Table.Body>
+  </Table.Root>
+</div>

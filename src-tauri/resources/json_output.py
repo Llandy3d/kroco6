@@ -1,3 +1,4 @@
+import json
 from mitmproxy import http
 from mitmproxy.tools.web.app import flow_to_json
 
@@ -5,7 +6,14 @@ from mitmproxy.tools.web.app import flow_to_json
 def request(flow: http.HTTPFlow) -> None:
 
     data = flow_to_json(flow)
-    # print(data)
+    data = json.dumps(data)
+    print(data, flush=True)
+
+def response(flow: http.HTTPFlow) -> None:
+
+    data = flow_to_json(flow)
+    data = json.dumps(data)
+    print(data, flush=True)
 
 
 # we flush it as we want to catch it as soon as it's emitted
