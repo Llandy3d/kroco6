@@ -65,6 +65,7 @@
         <Table.Head class="w-[100px]">Method</Table.Head>
         <Table.Head>Host</Table.Head>
         <Table.Head>Path</Table.Head>
+        <Table.Head>Content</Table.Head>
         <Table.Head class="text-right">Timestamp</Table.Head>
       </Table.Row>
     </Table.Header>
@@ -79,7 +80,8 @@
               <!-- <Table.Cell class="max-w-[30px] whitespace-normal">{event.request.host}</Table.Cell> -->
               <!-- <Table.Cell class="max-w-[20px] whitespace-normal text-ellipsis">{event.request.path}</Table.Cell> -->
               <Table.Cell>{event.request.host}</Table.Cell>
-              <Table.Cell>{event.request.path}</Table.Cell>
+              <Table.Cell class="break-all">{event.request.path}</Table.Cell>
+              <Table.Cell class="break-all">{event.request.content}</Table.Cell>
               <Table.Cell class="text-right">{event.request.timestamp_start}</Table.Cell>
             </Table.Row>
           {/if}

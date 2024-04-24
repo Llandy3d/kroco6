@@ -3,6 +3,7 @@ export interface BrowserRequest {
     host: string,
     method: string,
     path: string,
+    content: string,
     timestamp_start: Date,
 }
 
