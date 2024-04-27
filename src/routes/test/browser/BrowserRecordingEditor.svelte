@@ -8,6 +8,8 @@
   import { appWindow } from '@tauri-apps/api/window'
   import { listen } from '@tauri-apps/api/event'
   import type { BrowserRequest, BrowserResponse, BrowserEvent } from "$lib/browser-types";
+  import DataTable from "./requests-table.svelte";
+  import { data } from "./requests-store";
 
   let unlisten;
   let browserRequestResponseList: Array<BrowserEvent> = [];
@@ -23,6 +25,11 @@
     const unlisten = await listen('browser-request', (event) => {
       console.log(event);
       browserRequestResponseList.push(event.payload);
+
+      // TODO; improve me
+      let request = event.payload.request;
+      request["id"] = event.payload.id;
+      data.update(items => [...items, request]);
 
       // trigger svelte reactivity
       browserRequestResponseList = browserRequestResponseList;
@@ -53,40 +60,44 @@
   <hr>
 </div>
 
-<div class="max-w-[200px] w-1/4">
-  <Input placeholder="Filter by hostname" bind:value={hostFilterValue} on:input={onFilterValueChange} autocomplete="off" />
-</div>
 
 <div class="overflow-y-auto max-h-[700px]">
-  <Table.Root>
-    <Table.Caption>Captured requests</Table.Caption>
-    <Table.Header>
-      <Table.Row>
-        <Table.Head class="w-[100px]">Method</Table.Head>
-        <Table.Head>Host</Table.Head>
-        <Table.Head>Path</Table.Head>
-        <Table.Head>Content</Table.Head>
-        <Table.Head class="text-right">Timestamp</Table.Head>
-      </Table.Row>
-    </Table.Header>
-    <Table.Body>
-      {#each browserRequestResponseList as event}
-        {#if event.response}
-          <!-- todo: fill with status -->
-        {:else}
-          {#if event.request.host.includes(hostFilterValue)}
-            <Table.Row>
-              <Table.Cell class="font-medium">{event.request.method}</Table.Cell>
-              <!-- <Table.Cell class="max-w-[30px] whitespace-normal">{event.request.host}</Table.Cell> -->
-              <!-- <Table.Cell class="max-w-[20px] whitespace-normal text-ellipsis">{event.request.path}</Table.Cell> -->
-              <Table.Cell>{event.request.host}</Table.Cell>
-              <Table.Cell class="break-all">{event.request.path}</Table.Cell>
-              <Table.Cell class="break-all">{event.request.content}</Table.Cell>
-              <Table.Cell class="text-right">{event.request.timestamp_start}</Table.Cell>
-            </Table.Row>
-          {/if}
-        {/if}
-      {/each}
-    </Table.Body>
-  </Table.Root>
+  <DataTable/>
 </div>
+<!-- <div class="max-w-[200px] w-1/4"> -->
+<!--   <Input placeholder="Filter by hostname" bind:value={hostFilterValue} on:input={onFilterValueChange} autocomplete="off" /> -->
+<!-- </div> -->
+
+<!-- <div class="overflow-y-auto max-h-[700px]"> -->
+<!--   <Table.Root> -->
+<!--     <Table.Caption>Captured requests</Table.Caption> -->
+<!--     <Table.Header> -->
+<!--       <Table.Row> -->
+<!--         <Table.Head class="w-[100px]">Method</Table.Head> -->
+<!--         <Table.Head>Host</Table.Head> -->
+<!--         <Table.Head>Path</Table.Head> -->
+<!--         <Table.Head>Content</Table.Head> -->
+<!--         <Table.Head class="text-right">Timestamp</Table.Head> -->
+<!--       </Table.Row> -->
+<!--     </Table.Header> -->
+<!--     <Table.Body> -->
+<!--       {#each browserRequestResponseList as event} -->
+<!--         {#if event.response} -->
+<!--           <!-1- todo: fill with status -1-> -->
+<!--         {:else} -->
+<!--           {#if event.request.host.includes(hostFilterValue)} -->
+<!--             <Table.Row> -->
+<!--               <Table.Cell class="font-medium">{event.request.method}</Table.Cell> -->
+<!--               <!-1- <Table.Cell class="max-w-[30px] whitespace-normal">{event.request.host}</Table.Cell> -1-> -->
+<!--               <!-1- <Table.Cell class="max-w-[20px] whitespace-normal text-ellipsis">{event.request.path}</Table.Cell> -1-> -->
+<!--               <Table.Cell>{event.request.host}</Table.Cell> -->
+<!--               <Table.Cell class="break-all">{event.request.path}</Table.Cell> -->
+<!--               <Table.Cell class="break-all">{event.request.content}</Table.Cell> -->
+<!--               <Table.Cell class="text-right">{event.request.timestamp_start}</Table.Cell> -->
+<!--             </Table.Row> -->
+<!--           {/if} -->
+<!--         {/if} -->
+<!--       {/each} -->
+<!--     </Table.Body> -->
+<!--   </Table.Root> -->
+<!-- </div> -->

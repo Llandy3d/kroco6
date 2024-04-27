@@ -5,6 +5,7 @@ export interface BrowserRequest {
     path: string,
     content: string,
     timestamp_start: Date,
+    id: ?string,
 }
 
 export interface BrowserResponse {
