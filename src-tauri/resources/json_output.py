@@ -73,6 +73,14 @@ def flow_to_json(flow: mitmproxy.flow.Flow) -> dict:
             content_length = None
             content_hash = None
 
+        # let's cleanup the content
+        content = ""
+        content_type = flow.request.headers.get("content-type")
+        if content_type and (content_type.startswith("image") or content_type.startswith("video") or content_type.startswith("audio") or content_type.startswith("message/ohttp-") or content_type.startswith("application/x-protobuf")):
+            content = "<redacted content>"
+        elif flow.request.content:
+            content = flow.request.content.decode()
+
         f["request"] = {
             "method": flow.request.method,
             "scheme": flow.request.scheme,
@@ -86,7 +94,7 @@ def flow_to_json(flow: mitmproxy.flow.Flow) -> dict:
             "timestamp_start": flow.request.timestamp_start,
             "timestamp_end": flow.request.timestamp_end,
             "pretty_host": flow.request.pretty_host,
-            "content": flow.request.content.decode(),
+            "content": content,
         }
         if flow.response:
             if flow.response.raw_content is not None:
@@ -99,8 +107,8 @@ def flow_to_json(flow: mitmproxy.flow.Flow) -> dict:
             flow.response.decode()
             content = flow.response.content
             content_type = flow.response.headers.get("content-type")
-            if content_type and (content_type.startswith("image") or content_type.startswith("video") or content_type.startswith("audio")):
-                content = "<redacted image>"
+            if content_type and (content_type.startswith("image") or content_type.startswith("video") or content_type.startswith("audio") or content_type.startswith("message/ohttp-")):
+                content = "<redacted content>"
 
             f["response"] = {
                 "http_version": flow.response.http_version,
