@@ -34,7 +34,6 @@
     class="w-full"
     on:click={() => {
       currentFile.set(null);
-      // TODO: this breaks everything due to browser tests, needs to be reworked the whole system of sidebar separation from page separation
       goto("/");
 
     }}>Create test</Button

@@ -26,6 +26,11 @@
 
   onDestroy(() => {
     unlisten();
+
+    // cleanup browser resources when exiting the page
+    if (!recordingDisabled) {
+      stopRecording();
+    }
   });
 
 
