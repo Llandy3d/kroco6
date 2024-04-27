@@ -10,7 +10,6 @@ use std::io::{Read, Write, BufRead, BufReader};
 use std::path::Path;
 use std::process::{Command, Stdio};
 use std::sync::Mutex;
-use std::time::Duration;
 use serde_json::Value;
 use tauri::{Manager, Window};
 use tauri::api::process;
@@ -18,6 +17,7 @@ use regex::Regex;
 use tokio::task;
 use tokio::sync::mpsc;
 use headless_chrome::browser::default_executable;
+use sysinfo::System;
 
 use crate::operations::ProjectManager;
 
@@ -175,6 +175,15 @@ async fn open_browser(handle: tauri::AppHandle, window: Window) {
 
         command.kill().expect("failed to kill the browser process");
         child.kill().expect("failed to kill the proxy process");
+
+        // seems like the sidecar is spawning two processes and the second one is not getting
+        // closed so we manually check for running mitmdump and kill them.
+        // Should be good enough for now.
+        let mut sys = System::new();
+        sys.refresh_processes();
+        for process in sys.processes_by_name("mitmdump") {
+            process.kill();
+        }
     });
 }
 
