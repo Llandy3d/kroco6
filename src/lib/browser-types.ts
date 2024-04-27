@@ -1,5 +1,6 @@
 export interface BrowserRequest {
     headers: Array<Array<string>>;
+    scheme: string,
     host: string,
     method: string,
     path: string,

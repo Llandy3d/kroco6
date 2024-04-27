@@ -1,4 +1,4 @@
-<script lang="ts">
+<script lang="ts" context="module">
   import { createTable, Render, Subscribe, createRender } from "svelte-headless-table";
   import { addPagination, addTableFilter, addHiddenColumns, addSelectedRows } from "svelte-headless-table/plugins";
   import * as Table from "$lib/components/ui/table";
@@ -11,7 +11,6 @@
   import { get } from 'svelte/store';
   import { data } from "./requests-store";
 
-  //const table = createTable(readable(data), {
   const table = createTable(data, {
     page: addPagination({initialPageSize: 20}),
     filter: addTableFilter({
@@ -68,14 +67,16 @@
     }),
   ]);
 
-  const { headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates, flatColumns, rows } =
+  export const { headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates, flatColumns, rows } =
     table.createViewModel(columns);
 
   const { hasNextPage, hasPreviousPage, pageIndex, pageCount } = pluginStates.page;
   const { filterValue } = pluginStates.filter;
   const { hiddenColumnIds } = pluginStates.hide;
-  const { selectedDataIds } = pluginStates.select;
+  export const { selectedDataIds } = pluginStates.select;
+</script>
 
+<script lang="ts">
   // hide columns
   const ids = flatColumns.map((col) => col.id);
   let hideForId = Object.fromEntries(ids.map((id) => [id, true]));
@@ -85,7 +86,6 @@
     .map(([id]) => id);
  
   const hidableCols = ["host", "path", "content"];
-
 </script>
 
 <div>

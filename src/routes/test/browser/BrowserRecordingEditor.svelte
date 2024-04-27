@@ -9,32 +9,19 @@
   import { listen } from '@tauri-apps/api/event'
   import type { BrowserRequest, BrowserResponse, BrowserEvent } from "$lib/browser-types";
   import DataTable from "./requests-table.svelte";
+  import { get } from "svelte/store";
   import { data } from "./requests-store";
+  import  { selectedDataIds, rows } from "./requests-table.svelte";
 
   let unlisten;
-  let browserRequestResponseList: Array<BrowserEvent> = [];
-
-  let hostFilterValue = "";
-
-  function onFilterValueChange() {
-    // trigger the recreation of the table
-    browserRequestResponseList = browserRequestResponseList;
-  }
 
   onMount(async () => {
     const unlisten = await listen('browser-request', (event) => {
-      console.log(event);
-      browserRequestResponseList.push(event.payload);
-
       // TODO; improve me
       let request = event.payload.request;
       request["id"] = event.payload.id;
       data.update(items => [...items, request]);
-
-      // trigger svelte reactivity
-      browserRequestResponseList = browserRequestResponseList;
     });
-    window.levent = browserRequestResponseList;
   });
 
   onDestroy(() => {
@@ -50,54 +37,73 @@
     recordingDiscColor = "";
     appWindow.emit("stop-recorder");
   }
-</script>
 
+  const baseScriptStart = `
+import http from 'k6/http';
+import { sleep } from 'k6';
+
+export const options = {
+  vus: 1,
+  duration: '1s',
+};
+
+export default function () {
+`;
+
+const baseScriptEnd = `
+  sleep(1);
+}
+`;
+
+  function createScriptFromIds() {
+    let requestsString = [];
+    let selectedIds = get(selectedDataIds);
+    console.log(selectedIds);
+
+    // if the id is not present when indexing it will return undefined that is considered falsy, #js_stuff
+    const selectedData = $rows.filter(row => selectedIds[row.id]);
+
+    for ( const row of selectedData ) {
+      const request = row.original;
+      if (request.method === "GET") {
+        const requestLine = `  http.get('${request.scheme}://${request.host}${request.path}')\n`;
+        requestsString.push(requestLine);
+
+      } else if (request.method === "POST") {
+        const headers = Object.fromEntries(request.headers);
+        const headersLine = `  let headers = ${JSON.stringify(headers)}\n`;
+        const dataLine = `  let data = ${request.content}\n`;
+        const requestLine = `  http.post('${request.scheme}://${request.host}${request.path}', JSON.stringify(data), { headers: headers })\n`;
+
+        requestsString.push(headersLine);
+        requestsString.push(dataLine);
+        requestsString.push(requestLine);
+      }
+    }
+
+    // build the script
+    let script = "";
+    script += baseScriptStart;
+    for (const line of requestsString) {
+      script += line;
+    }
+    script += baseScriptEnd;
+
+    console.log(script);
+  }
+</script>
 
 <!-- <div class="flex flex-auto items-center gap-4 bg-white"> -->
 <div class="flex items-center gap-4 justify-center mt-5 mb-5">
   <Disc class="{recordingDiscColor}"/>
-  <Button disabled={recordingDisabled} variant="destructive" on:click={stopRecording}>Stop Recording</Button>
+  {#if recordingDisabled}
+    <Button on:click={createScriptFromIds}>Convert selected ids to script...</Button>
+  {:else}
+    <Button disabled={recordingDisabled} variant="destructive" on:click={stopRecording}>Stop Recording</Button>
+  {/if}
   <hr>
 </div>
-
 
 <div class="overflow-y-auto max-h-[700px]">
   <DataTable/>
 </div>
-<!-- <div class="max-w-[200px] w-1/4"> -->
-<!--   <Input placeholder="Filter by hostname" bind:value={hostFilterValue} on:input={onFilterValueChange} autocomplete="off" /> -->
-<!-- </div> -->
-
-<!-- <div class="overflow-y-auto max-h-[700px]"> -->
-<!--   <Table.Root> -->
-<!--     <Table.Caption>Captured requests</Table.Caption> -->
-<!--     <Table.Header> -->
-<!--       <Table.Row> -->
-<!--         <Table.Head class="w-[100px]">Method</Table.Head> -->
-<!--         <Table.Head>Host</Table.Head> -->
-<!--         <Table.Head>Path</Table.Head> -->
-<!--         <Table.Head>Content</Table.Head> -->
-<!--         <Table.Head class="text-right">Timestamp</Table.Head> -->
-<!--       </Table.Row> -->
-<!--     </Table.Header> -->
-<!--     <Table.Body> -->
-<!--       {#each browserRequestResponseList as event} -->
-<!--         {#if event.response} -->
-<!--           <!-1- todo: fill with status -1-> -->
-<!--         {:else} -->
-<!--           {#if event.request.host.includes(hostFilterValue)} -->
-<!--             <Table.Row> -->
-<!--               <Table.Cell class="font-medium">{event.request.method}</Table.Cell> -->
-<!--               <!-1- <Table.Cell class="max-w-[30px] whitespace-normal">{event.request.host}</Table.Cell> -1-> -->
-<!--               <!-1- <Table.Cell class="max-w-[20px] whitespace-normal text-ellipsis">{event.request.path}</Table.Cell> -1-> -->
-<!--               <Table.Cell>{event.request.host}</Table.Cell> -->
-<!--               <Table.Cell class="break-all">{event.request.path}</Table.Cell> -->
-<!--               <Table.Cell class="break-all">{event.request.content}</Table.Cell> -->
-<!--               <Table.Cell class="text-right">{event.request.timestamp_start}</Table.Cell> -->
-<!--             </Table.Row> -->
-<!--           {/if} -->
-<!--         {/if} -->
-<!--       {/each} -->
-<!--     </Table.Body> -->
-<!--   </Table.Root> -->
-<!-- </div> -->
