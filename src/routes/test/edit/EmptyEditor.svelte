@@ -79,7 +79,7 @@
       <BlockEditorIllustration class="my-2" />
       <h3 class="my-3 text-xl">Browser test</h3>
       <p class="mb-4 text-center font-thin">
-        blah blah browser.
+        Generate a script by browsing with a browser. This will generate a normal test.
       </p>
       <Button variant="outline" on:click={handleNewBrowser}>Start browsing</Button>
     </div>
