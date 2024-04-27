@@ -16,7 +16,7 @@
   let unlisten;
 
   onMount(async () => {
-    const unlisten = await listen('browser-request', (event) => {
+    unlisten = await listen('browser-request', (event) => {
       // TODO; improve me
       let request = event.payload.request;
       request["id"] = event.payload.id;
@@ -88,8 +88,6 @@ const baseScriptEnd = `
       script += line;
     }
     script += baseScriptEnd;
-
-    console.log(script);
   }
 </script>
 
