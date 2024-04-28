@@ -160,7 +160,7 @@ async fn open_browser(handle: tauri::AppHandle, window: Window) {
         let mut command = Command::new(path)
             .arg("--new")
             // .arg("https://grafana.com")
-            .args(["--args", &user_data_dir, &trust_certificate_fingerprint, "--proxy-server=http://localhost:8080", "--hide-crash-restore-bubble", "--test-type", "--no-default-browser-check", "--no-first-run", "--disable-background-networking"])
+            .args(["--args", &user_data_dir, &trust_certificate_fingerprint, "--proxy-server=http://localhost:8080", "--hide-crash-restore-bubble", "--test-type", "--no-default-browser-check", "--no-first-run", "--disable-background-networking", "--disable-component-update"])
         .spawn().expect("failed to launch browser");
 
         window.emit("browser-started", "").unwrap();
