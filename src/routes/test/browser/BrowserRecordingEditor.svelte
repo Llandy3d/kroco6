@@ -19,6 +19,7 @@
     "www.google.com",
     "accounts.google.com",
     "play.google.com",
+    "www.gstatic.com",
   ];
 
   onMount(async () => {
@@ -29,7 +30,7 @@
         return;
       }
 
-      // google search completions filtered out
+      // google stuff filtered out
       if (blockList.includes(event.payload.request.host)) {
         return;
       }
@@ -89,7 +90,7 @@ const baseScriptEnd = `
       const request = row.original;
 
       // comment line on overall description of request
-      const descriptionLine = `  // ${request.method} ${request.scheme}://${request.host}${request.path}\n\n`;
+      const descriptionLine = `  // ${request.method} ${request.scheme}://${request.host}${request.path}\n`;
       requestsString.push(descriptionLine);
 
       if (request.method === "GET") {
@@ -98,8 +99,8 @@ const baseScriptEnd = `
 
       } else if (request.method === "POST") {
         const headers = Object.fromEntries(request.headers);
-        const headersLine = `  let headers = ${JSON.stringify(headers)}\n`;
-        const dataLine = `  let data = ${request.content}\n`;
+        const headersLine = `  var headers = ${JSON.stringify(headers)}\n`;
+        const dataLine = `  var data = ${request.content}\n`;
         const requestLine = `  http.post('${request.scheme}://${request.host}${request.path}', JSON.stringify(data), { headers: headers })\n\n\n`;
 
         requestsString.push(headersLine);
