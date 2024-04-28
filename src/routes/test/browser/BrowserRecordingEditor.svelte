@@ -24,14 +24,21 @@
 
   onMount(async () => {
     unlisten = await listen('browser-request', (event) => {
-      // ignore responses for now
-
-      if (event.payload.response) {
+      // google stuff filtered out
+      if (blockList.includes(event.payload.request.host)) {
         return;
       }
 
-      // google stuff filtered out
-      if (blockList.includes(event.payload.request.host)) {
+      // ignore prefetch requests by chrome that get triggered while typing in the search bar
+      // sec-purpose: prefetch;prerender
+      const headers = Object.fromEntries(event.payload.request.headers);
+      if (headers.purpose === "prefetch") {
+        return;
+      }
+
+
+      // ignore responses for now
+      if (event.payload.response) {
         return;
       }
 
