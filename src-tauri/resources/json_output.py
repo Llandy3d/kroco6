@@ -76,7 +76,7 @@ def flow_to_json(flow: mitmproxy.flow.Flow) -> dict:
         # let's cleanup the content
         content = ""
         content_type = flow.request.headers.get("content-type")
-        if content_type and (content_type.startswith("image") or content_type.startswith("video") or content_type.startswith("audio") or content_type.startswith("message/ohttp-") or content_type.startswith("application/x-protobuf")):
+        if content_type and (content_type.startswith("image") or content_type.startswith("video") or content_type.startswith("audio") or content_type.startswith("message/ohttp-") or content_type.startswith("application/x-protobuf") or content_type.startswith("font/")):
             content = "<redacted content>"
         elif flow.request.content:
             content = flow.request.content.decode()
@@ -105,10 +105,11 @@ def flow_to_json(flow: mitmproxy.flow.Flow) -> dict:
                 content_hash = None
             # decode the response and ignore images
             flow.response.decode()
-            content = flow.response.content
             content_type = flow.response.headers.get("content-type")
-            if content_type and (content_type.startswith("image") or content_type.startswith("video") or content_type.startswith("audio") or content_type.startswith("message/ohttp-")):
+            if content_type and (content_type.startswith("image") or content_type.startswith("video") or content_type.startswith("audio") or content_type.startswith("message/ohttp-") or content_type.startswith("application/x-protobuf") or content_type.startswith('font/')):
                 content = "<redacted content>"
+            else:
+                content = flow.response.content.decode()
 
             f["response"] = {
                 "http_version": flow.response.http_version,
