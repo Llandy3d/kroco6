@@ -10,8 +10,9 @@
   import type { BrowserRequest, BrowserResponse, BrowserEvent } from "$lib/browser-types";
   import DataTable from "./requests-table.svelte";
   import { get } from "svelte/store";
-  import { data } from "./requests-store";
+  import { data, newBrowserScript } from "./requests-store";
   import  { selectedDataIds, rows } from "./requests-table.svelte";
+  import { goto } from "$app/navigation";
 
   let unlisten;
 
@@ -49,7 +50,7 @@ import { sleep } from 'k6';
 
 export const options = {
   vus: 1,
-  duration: '1s',
+  duration: '30s',
 };
 
 export default function () {
@@ -93,6 +94,9 @@ const baseScriptEnd = `
       script += line;
     }
     script += baseScriptEnd;
+
+    newBrowserScript.set(script);
+    goto("/");
   }
 </script>
 
