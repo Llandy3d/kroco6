@@ -29,12 +29,14 @@
         return;
       }
 
+      // NOTE: we keep them as the browser might not redo the requesto on enter.
+      // Previous Comment:
       // ignore prefetch requests by chrome that get triggered while typing in the search bar
       // sec-purpose: prefetch;prerender
-      const headers = Object.fromEntries(event.payload.request.headers);
-      if (headers.purpose === "prefetch") {
-        return;
-      }
+      //const headers = Object.fromEntries(event.payload.request.headers);
+      //if (headers.purpose === "prefetch") {
+      //  return;
+      //}
 
 
       // ignore responses for now
