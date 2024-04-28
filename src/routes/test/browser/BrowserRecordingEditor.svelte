@@ -39,12 +39,20 @@
       //}
 
 
-      // ignore responses for now
+      // assign response to a corresponding request
       if (event.payload.response) {
+        data.update(items => {
+          const request = items.find(item => item.id === event.payload.id);
+          request.response = event.payload.response;
+          return items;
+        });
+
+        // we don't need to handle the request again so we return here
         return;
       }
 
-      // TODO; improve me
+      // assign payload id to request and add it to the data list
+      // id will be used later for response matching
       let request = event.payload.request;
       request["id"] = event.payload.id;
       data.update(items => [...items, request]);

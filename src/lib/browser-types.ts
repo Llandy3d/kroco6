@@ -6,13 +6,15 @@ export interface BrowserRequest {
     path: string,
     content: string,
     timestamp_start: Date,
-    id: ?string,
+    id?: string,
+    response?: BrowserResponse
 }
 
 export interface BrowserResponse {
     headers: Array<Array<string>>;
     reason: string,
     status_code: number,
+    content: string,
     path: string,
     timestamp_start: Date,
 }

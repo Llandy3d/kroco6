@@ -8,6 +8,7 @@
   import ChevronDown from "lucide-svelte/icons/chevron-down";
   import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
   import DataTableCheckbox from "./requests-table-checkbox.svelte";
+  import ResponseStatusFeedback from "./requests-table-response.svelte";
   import { get } from 'svelte/store';
   import { data } from "./requests-store";
 
@@ -42,6 +43,13 @@
     table.column({
       accessor: "method",
       header: "Method",
+    }),
+    table.column({
+      accessor: "response",
+      header: "Response",
+      cell: ({ value }) => {
+        return createRender(ResponseStatusFeedback, { response: value });
+      },
     }),
     table.column({
       accessor: "host",
