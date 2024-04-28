@@ -71,15 +71,20 @@ const baseScriptEnd = `
 
     for ( const row of selectedData ) {
       const request = row.original;
+
+      // comment line on overall description of request
+      const descriptionLine = `  // ${request.method} ${request.scheme}://${request.host}${request.path}\n\n`;
+      requestsString.push(descriptionLine);
+
       if (request.method === "GET") {
-        const requestLine = `  http.get('${request.scheme}://${request.host}${request.path}')\n`;
+        const requestLine = `  http.get('${request.scheme}://${request.host}${request.path}')\n\n\n`;
         requestsString.push(requestLine);
 
       } else if (request.method === "POST") {
         const headers = Object.fromEntries(request.headers);
         const headersLine = `  let headers = ${JSON.stringify(headers)}\n`;
         const dataLine = `  let data = ${request.content}\n`;
-        const requestLine = `  http.post('${request.scheme}://${request.host}${request.path}', JSON.stringify(data), { headers: headers })\n`;
+        const requestLine = `  http.post('${request.scheme}://${request.host}${request.path}', JSON.stringify(data), { headers: headers })\n\n\n`;
 
         requestsString.push(headersLine);
         requestsString.push(dataLine);
