@@ -156,11 +156,15 @@ async fn open_browser(handle: tauri::AppHandle, window: Window) {
     let (stop_recorder_tx, mut stop_recorder_rx) = mpsc::channel::<()>(1);
 
     task::spawn_blocking(move || {
+        // disable all the mentioned optimizations from chrome as they are noisy
+        // https://stackoverflow.com/questions/71017812/how-to-remove-https-optimizationguide-pa-googleapis-com-call-execution-when-th
+        let disable_optimizations = "--disable-features=OptimizationGuideModelDownloading,OptimizationHintsFetching,OptimizationTargetPrediction,OptimizationHints";
+
         let path = default_executable().expect("failed to retrieve the browser");
         let mut command = Command::new(path)
             .arg("--new")
             // .arg("https://grafana.com")
-            .args(["--args", &user_data_dir, &trust_certificate_fingerprint, "--proxy-server=http://localhost:8080", "--hide-crash-restore-bubble", "--test-type", "--no-default-browser-check", "--no-first-run", "--disable-background-networking", "--disable-component-update"])
+            .args(["--args", &user_data_dir, &trust_certificate_fingerprint, "--proxy-server=http://localhost:8080", "--hide-crash-restore-bubble", "--test-type", "--no-default-browser-check", "--no-first-run", "--disable-background-networking", "--disable-component-update", disable_optimizations])
         .spawn().expect("failed to launch browser");
 
         window.emit("browser-started", "").unwrap();
