@@ -93,7 +93,7 @@
     .filter(([, hide]) => !hide)
     .map(([id]) => id);
  
-  const hidableCols = ["host", "path", "content"];
+  const hidableCols = ["host", "path", "content", "response"];
 </script>
 
 <div>
