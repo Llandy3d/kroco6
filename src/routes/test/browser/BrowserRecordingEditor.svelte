@@ -15,9 +15,25 @@
   import { goto } from "$app/navigation";
 
   let unlisten;
+  const blockList = [
+    "www.google.com",
+    "accounts.google.com",
+    "play.google.com",
+  ];
 
   onMount(async () => {
     unlisten = await listen('browser-request', (event) => {
+      // ignore responses for now
+
+      if (event.payload.response) {
+        return;
+      }
+
+      // google search completions filtered out
+      if (blockList.includes(event.payload.request.host)) {
+        return;
+      }
+
       // TODO; improve me
       let request = event.payload.request;
       request["id"] = event.payload.id;
