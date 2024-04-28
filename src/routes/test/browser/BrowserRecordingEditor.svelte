@@ -75,8 +75,7 @@ export const options = {
 export default function () {
 `;
 
-const baseScriptEnd = `
-  sleep(1);
+const baseScriptEnd = `  sleep(1);
 }
 `;
 
@@ -107,6 +106,34 @@ const baseScriptEnd = `
 
         requestsString.push(headersLine);
         requestsString.push(dataLine);
+        requestsString.push(requestLine);
+
+      } else if (request.method === "PATCH") {
+        const headers = Object.fromEntries(request.headers);
+        const headersLine = `  var headers = ${JSON.stringify(headers)}\n`;
+        const dataLine = `  var data = ${request.content}\n`;
+        const requestLine = `  http.patch('${request.scheme}://${request.host}${request.path}', JSON.stringify(data), { headers: headers })\n\n\n`;
+
+        requestsString.push(headersLine);
+        requestsString.push(dataLine);
+        requestsString.push(requestLine);
+
+      } else if (request.method === "PUT") {
+        const headers = Object.fromEntries(request.headers);
+        const headersLine = `  var headers = ${JSON.stringify(headers)}\n`;
+        const dataLine = `  var data = ${request.content}\n`;
+        const requestLine = `  http.put('${request.scheme}://${request.host}${request.path}', JSON.stringify(data), { headers: headers })\n\n\n`;
+
+        requestsString.push(headersLine);
+        requestsString.push(dataLine);
+        requestsString.push(requestLine);
+
+      } else if (request.method === "DELETE") {
+        const headers = Object.fromEntries(request.headers);
+        const headersLine = `  var headers = ${JSON.stringify(headers)}\n`;
+        const requestLine = `  http.del('${request.scheme}://${request.host}${request.path}', null, { headers: headers })\n\n\n`;
+
+        requestsString.push(headersLine);
         requestsString.push(requestLine);
       }
     }
