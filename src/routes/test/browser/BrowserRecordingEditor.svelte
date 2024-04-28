@@ -45,12 +45,14 @@
   onDestroy(() => {
     unlisten();
 
+    // clear browser data
+    data.set([]);
+
     // cleanup browser resources when exiting the page
     if (!recordingDisabled) {
       stopRecording();
     }
   });
-
 
   let recordingDisabled = false;
   let recordingDiscColor = "text-red-600";
