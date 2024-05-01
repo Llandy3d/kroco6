@@ -521,7 +521,7 @@ async fn run_script_in_cloud(script: String, project_id: String) -> Result<Strin
 }
 
 #[tauri::command]
-async fn ensure_k6_executable_installed() {
+async fn ensure_k6_executable_installed() -> Result<(), String> {
     // ensure ~<config>/kroco6/k6_executable exists
     let config_dir = dirs::config_dir().expect("Failed to get config directory");
     let storage_path = Path::new(&config_dir).join("kroco6");
@@ -536,10 +536,12 @@ async fn ensure_k6_executable_installed() {
     // naively if the executable directory is not empty we assume we have the binary and do nothing
     if executable_path.read_dir().expect("failed to read the k6 executable directory").next().is_some() {
         println!("k6 executable found");
-        return;
+        return Ok(());
     }
 
-    executable::download_executable().await;
+    executable::download_executable().await.map_err(|e| e.to_string())?;
 
     println!("k6 executable downloaded");
+
+    Ok(())
 }
