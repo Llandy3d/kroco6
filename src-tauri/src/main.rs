@@ -379,30 +379,17 @@ async fn save_test(
 
 #[tauri::command]
 async fn run_script(state: tauri::State<'_, ApplicationState>) -> Result<String, String> {
-    // let script = r#"
-
-    // import http from 'k6/http';
-    // import { sleep } from 'k6';
-
-    // export const options = {
-    //   vus: 1,
-    //   duration: '2s',
-    // };
-
-    // export default function () {
-    //   http.get('http://test.k6.io');
-    //   sleep(1);
-    // }
-    // "#;
 
     let script = {
         let state_script = state.script.lock().unwrap();
         state_script.clone()
     };
 
+    let k6_executable = executable::get_executable_path();
+
     // TODO: make it toggable
     std::env::set_var("K6_WEB_DASHBOARD", "true");
-    let mut child = Command::new("k6")
+    let mut child = Command::new(k6_executable)
         .arg("run")
         .arg("-")
         .stdin(Stdio::piped())
@@ -486,7 +473,8 @@ fn set_cloud_token(token: String) -> Result<(), String> {
 
 #[tauri::command]
 async fn run_script_in_cloud(script: String, project_id: String) -> Result<String, String> {
-    let mut child = Command::new("k6")
+    let k6_executable = executable::get_executable_path();
+    let mut child = Command::new(k6_executable)
         .arg("cloud")
         .arg("-")
         .stdin(Stdio::piped())

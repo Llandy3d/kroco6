@@ -1,6 +1,6 @@
 use std::io::Cursor;
 use anyhow::Result;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::fs;
 
 #[cfg(target_os = "linux")]
@@ -8,6 +8,10 @@ use tar::Archive;
 use flate2::read::GzDecoder;
 
 const K6_EXECUTABLE_DOWNLOAD_PATH_BASE: &str = "https://github.com/grafana/k6/releases/download/v0.50.0/k6-v0.50.0-";
+
+pub fn get_executable_path() -> PathBuf {
+    dirs::config_dir().expect("failed to get config directory").join("kroco6").join("k6_executable").join("k6")
+}
 
 pub fn is_k6_executable_installed() -> Result<bool> {
     // ensure ~<config>/kroco6/k6_executable exists
