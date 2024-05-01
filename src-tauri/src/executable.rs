@@ -91,4 +91,6 @@ pub async fn download_executable_for_platform(suffix: &str) -> Result<()> {
             file.unpack(&executable_path)?;
         }
     }
+
+    Ok(())
 }
