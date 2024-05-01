@@ -188,10 +188,5 @@
       disabled={!$hasNextPage}
       on:click={() => ($pageIndex = $pageIndex + 1)}>Next</Button
     >
-    <Button
-      variant="outline"
-      size="sm"
-      on:click={() => (console.log(get(selectedDataIds)))}>Log</Button
-    >
   </div>
 </div>
