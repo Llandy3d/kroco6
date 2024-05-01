@@ -6,6 +6,8 @@
   import EmptyEditor from "./EmptyEditor.svelte";
   import ScriptEditor from "./ScriptEditor.svelte";
   import BlocksEditor from "./blocks/BlocksEditor.svelte";
+  import { newBrowserScript } from "../browser/requests-store";
+  import { get } from "svelte/store";
 
   const handleCurrentFileChange = (handle: string | undefined) => {
     $currentFile = $openFiles.find((file) => file.handle === handle) ?? null;
@@ -32,6 +34,16 @@
       type: "script",
     });
   };
+
+  // TODO: not sure if this is the best way but let's get the browser file created if available
+  const newBrowserScriptData = get(newBrowserScript);
+  if (newBrowserScriptData) {
+    // clear the new file from the store
+    newBrowserScript.set(false);
+
+    newFile({type: "script", initial: newBrowserScriptData});
+  }
+
 </script>
 
 <Tabs.Root

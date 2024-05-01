@@ -5,14 +5,19 @@ mod models;
 mod operations;
 mod cloud;
 
-use core::fmt;
 use std::fs;
 use std::io::{Read, Write, BufRead, BufReader};
 use std::path::Path;
 use std::process::{Command, Stdio};
 use std::sync::Mutex;
+use serde_json::Value;
 use tauri::{Manager, Window};
+use tauri::api::process;
 use regex::Regex;
+use tokio::task;
+use tokio::sync::mpsc;
+use headless_chrome::browser::default_executable;
+use sysinfo::System;
 
 use crate::operations::ProjectManager;
 
@@ -56,6 +61,7 @@ fn main() {
             save_test,
             load_project_config,
             save_project_config,
+            open_browser,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -80,6 +86,109 @@ async fn get_cloud_tests(state: tauri::State<'_, ApplicationState>, project_name
             e.to_string()
         })?;
     Ok(cloud_tests)
+}
+
+#[derive(Clone, serde::Serialize)]
+struct Payload {
+  message: String,
+}
+
+#[tauri::command]
+async fn open_browser(handle: tauri::AppHandle, window: Window) {
+    let resource_path = handle.path_resolver()
+      .resolve_resource("resources/json_output.py")
+      .expect("failed to resolve resource");
+    let resource_path = format!("{}", resource_path.display());
+
+    let certificates_path = handle.path_resolver()
+      .resolve_resource("resources/certificates")
+      .expect("failed to resolve resource");
+    let certificates_setting = format!("confdir={}", certificates_path.display());
+
+
+    let (mut rx, child) = process::Command::new_sidecar("mitmdump")
+      .expect("failed to create `mitmdump` binary command")
+      .args(["-q", "-s", &resource_path, "--set", &certificates_setting])
+      .spawn()
+      .expect("Failed to spawn sidecar");
+
+    // the first event lets us know that the proxy started, it could either be the actual started
+    // message or a warning from the tool, so we need to handle that case
+    match rx.recv().await.unwrap() {
+        process::CommandEvent::Stdout(line) => {
+            // we got the proxy start event so we can continue
+            println!("{:?}", line);
+        }
+        process::CommandEvent::Stderr(line) => {
+            // we got the warning from the tool first so we still have to wait for the start event
+            println!("{:?}", line);
+            let event = rx.recv().await;
+            println!("{:?}", event);
+        }
+        _ => {}
+    };
+
+    let window_clone = window.clone();
+    // spawn a task to receive the events from the proxy and send them to the frontend
+    tauri::async_runtime::spawn(async move {
+        while let Some(event) = rx.recv().await {
+            if let process::CommandEvent::Stdout(line) = event {
+                let line = line.trim_end();
+                println!("{:?}", line);
+                let v: Value = serde_json::from_str(line).unwrap();
+                window_clone.emit("browser-request", v).expect("failed to send browser-request event");
+            } else {
+                println!("{:?}", event);
+            }
+        }
+    });
+
+    // temp directory for the browser
+    let mut user_data_dir = std::env::temp_dir();
+    user_data_dir.push("kroco6");
+    let user_data_dir = format!("--user-data-dir={}", user_data_dir.display());
+
+    let trust_certificate_fingerprint = "--ignore-certificate-errors-spki-list=pXWvAFIlMGj9EcIWKFJOpLkB6v0xCWDmz4k4T/sdu6E=";
+
+    // create a channel to communicate back when the stop-recorder event is received
+    // this channel doesn't send anything, it will just be dropped to indicate the arrival of the
+    // event. Since we are not passing anything the type of the channel has to be specified.
+    let (stop_recorder_tx, mut stop_recorder_rx) = mpsc::channel::<()>(1);
+
+    task::spawn_blocking(move || {
+        // disable all the mentioned optimizations from chrome as they are noisy
+        // https://stackoverflow.com/questions/71017812/how-to-remove-https-optimizationguide-pa-googleapis-com-call-execution-when-th
+        let disable_optimizations = "--disable-features=OptimizationGuideModelDownloading,OptimizationHintsFetching,OptimizationTargetPrediction,OptimizationHints";
+
+        let path = default_executable().expect("failed to retrieve the browser");
+        let mut command = Command::new(path)
+            .arg("--new")
+            // .arg("https://grafana.com")
+            .args(["--args", &user_data_dir, &trust_certificate_fingerprint, "--proxy-server=http://localhost:8080", "--hide-crash-restore-bubble", "--test-type", "--no-default-browser-check", "--no-first-run", "--disable-background-networking", "--disable-component-update", disable_optimizations])
+        .spawn().expect("failed to launch browser");
+
+        window.emit("browser-started", "").unwrap();
+
+        window.once("stop-recorder", move |_| {
+            // dropping the tx channel to indicate that we received the event
+            drop(stop_recorder_tx);
+        });
+
+        // wait for stop-recorder event
+        stop_recorder_rx.blocking_recv();
+
+        command.kill().expect("failed to kill the browser process");
+        child.kill().expect("failed to kill the proxy process");
+
+        // seems like the sidecar is spawning two processes and the second one is not getting
+        // closed so we manually check for running mitmdump and kill them.
+        // Should be good enough for now.
+        let mut sys = System::new();
+        sys.refresh_processes();
+        for process in sys.processes_by_name("mitmdump") {
+            process.kill();
+        }
+    });
 }
 
 #[tauri::command]
