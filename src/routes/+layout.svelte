@@ -26,7 +26,7 @@
   );
 </script>
 
-<Toaster />
+<Toaster richColors />
 
 <div class="flex">
   <div class="w-60">

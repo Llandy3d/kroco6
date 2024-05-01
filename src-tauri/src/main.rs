@@ -63,7 +63,8 @@ fn main() {
             load_project_config,
             save_project_config,
             open_browser,
-            ensure_k6_executable_installed,
+            is_k6_executable_installed,
+            download_k6_executable,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -521,27 +522,11 @@ async fn run_script_in_cloud(script: String, project_id: String) -> Result<Strin
 }
 
 #[tauri::command]
-async fn ensure_k6_executable_installed() -> Result<(), String> {
-    // ensure ~<config>/kroco6/k6_executable exists
-    let config_dir = dirs::config_dir().expect("Failed to get config directory");
-    let storage_path = Path::new(&config_dir).join("kroco6");
-    if !&storage_path.exists() {
-        fs::create_dir(&storage_path).expect("Failed to create storage directory");
-    }
-    let executable_path = storage_path.join("k6_executable");
-    if !&executable_path.exists() {
-        fs::create_dir(&executable_path).expect("Failed to create k6 executable directory");
-    }
+async fn is_k6_executable_installed() -> Result<bool, String> {
+    executable::is_k6_executable_installed().map_err(|e| e.to_string())
+}
 
-    // naively if the executable directory is not empty we assume we have the binary and do nothing
-    if executable_path.read_dir().expect("failed to read the k6 executable directory").next().is_some() {
-        println!("k6 executable found");
-        return Ok(());
-    }
-
-    executable::download_executable().await.map_err(|e| e.to_string())?;
-
-    println!("k6 executable downloaded");
-
-    Ok(())
+#[tauri::command]
+async fn download_k6_executable() -> Result<(), String> {
+    executable::download_executable().await.map_err(|e| e.to_string())
 }
