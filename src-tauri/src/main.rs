@@ -4,6 +4,7 @@
 mod models;
 mod operations;
 mod cloud;
+mod executable;
 
 use std::fs;
 use std::io::{Read, Write, BufRead, BufReader};
@@ -62,6 +63,7 @@ fn main() {
             load_project_config,
             save_project_config,
             open_browser,
+            ensure_k6_executable_installed,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -516,4 +518,28 @@ async fn run_script_in_cloud(script: String, project_id: String) -> Result<Strin
 
     let _ = child.wait_with_output().expect("Failed to execute command");
     Err("No URL found in output".to_string())
+}
+
+#[tauri::command]
+async fn ensure_k6_executable_installed() {
+    // ensure ~<config>/kroco6/k6_executable exists
+    let config_dir = dirs::config_dir().expect("Failed to get config directory");
+    let storage_path = Path::new(&config_dir).join("kroco6");
+    if !&storage_path.exists() {
+        fs::create_dir(&storage_path).expect("Failed to create storage directory");
+    }
+    let executable_path = storage_path.join("k6_executable");
+    if !&executable_path.exists() {
+        fs::create_dir(&executable_path).expect("Failed to create k6 executable directory");
+    }
+
+    // naively if the executable directory is not empty we assume we have the binary and do nothing
+    if executable_path.read_dir().expect("failed to read the k6 executable directory").next().is_some() {
+        println!("k6 executable found");
+        return;
+    }
+
+    executable::download_executable().await;
+
+    println!("k6 executable downloaded");
 }
