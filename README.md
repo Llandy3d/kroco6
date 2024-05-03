@@ -4,10 +4,15 @@ Magic in progress...
 
 ## Install & play
 
-As of now the application is not yet bundling `k6` so please download it first: [k6 releases
-](https://github.com/grafana/k6/releases)
+Get the release [here](https://github.com/Llandy3d/kroco6/releases) and enjoy! :)
 
-Then get the [application here](https://github.com/Llandy3d/kroco6/releases) and enjoy! :)
+### Macos
+
+On Macos the operating system will misleadingly say that the file is damaged and to throw it away. This happens because it's not signed, so the alternative to paying 100$ to apple right now is to run this command to remove the quarantine:
+
+```
+xattr -d com.apple.quarantine /Applications/kroco6.app/
+```
 
 
 ## Requirements (dev)
