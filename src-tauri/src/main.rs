@@ -4,6 +4,7 @@
 mod models;
 mod operations;
 mod cloud;
+mod executable;
 
 use std::fs;
 use std::io::{Read, Write, BufRead, BufReader};
@@ -62,6 +63,8 @@ fn main() {
             load_project_config,
             save_project_config,
             open_browser,
+            is_k6_executable_installed,
+            download_k6_executable,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -376,30 +379,17 @@ async fn save_test(
 
 #[tauri::command]
 async fn run_script(state: tauri::State<'_, ApplicationState>) -> Result<String, String> {
-    // let script = r#"
-
-    // import http from 'k6/http';
-    // import { sleep } from 'k6';
-
-    // export const options = {
-    //   vus: 1,
-    //   duration: '2s',
-    // };
-
-    // export default function () {
-    //   http.get('http://test.k6.io');
-    //   sleep(1);
-    // }
-    // "#;
 
     let script = {
         let state_script = state.script.lock().unwrap();
         state_script.clone()
     };
 
+    let k6_executable = executable::get_executable_path();
+
     // TODO: make it toggable
     std::env::set_var("K6_WEB_DASHBOARD", "true");
-    let mut child = Command::new("k6")
+    let mut child = Command::new(k6_executable)
         .arg("run")
         .arg("-")
         .stdin(Stdio::piped())
@@ -483,7 +473,8 @@ fn set_cloud_token(token: String) -> Result<(), String> {
 
 #[tauri::command]
 async fn run_script_in_cloud(script: String, project_id: String) -> Result<String, String> {
-    let mut child = Command::new("k6")
+    let k6_executable = executable::get_executable_path();
+    let mut child = Command::new(k6_executable)
         .arg("cloud")
         .arg("-")
         .stdin(Stdio::piped())
@@ -516,4 +507,14 @@ async fn run_script_in_cloud(script: String, project_id: String) -> Result<Strin
 
     let _ = child.wait_with_output().expect("Failed to execute command");
     Err("No URL found in output".to_string())
+}
+
+#[tauri::command]
+async fn is_k6_executable_installed() -> Result<bool, String> {
+    executable::is_k6_executable_installed().map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn download_k6_executable() -> Result<(), String> {
+    executable::download_executable().await.map_err(|e| e.to_string())
 }

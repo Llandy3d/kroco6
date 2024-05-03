@@ -54,7 +54,7 @@
     "monaco-editor": "^0.46.0",
     "nanoid": "^5.0.6",
     "svelte-highlight": "^7.6.0",
-    "svelte-sonner": "^0.3.11",
+    "svelte-sonner": "^0.3.22",
     "sveltekit-superforms": "^1.13.4",
     "tailwind-merge": "^2.2.1",
     "tailwind-variants": "^0.1.20",
