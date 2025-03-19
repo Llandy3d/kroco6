@@ -1,3 +1,9 @@
+> [!NOTE]
+>
+> Magic progressed... please checkout https://github.com/grafana/k6-studio
+
+---
+
 Magic in progress...
 
 ![output](https://github.com/Llandy3d/kroco6/assets/16627175/7736d612-71af-4564-b141-9da4ff6a4117)
